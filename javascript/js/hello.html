@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function Person() {
+
+        }
+        Person.prototype.name = 'bai';
+        Person.prototype.age = 18;
+        Person.prototype.sayHello = function () {
+            console.log(this.name + " " + this.age);
+        };
+        var p1 = new Person();
+        var p2 = new Person();
+        // p1.sayHello();
+        // p2.sayHello();
+
+        // p2._proto_.name = "hi";
+        // document.write(p2._proto_);
+        //  document.write("constructor" in p1);
+        //node 不支持_proto_
+        // p2.constructor.prototype.name = "hello";
+
+        // p1.sayHello();
+        // p2.sayHello();
+
+        // for( var a in p1){
+        //     document.write(a+"  ");
+        // };
+        var a1 = Object.keys(p1); //p1中所有的可枚举的实例属性
+        // document.write(a1);
+        function Pig(name, age) {
+            // console.log(this);
+         
+            this.name = name;
+            this.ager = age;
+            if (typeof this.sayName != "function") {
+                // console.log(this);
+                document.write(this);
+                Pig.prototype.sayName = function () {
+                    console.log(this.name);
+                }
+            }
+        }
+
+        var pig1= new Pig("bai",1);
+        var pig2 =new Pig("hei",2);
+        function say(){
+            console.log(this);
+        }
+        say();
+        new say();
+        console.log(say);
+
+    </script>
+</body>
+
+</html>

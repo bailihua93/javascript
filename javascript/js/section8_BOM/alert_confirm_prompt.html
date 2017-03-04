@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <button id="alert_">
+       alert
+   </button>
+    <button id="confirm_">confirm</button>
+    <button id="prompt_">prompt</button>
+    <script>
+        var alert_ = document.querySelector("#alert_");
+        var confirm_ = document.querySelector('#confirm_');
+        var prompt_ = document.querySelector('#prompt_');
+        alert_.addEventLi
+            alert("hello");stener("click", function () {
+            alert("hello");
+        });
+        confirm_.addEventListener("click", function () {
+            var con = confirm("确认的话返回ｔｒｕｅ，否则返回ｆａｌｓｅ");
+            if (con) {
+                console.log("true");
+            } else {
+                console.log("false");
+            }
+        });
+        prompt_.addEventListener("click", function () {
+            var prt = prompt("你是谁", "白");
+            console.log(prt);
+        });
+    </script>
+</body>
+
+</html>
