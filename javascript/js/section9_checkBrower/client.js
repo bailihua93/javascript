@@ -1,12 +1,3 @@
-window.onload = function () {
-    function getElement(id) {
-        if (document.getElementById) {
-            return document.getElementById('id');
-        } else if (document.all) {
-            return document.all[id];
-        }
-    }
-
     var client = function () {
 
         //呈现引擎
@@ -171,7 +162,3 @@ window.onload = function () {
         };
 
     }();
-    
-    console.log(client);
-
-}
