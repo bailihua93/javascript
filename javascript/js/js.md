@@ -343,18 +343,83 @@ function isHostMethod(object,property){
      -  1 ： 元素
      - 
 1.  nodeName 和 nodeValue
-```
+```js
     if(someNode.nodeType == 1){
         name = someNode.nodeName ; // 是**元素节点**的话，取出标签名
         value = someNode.nodeValue; // 元素节点的始终为 null
     }
 ```
-2.  节点关系
- + childNodes : Nodelist对象
+2.  节点关系(只读的指针)
+ + childNodes :此属性只想一个 Nodelist对象
  + Nodelist ： 类数组对象，可以通过位置访问，并且有length属性，不是数组，
- **基于DOM结构动态执行查询的结果,每次访问都是基于当时的快照**， 不停变化的，
+ **基于DOM结构动态执行查询的结果,每次访问都是基于当时的快照， 不停变化的，**
+```js
+ var ul_node = document.createElement("ul");
+     var childnode =ul_node.childNodes;          //传递的是对象的指针
+     var len = ul_node.childNodes.length;        //只传递的是数值
+     for (i =0;i<5;i++){
+        console.log(len);                        //不会变       
+        console.log(ul_node.childNodes.length);  // 动态访问会实时更新
+        console.log(childnode);                  //会实时更新
+        console.log(ul_node.childNodes);         //会实时更新
+        ul_node.appendChild(document.createElement("li"));
+     }
+```
+ - 判断是否有子节点的方法   node.hasChildNodes(); //等价于判断length
 
- 访问方法
-       
+ **访问方法**: 可以通过方括号也可以通过item();
+ ```js
+ var firstChild = someNode.childNodes[0];
+ var secondChild = someNode.childNodes.item(1);
+ var len = someNode.childNodes.length; //这里指的是访问该类数组的那一刻的数量
+ ```
+
+ **转换成数组的方法**
+ 兼容ie8和其他的东西，用另外的一种怪癖检测形式
+ ```js
+ function convertToArrey(args){
+         var arr = null ;
+         try{
+             arr = Arrey.prototype.slice.call(args,0);//针对非ie8浏览器
+         }catch(err){
+             arr = new Array();
+             for (var i =0; i<arg.length;i++){
+                 arr.push(arg[i]);
+             }
+         }
+         return arr;
+     }
+```
+
++ parentNode  指向父节点
++ previousSibling   前面的兄弟节点 ，没有的话返回null
++ nextSibling       后面的兄弟节点， 没有的话返回null
++ firstChild  lastChild 第一个和最后一个子节点 ，没有返回null
++ ownerDocument 文档节点，唯一，直接回溯到顶端
+
+3. 节点操作
++ **任何节点不能同时出现在文档的多个位置上**
++ appendChild(node); childNodes末尾处添加节点，并且返回该节点
+```js
+var returnNode = someNode.appendChild(newNode);
+alert(returnNode == newNode);                 //true
+alert(someNode.lastChild == newNode);         //true
+```
+*若调用appendChild();传入的是父节点的首子节点，那么该节点就会变成父节点的尾节点，因此可以调整过位置*
+
++ insertBefore(Node,indexNode); childNodes特定的节点前上插入子节点，并返回此节点
+     - someNode.insertBefore(node,null);直接插入到最后的节点
+     - someNode.insertBefore(node,someNode.firstChild); 插入到最前面
+     - someNode.insertBefore(node,someNode.lastChild); 插到倒数第二位置
++ replaceChild(node,repacedNode);  返回被替换掉的节点，dom中没有，但是还存在
++ removeChild(node);返回被移除的节点
+
+**上面的方法需要先取得父节点，并且在不支持子节点的节点上调用这些方法将会导致错误（text）**
 
 
++ node.cloneNode(boolean); true 克隆子节点、特性不会而空js属性;false父标签的特性和标签本身,不会克隆子节点的
+
+*bug：ie中会复制事件处理程序，复制前最好先移除事件*
+
++ normalize();  使用后，删除该节点的子节点中的空文本节点，病合并相邻的两个文本节点
+#####

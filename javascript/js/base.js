@@ -174,3 +174,19 @@ function isHostMethod(object,property){
         };
 
     }();
+/**
+ * 类数组转化为数组的方法
+ * @param {*} args 
+ */
+    function convertToArrey(args){
+         var arr = null ;
+         try{
+             arr = Arrey.prototype.slice.call(args,0);//针对非ie8浏览器
+         }catch(err){
+             arr = new Array();
+             for (var i =0; i<arg.length;i++){
+                 arr.push(arg[i]);
+             }
+         }
+         return arr;
+     }
