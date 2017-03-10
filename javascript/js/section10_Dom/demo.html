@@ -7,9 +7,28 @@
     <title>Document</title>
 </head>
 <body>
-    <div class= "hell" id = "bai">parent
+    <!--<div class= "hell" id = "bai">parent
       <p>hah</p>
-    </div>
-    <script src = "./demo.js"> </script>
+    </div>-->
+   
+   <!-- <button onclick = "clear"></button>
+     <script>
+        /*document.write("<strong>"+(new Date()).toString()+"</strong>");
+        document.write("<script src = \"demo.js\">"+"<\/script>");*/
+        function clear (){
+            console.log("hah");
+        }
+        var button = document.getElementsByTagName("button")[0];
+        console.log(button.onclick);
+        console.log(button.getAttribute("onclick"));
+        //   注意后面必须将 <\/script>
+    </script>-->
+    <!--<script src = "./demo.js"> </script>-->
+    <ul><li></li><li></li><li></li>
+    </ul>
+    <script>
+       var len =  document.getElementsByTagName("ul")[0].childNodes.length;
+       document.write(len);
+    </script>
 </body>
 </html>

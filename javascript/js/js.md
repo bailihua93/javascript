@@ -398,6 +398,26 @@ function isHostMethod(object,property){
 + ownerDocument 文档节点，唯一，直接回溯到顶端
 
 3. 节点操作
++  document.createElement("tagName");创建元素节点
+    - 对于<=ie7 
+```js
+if(client.browser.ie&&client.browser.ie<=7){
+    //必须用下面的方法创建对应的元素
+    //创建含有name属性的iframe
+    var iframe = document.createElement("<iframe name=\"maframe\"></iframe>");
+    
+    // 通过表单的reset（）方法重构的input元素
+    var input = document.createElement("<input type =\"checkbox\">");
+
+    //可以renset的按钮
+    var button = document.createElement("<input type = \"reset\"></button>");
+
+    //单选框
+    var radio1 = document.createElement("<input type=\"radio\" name=\"choice\" value=\"1\">");
+    var radio2 = document.createElement("<input type=\"radio\" name=\"choice\" value=\"2\">");
+}
+```
+   
 + **任何节点不能同时出现在文档的多个位置上**
 + appendChild(node); childNodes末尾处添加节点，并且返回该节点
 ```js
@@ -422,4 +442,183 @@ alert(someNode.lastChild == newNode);         //true
 *bug：ie中会复制事件处理程序，复制前最好先移除事件*
 
 + normalize();  使用后，删除该节点的子节点中的空文本节点，病合并相邻的两个文本节点
-#####
+#### Document类型（表示文档的类型）
++ document对象是HTMLDocment(继承Document)的实力，表示整个html页面，并且是windows对象的一个属性，因此可以全局访问
+   - nodeType 9    
+   - nodeName  "#document"
+   - nodeValue   parentNode    ownerDocument: null   
+   - 子节点可能是一个DocumentType、Element、ProcessingInstruction或者Comment
+  
+  所有的版本浏览器都可以访问HTMLDocument 但是ie可能无法访问Document
+1. 文档的子节点
+  + document .documentElement  指向html的整个页面
+  + document.firstChild == document.childNodes[0] == <Doctype>
+  + document.body    <body>标签
+  + document.head    <head>标签
+  + document.doctype 用处有限不值得记住
+
+  + <html>外的注释
+   ie8、chrome、safari把第一条作为节点
+    ie9及以上  每一条都是一个节点
+     firefox 忽略
+2. 文档信息
+   + var title = document.title;  //获取title
+   + document.title = “new page";
+
+   + http相关的
+      - var referrer = document.referrer ; // 链接到本页面的的那个页面
+      - var url = document.URL; //获取URL
+      - var domain =  document.domain;   //域名
+      -  这三个属性中只有domain可以设置，只能设置成url中包含的域，假设 url "www.baidu.com";
+      document.domain = "baidu.com"; //对的
+      document.domain = "php.baidu.com"; //错的
+      一旦用了短的，就不能再设置回长的
+      页面中有其他子域的框架或者内嵌框架的时候，不同框架间不能跨域访问，此时都改成相同的document.domain就可以相互访问了
+3. 查找元素
+   + (someNode||document)getElementById("str") ;  大小写一致且没有的话返回null ，ie7不区分;并且ie7会把name当id用，且返回的是第一个元素
+   + (someNode||document)getElementsByTagName("str") ;  大小写一致且没有的话返回null； 返回的HTMLCollection对象，是一个**动态合集** ,
+
+```js
+     var ul_node = document.createElement("ul");
+     var childnode =ul_node.getElementsByTagName("li");          //传递的是对象的指针
+     var len = childnode.length;        //只传递的是数值
+     var allElement = document.getElementsByTagName("*");  //获取全部标签
+     for (i =0;i<5;i++){
+         //访问方法  item 或者[]
+        childnode.item(1);
+        childnode[1];
+           //有name属性的话
+        childnode.namedItem("image");
+        childnode["image"];
+
+        //动态性
+        console.log(len);                        //不会变       
+        console.log(childnode.length);  // 动态访问会实时更新
+        console.log(childnode);                  //会实时更新
+        console.log(ul_node.getElementsByTagName("li"));         //会实时更新
+        ul_node.appendChild(document.createElement("li"));
+     }
+```
+   + getElementsByName(); 获取相同name的元素，单选等
+
+4. 特殊集合（HTMLCollection）
+   + document.anchors   所有带name属性的<a> 元素，锚点
+   + document.forms      document.getElementsByTagName("form");
+   + document.images     document.getElementsByTagNames("img");
+   + document.links     所有带href的<a>
+
+5. DOM一致性检测
+  判断浏览器实现了DOM的那些部分
+  > var hasXmlDom = document.implementation.hasFeature("HTML","5.0");
+  最好和能力检测一起用
+6. 文档写入
+ +  document.write(); document.writeln(); 向页面写入内容，一个
+```html
+    <script>
+        document.write("<strong>"+(new Date()).toString()+"</strong>");
+        document.write("<script src = \"demo.js\">"+"<\/script>");
+        //   注意后面必须将 <\/script>
+    </script>
+```
+  注意： 1.  写的内容会直接在这个script标签下面开始写
+        2.  当页面onload 之后在写的话就会重写整个页面
+
+ +  open();close();用于打开和关闭网页的输入流
+ #### Element
++  nodeType   ==    1
++  nodeValue     null
++  nodeName   ==   tagName
+注意： 返回的tagName都是大写的 比较的话需要加上 toLowerCase();
+
+1. HTML元素
+多数由HTMLElement来实现的，包含的特性，**可以直接读写**
+- id
+- className
+- title
+- lang
+- dir
+**标签对应的类型，  P264** 
+2.   getAttribute / node.attr  取得特性
+ +  getAttribute(string)  
+ > element.getAttribute("id");  
+ > element.getAttribute("class"); //获取class特性的时候是用className，而是直接用class
+
+- 特性名是不区分大小写的 “ID” 和“id”相同的
+- 在h5中规范，自定义属性需要加上data- 前缀以便验证
+- style 直接属性访问的话返回一个对象， getAttribute访问的话返回一个字符串
+- onclick 属性访问时返回一个函数，getAttribute访问的时候返回一个相应字符串的
+
+由于上面的特性，操作DOM的时候通常只使用对象的属性，自定义属性的时候才会用getAttribute()
+
+3.  设置特性
++ setAttribute(keystr,valuestr); // 特性有的话会覆盖，没有的话就创建,并且属性默认转化为小写
+
+ 直接通过属性来设置自定义属性不会有效果，除了那些特性，
+ > div.id = "hello";  //ok
+ > div.color = "red"; //null
++ div.removeAttribute("str");删除属性和特性  ie6不支持
+
+4. attributes 属性
++ 本质是一个NamedNodeMap，“动态” 集合，元素的每个特性都由一个Attr节点表示，每个节点都保存在NamedNodeMap中。方法
+   - element.attributes.getNamedItem("id").nodeValue;
+   - element.attributes["id"].nodeValue; // 和上面的相同  访问id属性
+   - element.attributes["id"].nodeValue = “someID” ； 赋值
+   - element.attributes.removeNamedItem("id"); 移除属性
+   - element.attributes.setNamedItem(newAttr); 添加属性
+**上面的没什么用**， **遍历属性的时候才用的到**
+   - 遍历成字符串形式的函数 
+```js
+function outputAttributes(element) {
+    var pairs = new Arrey(),
+        attrName,
+        attrValue,
+        i,
+        len;
+    for (i = 0, len = element.attributes.length; i < len; i++) {
+        attrName = element.attributes[i].nodeName;
+        attrValue = element.attributes[i].nodeValue;
+        //ie7会返回大量的没有定义的东西，定义后的话该属性的specified 为true
+        if(element.attrbutes[i].specified){
+            pairs.push(attrName + " = " + "\"" + attrValue + "\"");
+        }
+        
+    }
+    return pairs.join(" ");
+}
+```
+
+5. 元素的子节点
++ 空白符处理
+   
+   在一般浏览器的中元素中的空白符也是一个text节点；则遍历一个元素的所有节点的时候，至少要先有判断下nodeType 是否为 1；
+```js
+for(var i =0,len=element.childNodes.length;i<len;i++){
+    if(element.childNodes[i].nodeType == 1){
+
+    }
+}
+```
++ 访问元素
+     - 通过关系访问
+     - 通过选择器访问
+
+#### Text类型
++ 文本节点由Text类型表示，包含可以按照字面解释的纯文本内容，可以包含转转义后的HTML字符，不能包含HTML代码特性
+     - nodeType                  1
+     - nodeName                 "#text"
+     - nodeValue                自身包含的文本，也可以通过data访问
+     - parentNode               一份element
+     - 不支持子节点
+     - appendData(text);        将
+
+
+
+
+
+
+  
+
+
+ 
+
+
