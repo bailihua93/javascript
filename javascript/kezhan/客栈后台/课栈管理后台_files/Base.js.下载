@@ -1,0 +1,72 @@
+/*
+* bootstrap 模态框
+* params = {
+*     title:题目，
+*     context:内容,
+*     start:（function） show之前执行,
+*     cancel:（function） 点击关闭按钮执行,
+*     confirm:（function） 点击确定按钮执行,
+*     show:（function） 展示模态框,
+*     hide:（function） 隐藏模态框,
+*     Toggle:（function） 手动切换模态框,
+* }
+* */
+Object.extend = function(destination, source) {
+    for (var property in source) {
+        destination[property] = source[property];
+    }
+    return destination;
+}
+function ModalTips(){
+    this.initialize.apply(this,arguments);
+}
+ModalTips.prototype = {
+    modalDom:jQuery("#myModal"),
+    initialize:function(options){
+        var self = this;
+        self.options = {
+            title:    '',
+            context:    '',
+            start:    function(){},
+            cancel:   function(){},
+            confirm:   function(){}
+        };
+        Object.extend(this.options, options || {});
+        self.title = self.options.title ||  '提示框';
+        self.context = self.options.context ||  '';
+        self.renderMedal();
+        jQuery('#myModal').on('shown.bs.modal', function () {
+            self.options.start();// 执行一些动作...
+        });
+        self.show();
+        jQuery(".modal-dialog .btn-default").click(function(){
+            self.hide();
+            self.options.cancel();
+        });
+        jQuery(".modal-dialog .btn-primary").click(function(){
+            self.hide();
+            self.options.confirm();
+        });
+
+    },
+    renderMedal:function(){
+        var _html = '<div class="modal-dialog"><div class="modal-content"><div class="modal-header">\
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
+                <h4 class="modal-title" id="myModalLabel">' + this.title + '</h4></div>\
+                <div class="modal-body">'+ this.context +'</div>\
+                <div class="modal-footer">\
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>\
+                <button type="button" class="btn btn-primary">确定</button>\
+                </div></div></div>';
+        jQuery("#myModal").html(_html);
+    },
+    show:function(){
+        jQuery('#myModal').modal('show');
+    },
+    hide:function(){
+        jQuery('#myModal').modal('hide');
+    },
+    Toggle:function(){
+        jQuery('#myModal').modal('Toggle');
+    }
+}

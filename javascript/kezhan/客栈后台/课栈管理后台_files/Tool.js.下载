@@ -1,0 +1,54 @@
+/*
+* bootstrap 模态框
+* params = {
+*     title:题目，
+*     context:内容,
+*     start:（function） show之前执行,
+*     cancel:（function） 点击关闭按钮执行,
+*     confirm:（function） 点击确定按钮执行,
+*     show:（function） 展示模态框,
+*     hide:（function） 隐藏模态框,
+*     Toggle:（function） 手动切换模态框,
+* }
+* */
+Tool = {
+    checkLength:function(o, name, min, max) {
+        if (o.val().length > max || o.val().length < min) {
+            o.addClass("ui-state-error");
+            alert("" + name + "长度，需大于" + min + ",小于" + max + ".");
+            return false;
+        } else {
+            return true;
+        }
+    },
+    checkRegexp:function(o, regexp, n) {
+        if (!(regexp.test(o.val()))) {
+            o.addClass("ui-state-error");
+            alert(n);
+            return false;
+        } else {
+            return true;
+        }
+    },
+    showMsg:function(jumpurl,msg){
+        var msg = msg || '配置成功';
+        window.location = "/index/showMsg?msg="+msg+'&jumpurl='+jumpurl;
+    }
+}
+jQuery(document).ready(function(){
+    //图片预览
+    $('.with-pic[data-pic!=""]') && $('.with-pic[data-pic!=""]').hover(function(){
+            if ($(this).siblings('img').length) {
+                $(this).siblings('img').attr('src', $(this).data('pic')).show();
+            } else {
+                $(this).after("<img class='with-pic-img' src='" + $(this).data('pic') + "' />").show();
+            }
+            return false;
+        }, function(){
+            $(this).siblings('img').hide();
+            return false;
+        }
+    ).on('click', function(){
+            return false;
+        });
+});

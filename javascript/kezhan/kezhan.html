@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)http://payadmin.kezhanwang.cn/admin/aloan/list -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>课栈管理后台</title>
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="./kezhan_files/bootstrap.min.css" media="screen">
+    <link rel="stylesheet" href="./kezhan_files/font-awesome.min.css" media="screen">
+    <link rel="stylesheet" href="./kezhan_files/ionicons.min.css" media="screen">
+    <link rel="stylesheet" href="./kezhan_files/AdminLTE.min.css" media="screen">
+    <link rel="stylesheet" href="./kezhan_files/_all-skins.min.css" media="screen">
+    <link rel="stylesheet" href="./kezhan_files/bootstrap3-wysihtml5.min.css" media="screen">
+
+
+    <link href="./kezhan_files/jquery.ui.plupload.css" rel="stylesheet" media="screen">
+    <script type="text/javascript" src="./kezhan_files/jquery.js.下载" charset="UTF-8"></script>
+    <script type="text/javascript" src="./kezhan_files/layer.js.下载" charset="UTF-8"></script><link rel="stylesheet" href="./kezhan_files/layer.css" id="layui_layer_skinlayercss">
+    <script type="text/javascript" src="./kezhan_files/bootstrap.min.js.下载" charset="UTF-8"></script>
+    <script type="text/javascript" src="./kezhan_files/app.min.js.下载" charset="UTF-8"></script>
+    <!--[if lt IE 9]>
+      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="./kezhan_files/jquery.uploader.js.下载" charset="UTF-8"></script>
+    <script type="text/javascript" src="./kezhan_files/underscore.js.下载" charset="UTF-8"></script>
+<link href="./kezhan_files/WdatePicker.css" rel="stylesheet" type="text/css"></head>
+<body class="skin-blue sidebar-mini">
+<div class="wrapper">
+    <header class="main-header">
+    <!-- Logo -->
+            <a class="logo" style="background-color: black;" href="http://payadmin.kezhanwang.cn/"><img src="./kezhan_files/logo2016_b32982.png" height="35px" width="115px"></a>
+    
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+        <!-- Sidebar toggle button-->
+        <a href="http://payadmin.kezhanwang.cn/admin/aloan/list#" class="sidebar-toggle" data-toggle="offcanvas" role="button" id="sidebar-toggle">
+            <span class="sr-only"></span>
+        </a>
+        <div class="navbar-custom-menu">
+            <ul class="nav navbar-nav">
+                <li class="dropdown tasks-menu">
+                    <a href="http://payadmin.kezhanwang.cn/" class="dropdown-toggle">
+                        <i class="glyphicon glyphicon-home"></i>
+                    </a>
+                </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle">
+                        <span class="dragtable-toggle">2017年03月10日</span>
+                    </a>
+                </li>
+                <!-- User Account: style can be found in dropdown.less -->
+                <li class="dropdown user user-menu">
+                    <a href="http://payadmin.kezhanwang.cn/admin/aloan/list#" class="dropdown-toggle" data-toggle="dropdown">
+                        <img src="./kezhan_files/user2-160x160.jpg" class="user-image" alt="User Image">
+                        <span class="hidden-xs">白利华</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <!-- User image -->
+                        <li class="user-header">
+                            <img src="./kezhan_files/user2-160x160.jpg" class="img-circle" alt="User Image">
+                            <p>
+                                白利华 - bailihua@kezhanwang.cn                                <small>18210566350</small>
+                            </p>
+                        </li>
+                        <!-- Menu Footer-->
+                        <li class="user-footer">
+                            <div class="pull-right">
+                                <a href="http://payadmin.kezhanwang.cn/admin/apage/logout" class="btn btn-default btn-flat">退出</a>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Control Sidebar Toggle Button -->
+            </ul>
+        </div>
+    </nav>
+</header>
+<aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+        <!-- Sidebar user panel -->
+        <div class="user-panel">
+            <div class="pull-left image">
+                <img src="./kezhan_files/user2-160x160.jpg" class="img-circle" alt="User Image">
+            </div>
+            <div class="pull-left info">
+                <p>白利华</p>
+                <a href="http://payadmin.kezhanwang.cn/admin/aloan/list#"><i class="fa fa-circle text-success"></i> Online</a>
+            </div>
+        </div>
+        <!-- sidebar menu: : style can be found in sidebar.less -->
+        <ul class="sidebar-menu">
+            <li class="header">菜单</li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/aschool/list">
+                        <i class="fa fa-sitemap"></i>
+                        <span>机构</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class="active"><a href="http://payadmin.kezhanwang.cn/admin/aschool/list"><i class="fa fa-circle-o"></i>机构列表</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aschool/kzclist"><i class="fa fa-circle-o"></i>课栈卡机构列表</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aschool/bindbdlist"><i class="fa fa-circle-o"></i>绑定商务用户</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aschool/testlist"><i class="fa fa-circle-o"></i>测试机构列表</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aschool/installmentlist"><i class="fa fa-circle-o"></i>开通分期列表</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aschool/tool"><i class="fa fa-circle-o"></i>工具</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/acourse/list">
+                        <i class="fa fa-mortar-board"></i>
+                        <span>课程</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class="active"><a href="http://payadmin.kezhanwang.cn/admin/acourse/list"><i class="fa fa-circle-o"></i>课程列表</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview active">
+                    <a href="http://payadmin.kezhanwang.cn/admin/aloan/list">
+                        <i class="fa fa-check-square-o"></i>
+                        <span>贷款审核</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class="active"><a href="http://payadmin.kezhanwang.cn/admin/aloan/list"><i class="fa fa-circle-o"></i>贷款列表</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aloan/check"><i class="fa fa-circle-o"></i>贷款审核</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aloan/loangroup"><i class="fa fa-circle-o"></i>汇总信息</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aloan/creditaduit"><i class="fa fa-circle-o"></i>信审审核统计</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aloan/creditlist"><i class="fa fa-circle-o"></i>审核列表</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/asystem/checkuser">
+                        <i class="fa fa-gear"></i>
+                        <span>系统管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/addschooladmin"><i class="fa fa-circle-o"></i>添加机构管理员</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/checkcode"><i class="fa fa-circle-o"></i>查询手机验证码</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/checkuser"><i class="fa fa-circle-o"></i>查询用户</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/department"><i class="fa fa-circle-o"></i>部门管理</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/role"><i class="fa fa-circle-o"></i>角色管理</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/employee"><i class="fa fa-circle-o"></i>员工管理</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/privilegelist"><i class="fa fa-circle-o"></i>权限节点管理</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/asystem/loglist"><i class="fa fa-circle-o"></i>日志</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/astat/statloandetail">
+                        <i class="fa fa-line-chart"></i>
+                        <span>统计</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/summary"><i class="fa fa-circle-o"></i>概况</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/statloandetail"><i class="fa fa-circle-o"></i>贷款明细</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/exceed"><i class="fa fa-circle-o"></i>逾期</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/calcrepay"><i class="fa fa-circle-o"></i>账期应收</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/schooldetail"><i class="fa fa-circle-o"></i>学校明细</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/loanstat"><i class="fa fa-circle-o"></i>放款明细</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/loantool"><i class="fa fa-circle-o"></i>贷款工具</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/checktime"><i class="fa fa-circle-o"></i>贷款时间</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/exceptionlog"><i class="fa fa-circle-o"></i>异常日志</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/loanbill"><i class="fa fa-circle-o"></i>还款计划</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/rsauto"><i class="fa fa-circle-o"></i>融数自动化</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/astat/count?type=4"><i class="fa fa-circle-o"></i>统计</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/akzc/statloandetail">
+                        <i class="fa fa-bar-chart"></i>
+                        <span>课栈卡统计</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/akzc/summary"><i class="fa fa-circle-o"></i>概况</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/akzc/statloandetail"><i class="fa fa-circle-o"></i>贷款明细</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/akzc/exceed"><i class="fa fa-circle-o"></i>逾期</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/akzc/loanbill"><i class="fa fa-circle-o"></i>还款计划</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/arop/company">
+                        <i class="fa fa-random"></i>
+                        <span>融数</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/arop/company"><i class="fa fa-circle-o"></i>机构开户</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/arop/cobind"><i class="fa fa-circle-o"></i>机构绑卡</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/arop/ccredit"><i class="fa fa-circle-o"></i>机构授信</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/arop/sopen"><i class="fa fa-circle-o"></i>学生开户</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/arop/sbind"><i class="fa fa-circle-o"></i>学生绑卡</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/arop/bank"><i class="fa fa-circle-o"></i>银行列表</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/ascore/index">
+                        <i class="fa fa-area-chart"></i>
+                        <span>业绩</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/ascore/statistics"><i class="fa fa-circle-o"></i>数据统计</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/ascore/goalset"><i class="fa fa-circle-o"></i>目标设置</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/ascore/rewardset"><i class="fa fa-circle-o"></i>奖励设置</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/ascore/rewardlist"><i class="fa fa-circle-o"></i>奖励明细</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/aconfig/index">
+                        <i class="fa fa-gears"></i>
+                        <span>金融设置</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aconfig/loanType"><i class="fa fa-circle-o"></i>费率设置</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aconfig/smsTemplate"><i class="fa fa-circle-o"></i>短信模板</a></li>
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aconfig/sms"><i class="fa fa-circle-o"></i>短信记录</a></li>
+                                            </ul>
+                </li>
+                            <li class="treeview ">
+                    <a href="http://payadmin.kezhanwang.cn/admin/aepay/index">
+                        <i class="fa fa-credit-card"></i>
+                        <span>收银台</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                                                <li class=""><a href="http://payadmin.kezhanwang.cn/admin/aepay/index"><i class="fa fa-circle-o"></i>收银流水</a></li>
+                                            </ul>
+                </li>
+                    </ul>
+    </section>
+    <!-- /.sidebar -->
+</aside>
+<script src="./kezhan_files/jquery.cookie.js.下载" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        var COOKIE_NAME = 'admin_sidebar_toggle';
+        var hasClass= $('body').hasClass('sidebar-collapse');
+
+        if(hasClass == false && $.cookie(COOKIE_NAME) && $.cookie(COOKIE_NAME)=='sidebar-collapse'){
+            $('.sidebar-mini').addClass('sidebar-collapse');
+        }else if(hasClass == true){
+            $.cookie(COOKIE_NAME,'sidebar-collapse',{ path: '.kezhanwang.cn',expires:86400 });
+        }
+        $('#sidebar-toggle').click(function () {
+            $new = $('body').hasClass('sidebar-collapse');
+            if ($new == false){
+                $.cookie(COOKIE_NAME,'sidebar-collapse',{ path: '.kezhanwang.cn',expires:86400 });
+            }else{
+                $.cookie(COOKIE_NAME,'',{ path: '.kezhanwang.cn' });
+            }
+            console.log($.cookie(COOKIE_NAME));
+        });
+    });
+
+</script>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper" style="min-height: 581px;">
+        <!-- Main content -->
+        <section class="content">
+            <script type="text/javascript" src="./kezhan_files/WdatePicker.js.下载"></script>
+<div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">审核列表</h3></div>
+    <div class="panel-body">
+        <div class="row" style="border-bottom: 1px solid #999">
+            <form class="form_inline" action="http://payadmin.kezhanwang.cn/admin/aloan/list" method="get">
+                <div class="row">
+                    <div class="form-group col-sm-4 text-right">
+                        <label for="key1" class="col-md-4 pr_0">关键字：</label>
+                        <div class="col-md-8 pl_0">
+                            <input type="text" name="keyword" placeholder="身份证号/姓名/贷款id" class="form-control col-md-8 " id="key1" value="">
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-8 text-right">
+                        <label for="key1" class="col-md-2 pr_0">创建时间:</label>
+                        <div class="input-group col-md-8 pr_0">
+                            <input type="text" name="beginDate" class="form-control" id="exampleInputAmount" placeholder="开始时间" value="" onclick="WdatePicker()">
+                            <div class="input-group-addon">至</div>
+                            <input type="text" name="endDate" class="form-control" id="exampleInputAmount" placeholder="结束时间" value="" onclick="WdatePicker()">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-4 text-right">
+                        <label for="key1" class="col-md-4 pr_0">机构：</label>
+                        <div class="col-md-8 pl_0">
+                            <input type="text" name="school_name" class="form-control col-md-8 " id="key1" value="">
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-3 text-right" style="margin-left: 30px">
+                        <label for="key1" class="col-md-4 pr_0">省份：</label>
+                        <div class="col-md-8 pl_0">
+                            <select class="form-control" id="select_province" name="province">
+                                <option value="0">请选择...</option>
+                                                                    <option value="340000">A-安徽省</option>
+                                                                    <option value="820000">A-澳门特别行政区</option>
+                                                                    <option value="110000">B-北京市</option>
+                                                                    <option value="500000">C-重庆市</option>
+                                                                    <option value="350000">F-福建省</option>
+                                                                    <option value="440000">G-广东省</option>
+                                                                    <option value="450000">G-广西壮族自治区</option>
+                                                                    <option value="620000">G-甘肃省</option>
+                                                                    <option value="520000">G-贵州省</option>
+                                                                    <option value="130000">H-河北省</option>
+                                                                    <option value="410000">H-河南省</option>
+                                                                    <option value="460000">H-海南省</option>
+                                                                    <option value="420000">H-湖北省</option>
+                                                                    <option value="430000">H-湖南省</option>
+                                                                    <option value="230000">H-黑龙江省</option>
+                                                                    <option value="220000">J-吉林省</option>
+                                                                    <option value="320000">J-江苏省</option>
+                                                                    <option value="360000">J-江西省</option>
+                                                                    <option value="210000">L-辽宁省</option>
+                                                                    <option value="150000">N-内蒙古自治区</option>
+                                                                    <option value="640000">N-宁夏回族自治区</option>
+                                                                    <option value="630000">Q-青海省</option>
+                                                                    <option value="310000">S-上海市</option>
+                                                                    <option value="510000">S-四川省</option>
+                                                                    <option value="370000">S-山东省</option>
+                                                                    <option value="140000">S-山西省</option>
+                                                                    <option value="610000">S-陕西省</option>
+                                                                    <option value="710000">T-台湾省</option>
+                                                                    <option value="120000">T-天津市</option>
+                                                                    <option value="650000">X-新疆维吾尔自治区</option>
+                                                                    <option value="540000">X-西藏自治区</option>
+                                                                    <option value="810000">X-香港特别行政区</option>
+                                                                    <option value="530000">Y-云南省</option>
+                                                                    <option value="330000">Z-浙江省</option>
+                                                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-3 text-right">
+                        <label for="key1" class="col-md-4 pr_0">城市：</label>
+                        <div class="col-md-8 pl_0">
+                            <select class="form-control" id="select_city" name="city">
+                                <option value="0">请选择...</option>
+                                                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-4 text-right">
+                        <label for="key1" class="col-md-4 pr_0">审核人员：</label>
+                        <div class="col-md-8 pl_0">
+                            <select class="form-control" id="select_audit" name="auditor_id">
+                                <option value="0">请选择...</option>
+                                                                    <option value="1012611">蒋洪洋</option>
+                                                                    <option value="1035658">杨玲玉</option>
+                                                                    <option value="1036715">王雪</option>
+                                                                    <option value="1057347">韩爱春</option>
+                                                                    <option value="1057349">杜海蛟</option>
+                                                                    <option value="1193403">王红磊</option>
+                                                                    <option value="1193407">闫佳</option>
+                                                                    <option value="1193408">王琴</option>
+                                                                    <option value="1193410">白利华</option>
+                                                                    <option value="1193411">郝珂</option>
+                                                                    <option value="1193412">郭俊鹏</option>
+                                                                    <option value="1193413">刘岳青</option>
+                                                                    <option value="1193414">张丹丹</option>
+                                                                    <option value="1193415">吴昊</option>
+                                                                    <option value="1193416">李冰</option>
+                                                                    <option value="1193417">任宇璇</option>
+                                                                    <option value="1193420">李如意</option>
+                                                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-4 text-right">
+                        <label for="key1" class="col-md-4 pr_0">机构id:</label>
+                        <div class="col-md-8 pl_0">
+                            <input type="text" name="school" placeholder="机构id/名称" class="form-control col-md-8 " id="key1" value="">
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-4">
+                        <button type="submit" class="btn btn-primary delete">查询</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="row mt_10">
+            <div class="col-md-12">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>申请人</td>
+                        <td>分期金额</td>
+                        <td>分期费率</td>
+                        <td>机构名称</td>
+                        <td>创建时间</td>
+                        <td>机构确认时间</td>
+                        <td>状态</td>
+                        <td>级别</td>
+                        <td>期望审核时间</td>
+                        <td>抢单</td>
+                        <td>备注</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                                            <tr>
+                            <td style="color:blue;"><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152215" target="_blank">152215</a></td>
+                            <td style="color:blue;"><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152215" target="_blank">赵凌玉</a></td>
+                            <td>8800</td>
+                            <td>贴息18期(优惠9折（退课）)</td>
+                            <td style="color:blue;">新世界教育（徐州国贸中心）</td>
+                            <td>2017-03-10 14:52:03</td>
+                            <td>2017-03-10 14:54:09</td>
+                            <td>
+                                待审核                            </td>
+                            <td>
+                                优先                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                郭俊鹏                            </td>
+                            <td></td>
+                        </tr>
+                                            <tr>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152214" target="_blank">152214</a></td>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152214" target="_blank">边乘鹤</a></td>
+                            <td>13500</td>
+                            <td>弹性6+18(无保成人新（退课）)</td>
+                            <td>长春世政</td>
+                            <td>2017-03-10 14:22:32</td>
+                            <td>2017-03-10 14:34:42</td>
+                            <td>
+                                待审核                            </td>
+                            <td>
+                                普通                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                郝珂                            </td>
+                            <td></td>
+                        </tr>
+                                            <tr>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152212" target="_blank">152212</a></td>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152212" target="_blank">周好云</a></td>
+                            <td>15000</td>
+                            <td>弹性6+18(正常成人新（退课）)</td>
+                            <td>柏比特健身培训</td>
+                            <td>2017-03-10 14:22:07</td>
+                            <td>2017-03-10 14:32:04</td>
+                            <td>
+                                暂不审核                            </td>
+                            <td>
+                                普通                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                郭俊鹏                            </td>
+                            <td>第一联系人今晚7点左右才方便接电话</td>
+                        </tr>
+                                            <tr>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152207" target="_blank">152207</a></td>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152207" target="_blank">王昭逸</a></td>
+                            <td>19800</td>
+                            <td>弹性6+18(无保成人新（退课）)</td>
+                            <td>北京大盛优选教育咨询有限公司</td>
+                            <td>2017-03-10 13:51:35</td>
+                            <td>2017-03-10 14:28:23</td>
+                            <td>
+                                暂不审核                            </td>
+                            <td>
+                                普通                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                吴昊                            </td>
+                            <td>第一联系人多次拨打无人接听，后期拨打</td>
+                        </tr>
+                                            <tr>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152202" target="_blank">152202</a></td>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152202" target="_blank">赵自强</a></td>
+                            <td>19800</td>
+                            <td>弹性6+18(无保成人新（退课）)</td>
+                            <td>北京大盛优选教育咨询有限公司</td>
+                            <td>2017-03-10 13:20:07</td>
+                            <td>2017-03-10 14:28:16</td>
+                            <td>
+                                暂不审核                            </td>
+                            <td>
+                                普通                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                白利华                            </td>
+                            <td>13:00联系联系人</td>
+                        </tr>
+                                            <tr>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152201" target="_blank">152201</a></td>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152201" target="_blank">张晓楠</a></td>
+                            <td>19800</td>
+                            <td>弹性6+18(无保成人新（退课）)</td>
+                            <td>北京大盛优选教育咨询有限公司</td>
+                            <td>2017-03-10 13:19:50</td>
+                            <td>2017-03-10 14:28:08</td>
+                            <td>
+                                暂不审核                            </td>
+                            <td>
+                                普通                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                闫佳                            </td>
+                            <td>联系人16点方便接听</td>
+                        </tr>
+                                            <tr>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152196" target="_blank">152196</a></td>
+                            <td><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152196" target="_blank">刘雪芬</a></td>
+                            <td>36000</td>
+                            <td>贴息24期(优惠9折（退课）)</td>
+                            <td>韦博教育（常州武进中心）</td>
+                            <td>2017-03-10 11:41:46</td>
+                            <td>2017-03-10 11:43:12</td>
+                            <td>
+                                暂不审核                            </td>
+                            <td>
+                                普通                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                郭俊鹏                            </td>
+                            <td>下午6点和第一联系人联系</td>
+                        </tr>
+                                            <tr>
+                            <td style="color:blue;"><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152190" target="_blank">152190</a></td>
+                            <td style="color:blue;"><a href="http://payadmin.kezhanwang.cn/admin/aloan/check?id=152190" target="_blank">周奕奕</a></td>
+                            <td>7000</td>
+                            <td>贴息12期(优惠9折（退课）)</td>
+                            <td style="color:blue;">恒企教育（上海安亭校区）</td>
+                            <td>2017-03-09 19:46:20</td>
+                            <td>2017-03-09 19:58:51</td>
+                            <td>
+                                暂不审核                            </td>
+                            <td>
+                                普通                            </td>
+                            <td>
+                                尽快审核                            </td>
+                            <td>
+                                闫佳                            </td>
+                            <td>申请人3月10日晚18点方便接听</td>
+                        </tr>
+                                        </tbody>
+                    <tfoot>
+                    <tr>
+                        <td>ID</td>
+                        <td>申请人</td>
+                        <td>贷款金额</td>
+                        <td>贷款分期</td>
+                        <td>机构名称</td>
+                        <td>创建时间</td>
+                        <td>机构确认时间</td>
+                        <td>状态</td>
+                        <td>级别</td>
+                        <td>期望审核时间</td>
+                        <td>抢单</td>
+                        <td>备注</td>
+                    </tr>
+                    <tr>
+                        <td colspan="12" align="center"><button id="btnaudit" class="btn btn-primary">抢单</button></td>
+                    </tr>
+                    </tfoot>
+                </table>
+                <div class="container mxq-pagination">
+                    <ul id="star-pagination" class="pagination">
+                        <li class="first"><a data-action="first" onclick="goUrl(1)">首页</a></li>
+                        <li class="previous"><a data-action="previous">上一页</a></li>
+                        <li class="next"><a data-action="next">下一页</a></li>
+                        <li class="last"><a data-action="last" onclick="goUrl(1)">尾页</a></li>
+                        <li class=""><a>(共8条1页)</a></li>
+                        <li class="">
+                            <input type="text" value="1" id="go_page" class="form-control" style="width: 12%;display: inline;">
+                            <input type="button" onclick="goUrl($(&#39;#go_page&#39;).val())" value="确定">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="./kezhan_files/bootstrap-datetimepicker.js.下载" charset="UTF-8"></script>
+<script type="text/javascript" src="./kezhan_files/bootstrap-datetimepicker.zh-CN.js.下载" charset="UTF-8"></script>
+<script type="text/javascript">
+    function goUrl(page){
+        if(parseInt(page) != page)
+            return false;
+        var url = location.href;
+        url = url.replace(/&?page=\d{1,}/,'');
+//        url = url.replace(/page=\d{1,}/,'');
+        if(url.indexOf("?") > -1){
+            location.href = url + '&page='+page;
+        }else{
+            location.href = url + '?page='+page;
+        }
+    }
+    jQuery(document).ready(function(){
+        $('.off_on').click(function(){
+            var obj = $(this);
+            var id = obj.attr('value');
+            var inn = $(this).html();
+
+            if(!confirm('确认'+inn+'吗！')){
+                return false;
+            }
+            var status = 0;
+            if(inn == '上架')
+                status = 2
+            else
+                status = 0;
+            $.ajax({
+                type:'POST',
+                url:'/admin/acourse/off',
+                data:{id:id,status:status},
+                dataType:'json',
+                success:function (responseData) {
+                    if(responseData == 1){
+                        if(inn == '上架'){
+                            obj.html('下架');
+                            obj.parents('span').prev().html('已上架');
+                        }else{
+                            obj.html('上架');
+                            obj.parents('span').prev().html('未上架');
+                        }
+                    }
+                }
+            });
+        });
+        $('#btnaudit').click(function(){
+            var ids = [];
+            $('.auditor:checked').each(function(){
+                ids.push(this.value);
+            });
+            if (ids.length == 0) {
+                alert("请选中要抢的订单");
+                return false;
+            }
+            $.ajax({
+                type:'POST',
+                url:'/admin/aloan/collect',
+                data:{ids:ids.join(',')},
+                dataType:'json',
+                success:function (responseData) {
+                    if (responseData.code == 0) {
+                        alert('操作成功.锁定订单:' + responseData.data.ids);
+                        document.location.reload();
+                        return true;
+                    } else if (responseData.msg) {
+                        alert(responseData.msg);
+                        return false;
+                    } else {
+                        alert('未知错误');
+                        return false;
+                    }
+                }
+            });
+        });
+        $('.delete_one').click(function(){
+            var obj = $(this);
+            var id = obj.attr('value');
+            if(!confirm('确认删除吗！')){
+                return false;
+            }
+            $.ajax({
+                type:'POST',
+                url:'/admin/acourse/del',
+                data:{id:id},
+                dataType:'json',
+                success:function (responseData) {
+                    if(responseData == 1){
+                        obj.parents('li').remove();
+                    }
+                }
+            });
+        });
+        $("#select_city").change(function(){
+            var id = $(this).val();
+            $.ajax({
+                type:'POST',
+                url:'/admin/acourse/schools',
+                data:{area_id:id},
+                dataType:'json',
+                success:function (responseData) {
+                    var str = '<option value="0">请选择...</option>';
+                    $.each(responseData, function (n, v) {
+                        str += "<option value='"+v.id+"'>"+v.name+"</option>";
+                    });
+                    $("#select_school").html(str);
+                }
+            });
+        });
+        $("#select_province").change(function(){
+            var id = $(this).val();
+            $.ajax({
+                type:'POST',
+                url:'/admin/aschool/area',
+                data:{parent_id:id},
+                dataType:'json',
+                success:function (responseData) {
+                    var str = '<option value="0">请选择...</option>';
+                    $.each(responseData, function (n, v) {
+                        str += "<option value='"+v.id+"'>"+v.name+"</option>";
+                    });
+                    $("#select_city").html(str);
+                }
+            });
+        });
+
+
+        $('.form_date').datetimepicker({
+            language:  'zh-CN',
+            format: 'yyyy-mm-dd',
+            weekStart: 1,
+            todayBtn:  1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            minView: 2,
+            forceParse: 0
+        });
+    });
+</script>        </section>
+    </div>
+    <!-- /.content-wrapper -->
+<footer class="main-footer">
+    <div class="pull-right hidden-xs">
+        <b>Version</b> 2.3.7
+    </div>
+    <strong>Copyright © ezhan-admin&nbsp;2014 - 2017&nbsp;by&nbsp;kezhanwang.</strong> All rightsreserved.
+</footer></div>
+    <div class="clearfix"></div>
+            <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="4" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"></div>
+
+</body></html>
