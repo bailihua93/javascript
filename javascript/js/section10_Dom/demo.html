@@ -24,11 +24,17 @@
         //   注意后面必须将 <\/script>
     </script>-->
     <!--<script src = "./demo.js"> </script>-->
-    <ul><li></li><li></li><li></li>
+    <ul>
+        <li></li>
+        <li></li>
+        <li></li>
     </ul>
     <script>
-       var len =  document.getElementsByTagName("ul")[0].childNodes.length;
-       document.write(len);
+        var ul = document.getElementsByTagName("ul")[0];
+       ul.childNodes[0].nodeValue = "hello world" ;
+       var  newNode = ul.firstChild.splitText(5);
+       console.log(newNode.nodeValue);
+          console.log(ul.childNodes);
     </script>
 </body>
 </html>

@@ -608,8 +608,37 @@ for(var i =0,len=element.childNodes.length;i<len;i++){
      - nodeName                 "#text"
      - nodeValue                自身包含的文本，也可以通过data访问
      - parentNode               一份element
+     - length                  节点中字符的数目，nodeValue.length  data.length
      - 不支持子节点
-     - appendData(text);        将
+     - appendData(text);        将text添加到节点的末尾
+     - deleteData(offset,count); 从offset开始删除count个字符
+     - insertData(offset,text); 在offset指定的位置插入text
+     - replaceData(offset,count,text);
+     - splitText(offset);  从offset开始将当前文本节点分成两个文本节点
+     - substringData(offset,count); 提取offset到offset+count之间字符串
+     
+     var text = div.firstChild;//获取文本节点引用
+
+     text.nodeValue = "some other message";
+     
+     如果文档存在于文档树种，修改文本节点的结果就会立即反应。  设置的的文本节点后，会自动经过HTMl编码，  大于号小于号引号会转义,?????????这里并没有这样过，chrome证实的
+
+1. 创建文本节点,可以接受一个参数-要插入节点中的文本，和设置文本节点的值一样；
+> document.createTextNode(str)；
+
+一般情况下，每个元素只有一个文本子节点，添加的原因变成两个之后，文本就会链接起来，并且不会有空白符
+
+2. 规范化文本节点
+parentNode.normalize(); 自动合并
+
+3. 分割文本节点
+
+parentNode.splitText(5); 从第5个位置开始分，原来节点包含0~5的文本， 返回新的节点包含 5~ 末尾。 并且dom中还是有这两个文本的
+
+
+#### Comment  类型（注释）
+
+
 
 
 

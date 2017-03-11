@@ -13,7 +13,7 @@ window.onload = function(){
         console.log(ul_node.childNodes);         //会实时更新
         ul_node.appendChild(document.createElement("li"));
      }*/
-     var ul_node = document.createElement("ul");
+ /*    var ul_node = document.createElement("ul");
      var childnode =ul_node.getElementsByTagName("li");          //传递的是对象的指针
      var len = childnode.length;        //只传递的是数值
      for (i =0;i<5;i++){
@@ -23,7 +23,9 @@ window.onload = function(){
         console.log(ul_node.getElementsByTagName("li"));         //会实时更新
         ul_node.appendChild(document.createElement("li"));
      }
-     
+     */
+    var ul = document.getElementsByTagName("ul")[0];
+    ul.childNodes[0].nodeValue = "<strong>哈哈</strong>" 
     /**
      * 转换为arrey的方法
      */
