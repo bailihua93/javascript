@@ -749,13 +749,112 @@ fucntion() loadStyleString(css){
     head.appendChild(style);
 }
    
+```
+####操作表格
+
++ 构建下面的表格
+
+```html
+<table border = "1" width = "100%">
+        <tbody >
+            <tr>
+                <td>Cell 1,1</td>
+                <td>Cell 2,1</td>
+            </tr>
+            <tr>
+                <td>Cell 2,1</td>
+                <td>Cell 2,2</td>
+            </tr>
+        </tbody>
+    </table>
+```
 
 
++ 传统的DOM
+
+```js
+   //table
+    document.body.appendChild(table);
+    var table = document.createElement("table");
+    table.border = "1";
+    table.width = "100%";
+    //tbody
+    var tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+    //row1
+    var tr1 = document.createElement("tr");
+    tbody.appendChild(tr1);
+    var cell1_1 = document.createElement("td");
+    cell1_1.appendChild(document.createTextNode("cell 1 1"));
+    var cell1_2 = document.createElement("td");
+    cell1_2.appendChild(document.createTextNode("cell 1 2"));
+    tr1.appendChild(cell1_1);
+    tr1.appendChild(cell1_2);
+    //row2
+    var tr2 = document.createElement("tr");
+    tbody.appendChild(tr2);
+    var cell2_1 = document.createElement("td");
+    cell2_1.appendChild(document.createTextNode("cell 2 1"));
+    var cell2_2 = document.createElement("td");
+    cell2_2.appendChild(document.createTextNode("cell 2 2"));
+    tr2.appendChild(cell2_1);
+    tr2.appendChild(cell2_2);
+```
 
 
++  表格专用方法
+
+    + <table>属性的和方法
+     -  caption  指向<caption>(若果有的话)的指针
+     -  tBodys   <tbody>元素的HTMLCollection
+     -  tFoot    <tfoot>指针（若有）
+     -  tHead    thead 指针
+     -  createCaption()
+     -  createTHead()
+     -  createTFoot()
+     -  deleteCaption()
+     -  deleteTHead()
+     -  deleteTFoot()
+     -  rows     所有行的指针
+     - insertRow(pos); 向rows中指定位置添加行
+     - deleteRow(pos); 删除指定的行
+   + <tbody>属性和方法
+     - rows     tbody中行的HTMLCollection
+     - insertRow(pos); 向rows中指定位置添加行
+     - deleteRow(pos); 删除指定的行
+   + <tr>  属性和方法
+     - cells   保留着<tr> 元素单元格的HTMLCollection
+     - insertCell(pos)   向cells集合中插入单元格
+     - deleteCell(pos)   删除指定位置的单元格
+   
+
+```js
+    //创建表格并添加
+    var table = document.createElement("table");
+    table.border = "1";
+    table.width = "100%";
+    document.body.appendChild(table);
+    //  创建体
+    var tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+    // 创建第一行
+
+    tbody.insertRow(0);
+    tbody.rows[0].insertCell(0);
+    tbody.rows[0].cells[0].appendChild(document.createTextNode("cell 1_1"));
+    tbody.rows[0].insertCell(1);
+    tbody.rows[0].cells[1].appendChild(document.createTextNode("cell 1_2"));
+    //创建第二行
+    tbody.insertRow(1);
+    tbody.rows[1].insertCell(0);
+    tbody.rows[1].cells[0].appendChild(document.createTextNode("cell 2_1"));
+    tbody.rows[1].insertCell(1);
+    tbody.rows[1].cells[1].appendChild(document.createTextNode("cell 2_2"));
+```
 
 
-
+#### 使用Nodelist
+Nodelist 、NamedNodeMap、HtmlColection   本质访问DOM文档是的实时运行查询； 一般要减少访问，把需要的内容缓存起来
 
 
   
