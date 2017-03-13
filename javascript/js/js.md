@@ -637,6 +637,119 @@ parentNode.splitText(5); 从第5个位置开始分，原来节点包含0~5的文
 
 
 #### Comment  类型（注释）
+  - nodeType            8
+  - nodeName            #commemt
+  - nodeValue           注释的内容
+  - 不支持子节点
+
+  Coment和text继承相同的基类，除splitText（）外所有的字符串操作方法。也可以通过nodeValue或data属性来获取
+
+#### CDATASection（xml文档有用)
+- NodeType 值为4
+- nodeName    #cdata- section
+- nodeValue    cdata 去榆中的内容
+- 不支持子节点
+
+和comment继承相同的基类，没有splite ， document.createCDataSesction();
+
+#### DocumentType  类型
+   -  nodeType的值为10
+   -  nodeName 为doctype的名称
+   -  没有子节点
+经常被搞成注释，ie8不支持
+#### documentFragment 类型
+    - nodeType   11
+
+
+#### Attr类型
+元素特性在dom中医Attr类型来表示
+   - nodeType     11
+   - nodeName   特性的名字
+   - nodeValue   特性的值
+   - parentNode   null
+   - 没有子节点
+
++ Attr对象有3个属性，name（nodeName相同）、value（nodeValue相同）、specified（布尔值，区别代码中指定的还是默认的）
++ document.createAttribute()  传入特性名字
+```js
+var attr = document.createAttribute("align");
+attr.value = "left";
+element.setAttributeNode(attr);
+```
+
+**优先使用 getAttribute()  setAttribute()   removeAttriute()**
+
+### DOM 操作
+
+#### 动态脚本
++ 加载  <script type = "text/javascript" src= "client.js"></script>
+
+  ```js
+  function loadScript(url){
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src =url;
+      document.body.appendChild(script);
+  }
+```
++ 行内元素
+```html
+<script type = "text/javascript">
+function sayHi(){
+    alert("hi");
+}
+</script>
+```
+js函数
+```js
+function loadScriptString(code){
+    var script = document.creatElement("script");
+    script.type = "text/javascript";
+    try{
+        script.appendChild(document.createTextNode(code));
+    }catch(err){
+        script.text = code;
+    }
+    document.body.appendChild(script);
+}
+```
+
+#### 动态样式
++ <link rel = "stylesheet" type = "text/css" href = "styles.css">
+
+```js
+function loadStyles(url){
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href = url;
+    var head = document.getElementsByTagName("head")[0];
+    head.appendChild(link);
+}
+```
++ 行内样式
+```css
+<style type = "text/css">
+body{
+    background-color : red;
+}
+</style>
+```
+函数
+```js
+fucntion() loadStyleString(css){
+    var style = doccunment.createTextNode("style");
+    style.type = "text/css";
+    try{
+        style.appendChild(document.createTextNode(css));
+    }catch(err){
+        style.styleSheet.cssText = css;
+    }
+    var head = document.getElementsByTagName("head")[0];
+    head.appendChild(style);
+}
+   
+
 
 
 
