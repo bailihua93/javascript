@@ -856,8 +856,53 @@ fucntion() loadStyleString(css){
 #### 使用Nodelist
 Nodelist 、NamedNodeMap、HtmlColection   本质访问DOM文档是的实时运行查询； 一般要减少访问，把需要的内容缓存起来
 
+##DOM扩展
+###选择符Api
++ jQuery 核心是通过Css选择符查询DOM文档的取得元素的引用。querySelector()/querySelectorAll()兼容ie8+浏览器，可以通过Document、Element类型的实例调用他们
+#### querySelector()
++ 接收一个CSS选择符，返回与该模式匹配的一个元素，找到的话返回匹配的元素，返回null。
+```js
+var body = document.querySelector("body");
+var myDiv = document.querySelector("#myDiv");
+var img = document.querySelector("img.button");
+```
+如果传入了不被支持的选择符，querySelector回抛出错误
+#### querySelectorAll()
+ + 返回的是一个NodeList的实例，但是其底层实现类似于一组元素的快照，而**非不断对文档进行搜索的动态查询**，避免使用NodeList引起的多数性能问题 
+ + 可以通过item() \ []   访问元素
+#### matchesSelector()
++ 已经获取一个元素的引用的情况下，检测该元素是否可以被  指定的Css选择符返回，目前好像没有实现
+```js
+//实验性的函数不知道能不能用
+function matchesSelector(element,selector){
+    if(element.matchesSelector){
+        return element.matchesSelector(selector);
+    }else if(element.msMatchesSelector){
+        return element.msMatchesSelector(selector);
+    }else if(element.mozMatchesSelector){
+        return element.mozMatchesSeletor(selector);
+    }else if(element.webkitMatchesSelector){
+        return element.webkitMatchesSeletor(selector);
+    }else{
+        throw new Error("Not supported");
+    }
+}
+```
+### 元素遍历
 
-  
++ 对于元素间的空格，ie9以前不会返回文本节点。为了弥补childNodes和firstChild在不同浏览器之间的差异，Element Travarsal定义了一些新的特性，支持的浏览器有ie9+
+  - childElementCount： 返回子元素（不包含文本节点和注释）的个数
+  - firstElementChild : 第一个子元素
+  - lastElementChild
+  - previousElementSibling
+  - nextElementSibling
+### HTML5
+#### 与类相关的扩充
+h4导致class属性用的越来越多，**class一方面可以通过他为元素添加样式，另一方面可以表示元素的语义**。h5增加了很多api
+
+
+
+
 
 
  
