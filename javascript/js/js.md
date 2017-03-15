@@ -1061,6 +1061,148 @@ function setInnerText(element,text){
 3.outerText 尽量别用
 
 
+## DOM2和DOM3
+###DOM变化
++ 判断浏览器是否实现了对应的部分
+```js
+ var hasXmlDom = document.implementation.hasFeature("HTML","5.0");
+ var hasDom2Core = document.implementation.hasFeature("Core","2.0");
+ var hasDom3Core = document.implementation.hasFeature("Core","3.0");
+ var hasDom2HTML = document.implementation.hasFeature("HTML","5.0");
+ var hasDom2XML = document.implementation.hasFeature("XML","2.0");
+```
+#### 针对XML命名空间的变化  ????? 变量的封装和隐藏， 88班的白丽华，88班就是命名空间
+有了命名空间，不同的xml文档的元素可以混合在一起，而不必担心发生命名冲突。HTML不支持XML的命名空间，但是XHTML支持，
+
+XHTML的命名空间是 http://www.w3.org/1999/xhtml,必须写作
+```xml
+<xhtml:html xmlns:xhtml = "http://www.w3.org/1999/xhtml">
+    <xhtml:head>
+         <xhtmltitile>Example</xhtml:title>
+    </xhtml:head>
+    <xhtml:body>
+      hello
+    </xhtml:body>
+</xhtml:html>
+```
+
+但是命名空间在不同的语言下才有用
+
+```xml
+<html xmlns = "http://www.w3.org/1999/xhtml">
+    <head>
+         <titile>Example</title>
+    </head>
+    <body>
+       <s:svg xmlns:s = "http://www.w3.org/2000/svg" version = "1.1"
+             viewBox = "0 0 100 100" style = "width:100%;height:100%">
+            <s:rect x="0" y ="0" width="100" height="100" style="fill:red"/>
+       </s:svg>
+    </body>
+</html>
+```
+svg 元素所有子元素，以及这些元素的所有特性，都被认为属于 http://www.w3.org/2000/svg命名空间。
+
+1. Node类型的变化
+
+- localName   不带命名空间前缀的节点名称
+- namespaceURI  命名空间的URI 未指定的话为null
+- prefix 命名空间前缀 未指定的话是null
+- nodeName    (prefix:)localName  tagName
+
+对html来说，localName和tagName为html，namespaceURI是“http://www.w3.org/1999/xhtml”，prefix是null   
+对svg 来说  localName 为svg ，tagName和nodeName s:svg 。prefix是s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7女巫
+1 对了4   
+9 假的 预言家
+4 
+2 猎人
+4 
+9是假的
+3 帮4
+3 和 9一起的
+4 随便来
+
+8 10 神
+
+ 5 好人  3 7 号人
+
+
+2 好人
+7 预言家
+1 好人
+6 语言家
+
 
 
  
