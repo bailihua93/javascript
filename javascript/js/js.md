@@ -899,8 +899,166 @@ function matchesSelector(element,selector){
 ### HTML5
 #### 与类相关的扩充
 h4导致class属性用的越来越多，**class一方面可以通过他为元素添加样式，另一方面可以表示元素的语义**。h5增加了很多api
+1. getElementsByClassName()
+返回的是一个动态NodeList，可以传入的参数是“class1 class2 ”这种的
+
+2. classList属性
+
++ 传统的操作类名的方法。通过对className属性的字符串操作
+>  <div class ="bd user disable"></div> 删除
+
+```js
+function deleteClass(element,classname){
+    var className = element.className;
+    var classArr = className.splite(/\s+/);
+    var pos = -1,
+        i,
+        len;
+   for(i=0,len=classArr.length;i<len;i++){
+       if(classArr[i] == className){
+           pos = i;
+           break;
+       }
+   }
+   classArr = classArr.splice(i,1);
+   element.className = classArr.join(" ");
+}
+```
++ h5添加了操作类名的方式，为所有元素添加classList属性，此属性是 DOMTokenList的实例，动态属性？？，并且定义了一些新的方法 操作类名的方法，chrome
+   - add(value)
+   - contains(value)
+   - remove(value)
+   - toggle(value)   存在的话删除，不存在的话添加
+#### 焦点管理（ie4）
++ document.activeElement;  获取目前页面获得焦点的元素
++ document.hasFocus();   判断当前页面是否获得了焦点
+#### HTMLDocument的变化
+1. document.readyState; 有两个值 "loading/complete" 检查文档是否加载完毕，ie4
+
+2. ie6开始区分页面的模式是标准的还是混杂的，检测页面的兼容性，
+   
+   + document.compatMode    compat 兼容
+      - CSS1Compat 标准模式
+      - BackCompat 混在模式
+3. doucment.head  chrome
+  > var head = document.head||document.getElementsByTagName("head")[0];
+#### 字符集属性
++ document.charset 可读写的属性
++ document.defaultCharset  根据系统和浏览器确认的话该是哪种字符集，只读的
+
+#### 自定义数据属性
+html5 规定可以给元素添加非标准属性，但是要加上data-；为元素提供与渲染无关的信息，或者提供语义信息，如 <div id="myId" data-appId = "12345" data-myname= "nicholas"></div>,然后可以通过元素的 **datalist** 属性来访问自定义属性值，属性值是DOMStringMap的一个实例，可读写的
+>div.dataset.appId = "3"
+> div.dataset.myname = "bai"
 
 
++ **给元素添加一些不可见的数据以便进行其他处理的，那就需要用到自定义数据属性**
++ **在跟踪链接或者混搭应用中。自定义属性可方便的知道点击来自页面的哪个部分**
+
+#### 插入标记
+1. innerHTML 属性
+
++ 读模式下，返回调用元素的所有子节点对用的HTML标记；ie和opera会大写标签，其他浏览器原原本本的返回
+
++ 写模式下，根据指定的值创建新的DOM树，然后这个DOM树完全替换元素原来的所有子节点；一定会序列化，所以在设置的时候要转义
+
+
++ **限制**
+
+在多数浏览器中innerHTML插入<script></script> 元素并不会执行其中的脚本。 IE8及更早的版本是唯一能在这种情况下执行脚本的浏览器。但需要满足一定的条件才行： 一是必须指定defer属性，二是必须位于（微软所谓的）“有作用域的元素”之后。script style comment 属于无作用域元素。
+
++ 优先使用过的方法：
+```js
+ div.innerHTML = "<input type = \"hidden\"><script defer>alert('hi');<\/script>";
+```
+
++ 其他的方法就需要之后删除这个元素
+```js
+ div.innerHTML = "_<script defer>alert('hi');<\/script>";
+ div.innerHTML = "<div>&nbsp;</div><script defer>alert('hi')<\/script>";
+ div.removeChild(div.firstCHlid);
+```
+
++ ie8之前 style没有作用域的元素，需要上免得方法来尽心
+```html
+ <col>/<fragemet>/<head>/<html>/<table>/<thead>/<tbdy>/<tr> 都不支持innerHTML
+```
++ 插入innerHTML前，最好先用东西检测下是否有害
+
+2.  outerHTML
+```js
+ div.outerHTML = "<p> this is p </p>";
+```
+新建p元素代替div的所有
+
+3. insertAdjacentHTML()  相邻的
+
+```js
+    var div2 = document.getElementById("div2");
+    div2.insertAdjacentHTML("beforebegin","<p>beforebegin</p>");  //前面的同辈元素
+    div2.insertAdjacentHTML("afterbegin","<p>afterbegin</p>");    //第一个子元素
+    div2.insertAdjacentHTML("beforeend","<p>beforeEnd</p>");      //最后一子元素
+    div2.insertAdjacentHTML("afterend","<p>afterEnd</p>");        //后一个同辈元素
+```
+
+4. 内存与性能问题
+   - 内存 ：替换子节点可能会导致浏览器内存占用问题，尤其在ie中，删除带有事件处理程序或者应用该其他JS对象子树的时候，可能会导致内存占用。 最好先手动删除要替换元素的所有事件处理程序和js 对象属性
+   - 性能：innerHTML和outerHTML的html解析器是浏览器级别的代码（通常c++编写的）的基础上运行，远远高于JS运行； 但是最好减少使用次数，调用也是需要时间的
+#### scrollIntoView()
+
+element.scrollIntoView(); 将元素滚动到可见的页面
+
+### 转有扩展
+#### 文档模式
++ 专属于ie 后面的ie = 数值是按照什么标准渲染的
+```html
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+```
+   - Edge 最新版本，浏览器的版本
+   - EmulateIE9   || EmulateIE8 || EmulateIE7 ,有文档声明类型的话，以ie9(8,7)标准模式渲染，否则ie5
+   - 9 8 7 5 强制使用ie9的标准模式渲染
+   
++ document.documentMode 返回渲染的形式
+
+#### children属性
+HTMLCollection的实例，包含元素子节点,ie5就开始支持，ie9以上其他浏览器返回非空白字符的元素，
+childNodes 则在ie9以下返回非空元素，ie9以上返回包含非空的东西
+#### contains() 
+```js
+elementFather.contains(elementb); //b是不是a的后代节点
+```
++ A.compareDocumentPosition(B) A和B的关系 ie9
+```js
+    console.log(div2.compareDocumentPosition(div3));    //前 4
+    console.log(div2.compareDocumentPosition(div1));    //后 2
+    console.log(div1.compareDocumentPosition(mydiv));   //里 10
+    console.log(mydiv.compareDocumentPosition(div1));   //外 20
+```
+#### 插入文本
+1. innerText 属性  ie8
+
+读的时候，element.innerText将返回所有的文本内容（包括子节点的）,不包含行内样式和脚本
+
+写的时候，会删除所有的子节点，并且也会对文本中存在的HTML语法字符（大于小于号引号和号）进行过编码; 这里不知道怎回事没有达到预期的效果什么有没变    ？？？？？
+
+2. textContent ie9
+
+
+上面的内容由两个函数代替
+```js
+function getInnerText(element){
+   return (typeof element.textContent == "string")?element.textContent : element.innerText;
+}
+function setInnerText(element,text){
+    if(typeof element.textContent == "string"){
+        element.textContent = text;
+    }else{
+        element.innerText = text;
+    }
+}
+```
+
+3.outerText 尽量别用
 
 
 

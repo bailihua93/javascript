@@ -226,3 +226,14 @@ if(client.browser.ie&&client.browser.ie<=7){
     var radio1 = document.createElement("<input type=\"radio\" name=\"choice\" value=\"1\">");
     var radio2 = document.createElement("<input type=\"radio\" name=\"choice\" value=\"2\">");
 }
+
+function getInnerText(element){
+   return (typeof element.textContent == "string")?element.textContent : element.innerText;
+}
+function setInnerText(element,text){
+    if(typeof element.textContent == "string"){
+        element.textContent = text;
+    }else{
+        element.innerText = text;
+    }
+}
