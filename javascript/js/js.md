@@ -1113,98 +1113,16 @@ svg 元素所有子元素，以及这些元素的所有特性，都被认为属�
 对html来说，localName和tagName为html，namespaceURI是“http://www.w3.org/1999/xhtml”，prefix是null   
 对svg 来说  localName 为svg ，tagName和nodeName s:svg 。prefix是s
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-7女巫
-1 对了4   
-9 假的 预言家
-4 
-2 猎人
-4 
-9是假的
-3 帮4
-3 和 9一起的
-4 随便来
-
-8 10 神
-
- 5 好人  3 7 号人
-
-
-2 好人
-7 预言家
-1 好人
-6 语言家
-
-
-
- 
-
+2. DOM3在这基础上引入了与命名空间有关的的方法
+- isDefaultNamespace(namespaceURI)       当前节点的默认命名空间是否为namespaceURI
+- lookupNamespaceURI(prefix)             返回给定的prefix的命名空间
+- lookupPrefix(namespaceURI)             返回给定namespaceURI
+
+3. Document类型的变化
+- createElementNS(namespaceURI,tagName); 使用给定的tagName创建一个属于命名空间namespaceURI的新元素  
+- createAttributeNS(namespaceURI，attributeName)； 使用给定attributeName创建一个属于命名空间的namespaceURI的新特性  
+- getElementsByTagNameNS(namespaceURI,tagName);   
+只有文档中存在两个或者多个命名空间的时，这些与命名空间有关的防范才是必须的
+
+4. Element类型的的变化
 
