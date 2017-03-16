@@ -750,143 +750,36 @@ fucntion() loadStyleString(css){
 }
    
 ```
-####操作表格
-
-+ 构建下面的表格
-
-```html
-<table border = "1" width = "100%">
-        <tbody >
-            <tr>
-                <td>Cell 1,1</td>
-                <td>Cell 2,1</td>
-            </tr>
-            <tr>
-                <td>Cell 2,1</td>
-                <td>Cell 2,2</td>
-            </tr>
-        </tbody>
-    </table>
-```
 
 
-+ 传统的DOM
-
-```js
-   //table
-    document.body.appendChild(table);
-    var table = document.createElement("table");
-    table.border = "1";
-    table.width = "100%";
-    //tbody
-    var tbody = document.createElement("tbody");
-    table.appendChild(tbody);
-    //row1
-    var tr1 = document.createElement("tr");
-    tbody.appendChild(tr1);
-    var cell1_1 = document.createElement("td");
-    cell1_1.appendChild(document.createTextNode("cell 1 1"));
-    var cell1_2 = document.createElement("td");
-    cell1_2.appendChild(document.createTextNode("cell 1 2"));
-    tr1.appendChild(cell1_1);
-    tr1.appendChild(cell1_2);
-    //row2
-    var tr2 = document.createElement("tr");
-    tbody.appendChild(tr2);
-    var cell2_1 = document.createElement("td");
-    cell2_1.appendChild(document.createTextNode("cell 2 1"));
-    var cell2_2 = document.createElement("td");
-    cell2_2.appendChild(document.createTextNode("cell 2 2"));
-    tr2.appendChild(cell2_1);
-    tr2.appendChild(cell2_2);
-```
-
-
-+  表格专用方法
-
-    + <table>属性的和方法
-     -  caption  指向<caption>(若果有的话)的指针
-     -  tBodys   <tbody>元素的HTMLCollection
-     -  tFoot    <tfoot>指针（若有）
-     -  tHead    thead 指针
-     -  createCaption()
-     -  createTHead()
-     -  createTFoot()
-     -  deleteCaption()
-     -  deleteTHead()
-     -  deleteTFoot()
-     -  rows     所有行的指针
-     - insertRow(pos); 向rows中指定位置添加行
-     - deleteRow(pos); 删除指定的行
-   + <tbody>属性和方法
-     - rows     tbody中行的HTMLCollection
-     - insertRow(pos); 向rows中指定位置添加行
-     - deleteRow(pos); 删除指定的行
-   + <tr>  属性和方法
-     - cells   保留着<tr> 元素单元格的HTMLCollection
-     - insertCell(pos)   向cells集合中插入单元格
-     - deleteCell(pos)   删除指定位置的单元格
-   
-
-```js
-    //创建表格并添加
-    var table = document.createElement("table");
-    table.border = "1";
-    table.width = "100%";
-    document.body.appendChild(table);
-    //  创建体
-    var tbody = document.createElement("tbody");
-    table.appendChild(tbody);
-    // 创建第一行
-
-    tbody.insertRow(0);
-    tbody.rows[0].insertCell(0);
-    tbody.rows[0].cells[0].appendChild(document.createTextNode("cell 1_1"));
-    tbody.rows[0].insertCell(1);
-    tbody.rows[0].cells[1].appendChild(document.createTextNode("cell 1_2"));
-    //创建第二行
-    tbody.insertRow(1);
-    tbody.rows[1].insertCell(0);
-    tbody.rows[1].cells[0].appendChild(document.createTextNode("cell 2_1"));
-    tbody.rows[1].insertCell(1);
-    tbody.rows[1].cells[1].appendChild(document.createTextNode("cell 2_2"));
-```
-
-
-#### 使用Nodelist
-Nodelist 、NamedNodeMap、HtmlColection   本质访问DOM文档是的实时运行查询； 一般要减少访问，把需要的内容缓存起来
-
-##DOM扩展
-###选择符Api
-+ jQuery 核心是通过Css选择符查询DOM文档的取得元素的引用。querySelector()/querySelectorAll()兼容ie8+浏览器，可以通过Document、Element类型的实例调用他们
+##DOM 扩展
+###  选择符Api
+querySelector()/ querySelectorAll(),兼容ie8+，调用者可以是document和Element元素，不支持的话会抛出错误
 #### querySelector()
-+ 接收一个CSS选择符，返回与该模式匹配的一个元素，找到的话返回匹配的元素，返回null。
++ 支持css选择器，返回该模式匹配的第一个元素，没有的话返回 null。
 ```js
-var body = document.querySelector("body");
-var myDiv = document.querySelector("#myDiv");
-var img = document.querySelector("img.button");
+document.querySelector("em");
+document.querySelector("#myDiv");
+document.querySelector("img.button");
 ```
-如果传入了不被支持的选择符，querySelector回抛出错误
-#### querySelectorAll()
- + 返回的是一个NodeList的实例，但是其底层实现类似于一组元素的快照，而**非不断对文档进行搜索的动态查询**，避免使用NodeList引起的多数性能问题 
- + 可以通过item() \ []   访问元素
-#### matchesSelector()
-+ 已经获取一个元素的引用的情况下，检测该元素是否可以被  指定的Css选择符返回，目前好像没有实现
+####querySelectorAll()
++ 返回的是NodeList实例，底层实现是类似于数组的快照，而非不断对文档进行搜索的动态查询。没有找到元素的话，会返回一个空的NodeList对象。 静态的类数组
+#### matchesSelector(str)
+ie9+，在去的某个元素引用的情况下，用这个方法，可以方便的检测他是否被querySelector()或者querySelectorAll()返回
+
 ```js
-//实验性的函数不知道能不能用
 function matchesSelector(element,selector){
-    if(element.matchesSelector){
+    if(elelment.matchseSelector){
         return element.matchesSelector(selector);
-    }else if(element.msMatchesSelector){
+    }else if(element,msMatchesSelector){
         return element.msMatchesSelector(selector);
-    }else if(element.mozMatchesSelector){
-        return element.mozMatchesSeletor(selector);
+    }else if(element.mozMachesSelector){
+        return element.msMatchesSelector(selector);
     }else if(element.webkitMatchesSelector){
-        return element.webkitMatchesSeletor(selector);
-    }else{
-        throw new Error("Not supported");
+        return element.webkitM
     }
 }
+
 ```
 ### 元素遍历
 
@@ -1126,4 +1019,15 @@ svg 元素所有子元素，以及这些元素的所有特性，都被认为属�
 
 4. Element类型的的变化
 
+<<<<<<< HEAD
 hello
+=======
+
+
+  
+
+
+ 
+
+
+>>>>>>> b9b6f83fcab6008cbb746eef4246e505011f3b1d
