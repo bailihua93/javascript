@@ -749,8 +749,23 @@ fucntion() loadStyleString(css){
     head.appendChild(style);
 }
    
+```
 
 
+##DOM 扩展
+###  选择符Api
+querySelector()/ querySelectorAll(),兼容ie8+，调用者可以是document和Element元素，不支持的话会抛出错误
+#### querySelector()
++ 支持css选择器，返回该模式匹配的第一个元素，没有的话返回 null。
+```js
+document.querySelector("em");
+document.querySelector("#myDiv");
+document.querySelector("img.button");
+```
+####querySelectorAll()
++ 返回的是NodeList实例，底层实现是类似于数组的快照，而非不断对文档进行搜索的动态查询。没有找到元素的话，会返回一个空的NodeList对象。 静态的类数组
+#### matchesSelector(str)
+ie9+，在去的某个元素引用的情况下，用这个方法，可以方便的检测他是否被querySelector()或者querySelectorAll()返回
 
 
 
