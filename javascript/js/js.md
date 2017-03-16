@@ -767,7 +767,18 @@ document.querySelector("img.button");
 #### matchesSelector(str)
 ie9+，在去的某个元素引用的情况下，用这个方法，可以方便的检测他是否被querySelector()或者querySelectorAll()返回
 
-
+```js
+function matchesSelector(element,selector){
+    if(elelment.matchseSelector){
+        return element.matchesSelector(selector);
+    }else if(element,msMatchesSelector){
+        return element.msMatchesSelector(selector);
+    }else if(element.mozMachesSelector){
+        return element.msMatchesSelector(selector);
+    }else if(element.webkitMatchesSelector){
+        return element.webkitM
+    }
+}
 
 
 
