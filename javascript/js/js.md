@@ -1063,4 +1063,54 @@ document.implementation.createDocumentType("html","-//W3C//DTD XHTML 1.0 Strict/
 - A_element.isEqualNode(B_element);      属性和名字相同         
   A_element.isSameNode(B_element);       同一个元素
 
-Dom3 针对DOM添加额外数据引入的方法，setUserData(设置的键)
+4. Dom3 针对DOM添加额外数据引入的方法    
+setUserData(name，data，function(){});      传入的是设置的键，实际的数据，处理函数    
+.getUserData("name");                       获取     
+这里我们并不知道这是什么
+```js
+var mydiv = document.getElementById("mydiv");
+    mydiv.setUserData("name","bai",function(operation,key,value,src,dest){});
+    var value = document.body.getUserData("name");
+```
+传入setUserData()中的处理函数会在带有数据的节点被复制、删除、重命名、或者引入一个文档的时调用，因而你可以决定如何处理用户数据。处理函数接受5个参数：表示操作类型的数值（1表示复制，2表示导入，3表示删除，4表示重命名）、数据键、值、源节点、目标节点；删除节点的时候后，源节点为null，除在复制节点是，目标节点均为null。在函数内部你可以决定如何存储.多数浏览器不支持这个方法
+
+```js
+var div = document.createElement("div");
+div.setUserData("name","Bailihua",function(operation,key,value,src,dest){
+    if(operation==1){
+        dest.setUserData(key,value,function(){});
+    }
+});
+var newDiv = div.cloneNode(true);
+console.log(newDiv.getUserData("name"));
+```
+
+5. 框架的变化
+框架和内嵌框架分别用HTNLFrameElement和HTMLIFrameElement表示，他们在DOM2中有一个新的属性叫做，contentDocument。这个属性包含一个指针，指向表示框架内容的文档对象。 
+```js       
+var iframe = document.getElementById("myIframe");
+var iframeDoc = iframe.contentDocument||iframe.contentWindow.document;
+```
+不同框架间访问会跨域，导致错误
+
+
+
+### 样式
+html中定义方式有山中：1.通过<link/>元素包含外部样式2.使用<style/>元素定义嵌入式样式3. 使用style特性定义特定元素的样式。 DOM2为此提供一套操作class的API。
+#### 访问元素的样式
+任何支持style属性的HTML元素在js中都有一个对应的style属性，是CSSStyleDeclaration的实例，包含通过HTML的    style特性指定的所有样式信息，但是不是包含 外部样式表或者嵌样式表  层叠来的样式 ,必须将过期转化为驼峰样式
+
+```html
+<div id = "mydiv" style="background-color:blue;width:10px;height:25px"></div>
+```
+对应的js
+```js
+mydiv.style.width; //10px
+mydiv.style.backgroundColor; //blue
+```
+如果没有给html元素设置style属性的话，那么style对象中可能只包含一些默认值
+
+1.style的属性和方法
+  - cssText       返回css代码    
+  - length        返回css属性的数量
+  - parentRule
