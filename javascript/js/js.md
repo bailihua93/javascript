@@ -1057,3 +1057,10 @@ document.implementation.createDocumentType("html","-//W3C//DTD XHTML 1.0 Strict/
 - createHTMLDocument(title);  创建完整的文档，传入的是title
  document.implementation.createDocument("http://www.w3.org/1999/xhtml","html",doctype);  
 
+3. Node类型的变化
+
+- element.isSupported("HTML","2.0");      最好要能力检测
+- A_element.isEqualNode(B_element);      属性和名字相同         
+  A_element.isSameNode(B_element);       同一个元素
+
+Dom3 针对DOM添加额外数据引入的方法，setUserData(设置的键)
