@@ -1019,15 +1019,41 @@ svg 元素所有子元素，以及这些元素的所有特性，都被认为属�
 
 4. Element类型的的变化
 
-<<<<<<< HEAD
-hello
-=======
+5. NamedNodeMap
 
+变化就是在方法后面加了个NS
 
-  
+#### 其他方面的变化
+1. DocumentType
+```html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml/DTD/xhtml1-strict.dtd"
+[<!ELEMENT name (#PCDATA)>]>
+```
+document.doctype.publicId ;  //-//W3C//DTD XHTML 1.0 Strict//EN  
+document.doctype.systemId;  //  http://www.w3.org/TR/xhtml/DTD/xhtml1-strict.dtd     
+document.doctype.internalSubset; //  文档类型的额外定义
 
+2. Document类型的变化
 
- 
+- importNode()    
+每一个节点都有的一ownDocument属性，表示所属的文档，如果调用appendChild()时传入的是属于不同的文档，则会导致错误，     
+但是在调用importNode()时传入不同文档的节点则会返回一个新节点，这个新节点的所有权归当前文档所有 
+```js
+var newNode = document.importNode(oldNode,true);
+document.body.appendChild(newNode);
+```
+- defualtView    
+var parentWindow = document.defautView||document.parentWindow;    
+获取到的是网址 Window → http://offlintab.firefoxchina.cn/        
 
+- createDocumentType(文档类型，publicId，systemId)；    
+document.implementation.createDocumentType("html","-//W3C//DTD XHTML 1.0 Strict//EN","http://www.w3.org/TR/xhtml/DTD/xhtml1-strict.dtd");      
 
->>>>>>> b9b6f83fcab6008cbb746eef4246e505011f3b1d
+- createDocument(namespace,tagname,文档类型)      
+ document.implementation.createDocument("http://www.w3.org/1999/xhtml","html",doctype);    
+ 创建的是一个只包含html标签的文档
+
+- createHTMLDocument(title);  创建完整的文档，传入的是title
+ document.implementation.createDocument("http://www.w3.org/1999/xhtml","html",doctype);  
+
