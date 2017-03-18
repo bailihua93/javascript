@@ -1063,7 +1063,7 @@ document.implementation.createDocumentType("html","-//W3C//DTD XHTML 1.0 Strict/
 - A_element.isEqualNode(B_element);      属性和名字相同         
   A_element.isSameNode(B_element);       同一个元素
 
-4. Dom3 针对DOM添加额外数据引入的方法    
+4. Dom3 针对DOM添加额外数据引入的方法      已经弃用
 setUserData(name，data，function(){});      传入的是设置的键，实际的数据，处理函数    
 .getUserData("name");                       获取     
 这里我们并不知道这是什么
@@ -1095,7 +1095,7 @@ var iframeDoc = iframe.contentDocument||iframe.contentWindow.document;
 
 
 
-### 样式
+### 样式  ie9
 html中定义方式有山中：1.通过<link/>元素包含外部样式2.使用<style/>元素定义嵌入式样式3. 使用style特性定义特定元素的样式。 DOM2为此提供一套操作class的API。
 #### 访问元素的样式
 任何支持style属性的HTML元素在js中都有一个对应的style属性，是CSSStyleDeclaration的实例，包含通过HTML的    style特性指定的所有样式信息，但是不是包含 外部样式表或者嵌样式表  层叠来的样式 ,必须将过期转化为驼峰样式
@@ -1111,6 +1111,22 @@ mydiv.style.backgroundColor; //blue
 如果没有给html元素设置style属性的话，那么style对象中可能只包含一些默认值
 
 1.style的属性和方法
-  - cssText       返回css代码    
+  - cssText       返回css代码，并且也可以设置，就如同innerHMTL一样的东西 
+  - parentRule    表示css信息的CSSRule对象。
   - length        返回css属性的数量
-  - parentRule
+  - item(index)    返回给定位置的CSS属性的名称，等价于[index],都是获取属性名； “background-Color” 不是驼峰的  
+  - getPropertyPriority(propertyName):  优先权，如果给定的属性使用了!important 设置，则返回important，否则返回空字符串    
+  - getPropertyValue(propertyName):    
+  - getPropertyCSSValue(propertyName):  给定的属性的CSSValue对象， “background-Color” 不是驼峰的，  CssValue包含一个cssText和cssValueType，cssvaluetype为数值（0表示继承的值，1表示基本的值，2表示值列表，3表示自定义的值），ie9才开始支持
+  - removeProperty(propertyName);  从样式中删除给定的属性，然后应用迭代的来的样式
+  - setProperty(propertyName,value,priority);  将给定属性设置为相应的值，并加上优先权标志（important或者一个空字符串）
+
+
+2. 计算的样式
+虽然style支持style特性的任何元素样式信息，但不包含那些从其他样式表层叠来影响到当前元素的样式信息。 “DOM2”增强了document.defaultView,提供了getComputedStyle();传入的是元素和可选的伪元素字符串（“：after”）；
+
+var style = window.getComputedStyle(element[, pseudoElt]);
+
+获取元素层叠后的最终显示的样式，
+  
+  
