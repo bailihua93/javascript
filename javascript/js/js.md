@@ -1122,11 +1122,24 @@ mydiv.style.backgroundColor; //blue
   - setProperty(propertyName,value,priority);  将给定属性设置为相应的值，并加上优先权标志（important或者一个空字符串）
 
 
-2. 计算的样式
+2. 计算的样式（所有的计算样式都是只读的）
 虽然style支持style特性的任何元素样式信息，但不包含那些从其他样式表层叠来影响到当前元素的样式信息。 “DOM2”增强了document.defaultView,提供了getComputedStyle();传入的是元素和可选的伪元素字符串（“：after”）；
 
-var style = window.getComputedStyle(element[, pseudoElt]);
+var style = window.getComputedStyle(element[, pseudoElt]);      
+var style = document.defualtView.getComputedStyle(element[, pseudoElt]);
 
-获取元素层叠后的最终显示的样式，
-  
-  
+获取元素层叠后的最终显示的样式，但是由于各个浏览器之间存在差别，不同浏览器中返回的值存在差别，   
+computedStyle.borderLeftWidth一定会有返回值     
+IE不支持上述方法，有个style属性有一个currentStyle属性，这个属性是CSSStuleDeclaration，     
+访问element.currentStyle
+
+#### 操作样式表
+CSSStyleSheet类型表示样式表，包含link和style中的样式表，是一个只读的借口，继承自StyleSheet，继承的属性  
+- var supprotsDOM2StyleSheets = document.implementation.hasFeature("StyleSheets","2.0");
+- disabled ： 表示样式表是否被禁用，这个是可读写的
+- href        样式表示通过link包含的，则返回ULR，否则null
+- media       当前样式表支持的所有媒体类型的集合
+- ownerNode   指向拥有当前样式表的节点的指针，样式表可能在HTNL中通过 link 或者  style 引入的，如过是通过@import导入的，则这个属性值为null。ie不支持
+- parentStyleSheet  样式表通过@important导入的情况下，这个属性指向导入他的样式表
+- title  
+
