@@ -237,3 +237,12 @@ function setInnerText(element,text){
         element.innerText = text;
     }
 }
+
+  /**
+     * 取得元素的styleSheet
+     * @param {*} element 
+     */
+    function getStyleSheet(element){
+        return element.sheet||element.styleSheet;
+    }
+    
