@@ -239,6 +239,7 @@ function setInnerText(element, text) {
     }
 }
 
+<<<<<<< HEAD
 function getElementLeft(element) {
     var actualLeft = element.offsetLeft;
     var current = element.offsetParent;
@@ -288,3 +289,13 @@ function getBoundingClientRect(element){
         doucemnt
     }
 }
+=======
+  /**
+     * 取得元素的styleSheet
+     * @param {*} element 
+     */
+    function getStyleSheet(element){
+        return element.sheet||element.styleSheet;
+    }
+    
+>>>>>>> 5a28910e86e4175ffb8053ddeddfffd10310143a
