@@ -1141,5 +1141,137 @@ CSSStyleSheet类型表示样式表，包含link和style中的样式表，是一�
 - media       当前样式表支持的所有媒体类型的集合
 - ownerNode   指向拥有当前样式表的节点的指针，样式表可能在HTNL中通过 link 或者  style 引入的，如过是通过@import导入的，则这个属性值为null。ie不支持
 - parentStyleSheet  样式表通过@important导入的情况下，这个属性指向导入他的样式表
-- title  
+- title       ownerNode中的title属性
+- type        “type/css”
+- cssRules    样式表中包含的的样式规则的集合。ie不支持，但有一个类似的rules
+- ownerRule   如果通过@import导入的，这个属性就是一个指针，指向导入的规则，否则值为null，ie不支持
+- deleteRule(index)  删除cssRules集合指定的位置的规则。ie是removeRule()方法
+- insertRule (rule，index)    指定位置插入字符串， ie是addRule();         
+应用于文档的所有样式表通过document.styleSheets  获取一个集合 访问直接通过[]或者item()。    
+    
+已经可以通过link/style 取得CSSStyleSheet对象
+```js
+function getStyleSheet(element){
+    return element.sheet||element.styleSheet ;
+}
+```
+这里getStylesheet()返回的样式和对象与 document.styleSheets集合的样式相同
 
+
+
+1. Css 规则
+CSSRule对象表示样式表中的每一条规则。有很多类继承他，最常见的是CSSStyleRule类型，表示样式信息（其他规则还是有
+@import/@font-face/@page/@charset)。包含的属性有
+- cssText   ie不支持
+- parentRule 当前规则为导入规则的话，引用的就是导入规则。 否则为null。 ie不支持
+- parentStyleSheet 当前规则所属的样式表    IE不支持
+- selectorText     返回当前规则的选择符文本，需要转义成小写
+- style     CSSStyleDeclaration对象，可以通过他取得和设置规则同特定的样式‘
+- type     规则类型的常量值，对于样式规则，这个值是1. ie不支持    
+cssText、selectorText、style最常用       
+对于位于第一样式表中的只有一条规则的例子      
+```css
+div.box{
+    background-color : blue;
+    width : 100px;
+    height : 200px;
+}
+```
+对应的修改和获取方法
+```js
+var sheet = document.styleSheet[0];
+var rules = sheet.cssRules||sheet.rules;
+var rule = rules
+```
+
+
+
+
+
+
+
+
+
+2. 创建规则      
+向现有样式表添加规则,stylesheet.insertRule(rule, index),插入规则的文本和在哪里插入的索引（当前样式表中的样子）。ie8支持 addRule(selector,csstext,index); 兼容性
+```js
+function  insertRule(sheet,selectorText,cssText,position){
+    if(sheet.insertRule){
+        sheet.insertRule(selectorText+"{"+cssText+"}",position);
+    }else if(sheet.addRule){
+        sheet.addRule(selectorText,cssText,position);
+    }
+}
+```
+**需要添加的样式很多的话，可以选择动态加载样式表**
+3. 删除规则
+```js
+function deleteRule(sheet,index){
+    if(sheet.deleteRule){
+        sheet.deleteRule(index);
+    }else if(sheet.removeRule){
+        sheet.removeRule(index);
+    }
+```
+#### 元素大小
+1. 偏移量（offset）        
+元素的可见大小由其高度、宽度决定，包括所有内边距、滚动条和边框大小（不包括外边距）。通过四个属性可以取得       
+-  offsetHeight：  边框高+元素高+滚动条高，以像素为单位
+-  offsetWidth ：  边框宽+元素宽+滚动条宽
+-  offsetLeft  ：  元素左边框外到到其包含元素的内左边框的距离 ，px为单位
+-  offsetTop   :   上边框到内上边框距离         
+其中offsetLeft、offsetTop属性与包含的元素有关，该元素保存在offsetParent属性中，并且并不一定是parentNode值相等。偏移量是上述属性的叠加。
+```js
+function getElementLeft(element){
+    var actualLeft = element.offsetLeft;
+    var current = element.offsetParent；
+
+    while(current != null){
+        actualLeft+=current.offsetLeft;
+        current = current.offsetParent;
+    }
+    return actualLeft;
+}
+
+function getElementTop(element){
+    var actualTop = element.offsetTop;
+    var current = element.offsetParent；
+
+    while(current != null){
+        actualTop+=current.offsetTop;
+        current = current.offsetParent;
+    }
+    return actualTop;
+}
+```
+**上述属性是只读的**,每次访问都需要计算一遍，所以尽量保存成局部变量
+
+2. 客户区大小（client dimension）          
+元素的内容和内边距所占的空间大小 ，不包括滚动条。 最常用的是确定浏览器的视口大小，这些都是只读的属性        
+- clientWidth 
+- clientHeight
+```js
+function getViewport(){
+    if(document.compatMode == "BackCompat"){
+        return {
+            width : document.body.clientWidth;
+            height : document.body.clientHeight;
+        };
+    }else{
+        return {
+            width : document.documentElement.clientWidth;
+            height :  document.documentElement.clientHeight;
+        }
+    }
+}
+```
+3. 滚动大小（scroll dimension)                
+包含滚动内容的元素的大小。有些元素（例如html）即使没有任何代码也能自动的添加滚动条，但是另外的元素需要css的overflow属性才能滚动，主要属性
+- scrollHeight   没有滚动条的情况下，元素内容的总高度
+- scrollWidth    没有滚动条的情况下，元素的总宽度
+- scrollLeft     被隐藏在内容区域左侧的像素数，通过修改该值可以改变元素的滚动位置 
+- scrollTop      被隐藏在内容区域上方的像素数，通过修改该值可改变元素的位置       
+在确认文档的总高度时（包括基于是口的最小高度时），必须取得scrollWidth/clientWidth  和scrollHeight/clientHeight 中最大值，才能保证在跨浏览器的环境下得到精确的结果。
+
+4. 确定元素的大小      
+浏览器提供了一个getBoundingClientRect()方法，返回一个矩形对象，包含的属性：left、top、right、bottom.元素相对于视口的位置。但是ie8认为文档的左上角坐标是(2,2),传统的浏览器以(0,0)为起点坐标。

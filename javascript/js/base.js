@@ -204,18 +204,18 @@ function outputAttributes(element) {
         attrName = element.attributes[i].nodeName;
         attrValue = element.attributes[i].nodeValue;
         //ie7会返回大量的没有定义的东西，定义后的话该属性的specified 为true
-        if(element.attrbutes[i].specified){
+        if (element.attrbutes[i].specified) {
             pairs.push(attrName + " = " + "\"" + attrValue + "\"");
         }
-        
+
     }
     return pairs.join(" ");
 }
-if(client.browser.ie&&client.browser.ie<=7){
+if (client.browser.ie && client.browser.ie <= 7) {
     //必须用下面的方法创建对应的元素
     //创建含有name属性的iframe
     var iframe = document.createElement("<iframe name=\"maframe\"></iframe>");
-    
+
     // 通过表单的reset（）方法重构的input元素
     var input = document.createElement("<input type =\"checkbox\">");
 
@@ -227,13 +227,64 @@ if(client.browser.ie&&client.browser.ie<=7){
     var radio2 = document.createElement("<input type=\"radio\" name=\"choice\" value=\"2\">");
 }
 
-function getInnerText(element){
-   return (typeof element.textContent == "string")?element.textContent : element.innerText;
+function getInnerText(element) {
+    return (typeof element.textContent == "string") ? element.textContent : element.innerText;
 }
-function setInnerText(element,text){
-    if(typeof element.textContent == "string"){
+
+function setInnerText(element, text) {
+    if (typeof element.textContent == "string") {
         element.textContent = text;
-    }else{
+    } else {
         element.innerText = text;
+    }
+}
+
+function getElementLeft(element) {
+    var actualLeft = element.offsetLeft;
+    var current = element.offsetParent;
+
+    while (current != null) {
+        actualLeft += current.offsetLeft;
+        current = current.offsetParent;
+    }
+    return actualLeft;
+}
+
+function getElementTop(element) {
+    var actualTop = element.offsetTop;
+    var current = element.offsetParent;
+
+    while (current != null) {
+        actualTop += current.offsetTop;
+        current = current.offsetParent;
+    }
+    return actualTop;
+}
+/**
+ * getViewport  获取视口
+ */
+function getViewport() {
+    if (document.compatMode == "BackCompat") {
+        return {
+            width: document.body.clientWidth,
+            height: document.body.clientHeight
+        };
+    } else {
+        return {
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight
+        }
+    }
+}
+/**
+ * 获取元素相对视口的位置
+ * @param {*} element 
+ */
+function getBoundingClientRect(element){
+    if(typeof arguments.callee.offset != "number"){
+        var scrollTop = document.documentElement.scrollTop;
+        var temp = document.createElement("div");
+        temp.style.cssText = "position:absolute;left:0;top:0;";
+        doucemnt
     }
 }
