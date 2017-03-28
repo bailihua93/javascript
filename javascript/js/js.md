@@ -1271,7 +1271,63 @@ function getViewport(){
 - scrollWidth    没有滚动条的情况下，元素的总宽度
 - scrollLeft     被隐藏在内容区域左侧的像素数，通过修改该值可以改变元素的滚动位置 
 - scrollTop      被隐藏在内容区域上方的像素数，通过修改该值可改变元素的位置       
-在确认文档的总高度时（包括基于是口的最小高度时），必须取得scrollWidth/clientWidth  和scrollHeight/clientHeight 中最大值，才能保证在跨浏览器的环境下得到精确的结果。
+- 对于包含滚动条的页面 document.documentElement.scrollheight就是页面的高度    
+- 在确认文档的总高度时（包括基于是口的最小高度时）
+ ```js
+function docHeight(){
+    if(document.documentElement){
+        return Math.max(document.documentElement.scrollHeight,
+        document.documentElement.clientHeight);
+    }else{
+        return Math.max(document.body.scrollHeight,
+        document.body.clientHeight)
+    }
+}
+function docWidth(){
+    if(document.documentElement){
+        return Math.max(document.documentElement.scrollWidth,
+        document.documentElement.clientWidth);
+    }else{
+        return Math.max(document.body.scrollWidth,
+        document.body.clientWidth)
+    }
+}
+```
 
 4. 确定元素的大小      
 浏览器提供了一个getBoundingClientRect()方法，返回一个矩形对象，包含的属性：left、top、right、bottom.元素相对于视口的位置。但是ie8认为文档的左上角坐标是(2,2),传统的浏览器以(0,0)为起点坐标。
+```js
+function getBoundingClientRect(element){
+
+    var scrollTop = document.documentElement.scrollTop;
+    var scrollLeft = document.documentElement.scrollLeft;
+
+    if(element.getBoundingClientRect){
+        if(typeof arguments.callee.offset.offset != "number"){
+            var temp = document.createElement("div");
+            temp.style.cssText = "position:absolute;left:0;top:0";
+            document.body.appendChild(temp);
+            argument.callee.offset = -temp.getBoundingClientRect().top - scrollTop;
+            document.body.removeChild(temp);
+            temp = null;
+        }
+        var rect = element.getBoundingClientRect();
+        var offset = argument.callee.offset;
+        return {
+            left : rect.left + offset,
+            right : rect.right + offset,
+            top : rect.top + offset,
+            bottom : rect.botton + offset
+        };
+    }else{
+        var actualLeft = getElementLeft(element);
+        var actualTop = getElementTop(element);
+        return {
+            left : actualLeft -scrollLeft,
+            right : actualLeft + element.offsetWidth -scrollLeft,
+            top : actualTop - scrollTop,
+            bottom : actualTop + element.offsetHeight -scrollTop
+        }
+    }
+}
+```

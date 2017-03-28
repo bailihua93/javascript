@@ -239,7 +239,7 @@ function setInnerText(element, text) {
     }
 }
 
-<<<<<<< HEAD
+
 function getElementLeft(element) {
     var actualLeft = element.offsetLeft;
     var current = element.offsetParent;
@@ -289,7 +289,7 @@ function getBoundingClientRect(element){
         doucemnt
     }
 }
-=======
+
   /**
      * 取得元素的styleSheet
      * @param {*} element 
@@ -297,5 +297,61 @@ function getBoundingClientRect(element){
     function getStyleSheet(element){
         return element.sheet||element.styleSheet;
     }
-    
->>>>>>> 5a28910e86e4175ffb8053ddeddfffd10310143a
+/**
+ * 取得文档的大小
+ */
+function docHeight(){
+    if(document.documentElement){
+        return Math.max(document.documentElement.scrollHeight,
+        document.documentElement.clientHeight);
+    }else{
+        return Math.max(document.body.scrollHeight,
+        document.body.clientHeight)
+    }
+}
+function docWidth(){
+    if(document.documentElement){
+        return Math.max(document.documentElement.scrollWidth,
+        document.documentElement.clientWidth);
+    }else{
+        return Math.max(document.body.scrollWidth,
+        document.body.clientWidth)
+    }
+}
+
+/**
+ * 确定元素的大小,也就是距离视口各边的距离
+ */
+function getBoundingClientRect(element){
+
+    var scrollTop = document.documentElement.scrollTop;
+    var scrollLeft = document.documentElement.scrollLeft;
+
+    if(element.getBoundingClientRect){
+        if(typeof arguments.callee.offset.offset != "number"){
+            var temp = document.createElement("div");
+            temp.style.cssText = "position:absolute;left:0;top:0";
+            document.body.appendChild(temp);
+            argument.callee.offset = -temp.getBoundingClientRect().top - scrollTop;
+            document.body.removeChild(temp);
+            temp = null;
+        }
+        var rect = element.getBoundingClientRect();
+        var offset = argument.callee.offset;
+        return {
+            left : rect.left + offset,
+            right : rect.right + offset,
+            top : rect.top + offset,
+            bottom : rect.botton + offset
+        };
+    }else{
+        var actualLeft = getElementLeft(element);
+        var actualTop = getElementTop(element);
+        return {
+            left : actualLeft -scrollLeft,
+            right : actualLeft + element.offsetWidth -scrollLeft,
+            top : actualTop - scrollTop,
+            bottom : actualTop + element.offsetHeight -scrollTop
+        }
+    }
+}
