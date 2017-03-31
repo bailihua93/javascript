@@ -1331,3 +1331,6 @@ function getBoundingClientRect(element){
     }
 }
 ```
+
+####遍历
+#####NodeIterator
