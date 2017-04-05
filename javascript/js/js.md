@@ -1431,3 +1431,6 @@ range.setEnd(endNode, endOffset);       不包含offset
 
 创建范围后，在dom底层会生成完整的dom结构
 
++ 操作范围
+ - range.deleteContents()    单楚楚范围包含的所有内容
+ 
