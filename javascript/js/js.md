@@ -1331,3 +1331,13 @@ function getBoundingClientRect(element){
     }
 }
 ```
+
+#### 遍历
+Dom2 提供了NodeIterator和TreeWalker可以执行深度优先的遍历。ie不支持。 检测是否支持的方法  
+```js
+var supportTraversals = document.implementation.hasFeature("Traversal","2.0");
+var supportNodeIterator = (typeof document.createNodeIterator == "function");
+var supportTeerWalker = (typeof document.createTeerWalker == "function");
+```
+
+##### NodeIterator
