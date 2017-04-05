@@ -36,21 +36,20 @@ window.onload = function () {
     //     console.log(rule.selectorText);
     //     console.log(rule.style);
     // }
-    var ul = document.getElementsByTagName("ul")[0];
    
-   "//nodeIterator                                                                                                 ",
-   "//创建适配器，注意尽量用nodeName而非tagName",
-   " var filter = function (node) {",
-   "     return node.nodeName.toLowerCase() == \"li\" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;",
-   " }",
-   " // 创建遍历器，并且有一个指向初始节点的指针，通过nextNode指向第一个",
-   " var iterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, filter);",
-   " //nextNode指针向后移动",
-   " var curentNode = iterator.nextNode();",
-   " //先深度后横向的遍历，无节点的时候返回null，nextNode() 返回下一个节点，previousNode()返回前一个节点",
-   " while(currentNode != null){",
-   "     console.log(currentNode.nodeName);",
-   " }"
+/*//nodeIterator                                                                                                 
+//创建适配器，注意尽量用nodeName而非tagName
+ var filter = function (node) {
+     return node.nodeName.toLowerCase() == "li" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+ }
+ // 创建遍历器，并且有一个指向初始节点的指针，通过nextNode指向第一个
+ var iterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, filter);
+ //nextNode指针向后移动
+ var curentNode = iterator.nextNode();
+ //先深度后横向的遍历，无节点的时候返回null，nextNode() 返回下一个节点，previousNode()返回前一个节点
+ while(currentNode != null){
+     console.log(currentNode.nodeName);
+ }*/
     
 
 
@@ -68,4 +67,28 @@ window.onload = function () {
     while (currentNode = nodeIterator.nextNode()) {
         pars.push(currentNode);
     }*/
+    var ul = document.getElementsByTagName("ul")[0];
+    console.log(ul);
+    console.log(typeof document.createRange);
+    console.log(document.implementation.hasFeature("Range","2.0"));
+    var range = document.createRange();
+     console.log(typeof range.selectNode);
+    range.selectNodeContents(ul);
+  
+    // var child = range.selectNodeContents(ul);
+    var startContainer,
+        startOffset,
+        endContainer,
+        endOffset,
+        commonAncestorContainer;
+    startContainer = range.startContainer;
+    startOffset = range.startOffset;
+    endContainer = range.endContainer;
+    endOffset = range.endOffset;
+    console.log(startContainer.nodeName+ " "+ startOffset+" " +endContainer.nodeName+ " "+ endOffset );
+    // startContainer = child.startContainer;
+    // startOffset = child.startOffset;
+    // endContainer = child.endContainer;
+    // endOffset = child.endOffset;
+    // console.log(startContainer+ " "+ startOffset+" " +endContainer+ " "+ endOffset );
 }

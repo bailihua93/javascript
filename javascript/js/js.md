@@ -1375,3 +1375,47 @@ var filter = {
       console.log(currentNode.nodeName);
   }
  ```
+##### TreeWalker
+NodeIterator的高级版本，包含方法：    
+- nextNode()
+- previousNode()
+- parentNode()
+- firstChild()
+- lastChild()
+- nextSibling()
+- previousSibling()
+- document.createTreeWalker(node,whatToShow,filter)
+- filter支持NodeFilter.FILTER_ACCEPT   NodeFilter.FILTER_SKIP , 并且支持 NodeFilter.FILTER_REJECT直接跳过整个子树
+#### 范围    
+通过范围可以选择文档中的一个区域，而不必考虑节点的界限，可以用来修改文档
+##### DOM中的范围
+检测是否支持      
+```js
+var supportRange = document.implement.hasFeature("Range","2.0");
+var alsoSupportRange = (typeof document.createRange == "function");
+```
+使用： var range =  document.createRange();此时range包含的属性有，      
+- startContainer 包含范围起点的节点，一般为包含range的父节点
+- startOffset     如果startContainer是文本节点、注释或者CDATA，offset是跳过的字符的数量，否则就是范围中第一个节点的索引
+- endContainer   包含范围起点的节点，一般为包含range的父节点
+- endOffset     终点在父节点的childNodes中的索引位置
+- commonAncestorContainer       
+上面的属性都是可以直接读写的
+1. Dome的简单选择
+range.selectNode(node);        选择包含node节点在内的所有节点和子节点         
+range.selectNodeContents(node); node节点的所有子节点      
+
+
+range.setStartBefore(relNode);         
+range.setStartAfter(relNode);     
+range.setEndBefore(relNode2);    
+renge.setEndAfter(relNode2);    
+
+
+包前不包后  
+range.setStart(startNode, startOffset);   包含offset      
+range.setEnd(endNode, endOffset);       不包含offset
+
+可以选择范围指的是一段代码，并且不是只有标签，当有子节点的时候选择是按照子节点的索引来选择的，子节点没有的话就是按照文本的位来选择了
+
+创建范围后，在dom底层会生成完整的dom结构
