@@ -1332,6 +1332,7 @@ function getBoundingClientRect(element){
 }
 ```
 
+<<<<<<< HEAD
 #### 遍历
 Dom2 提供了NodeIterator和TreeWalker可以执行深度优先的遍历。ie不支持。 检测是否支持的方法  
 ```js
@@ -1341,3 +1342,92 @@ var supportTeerWalker = (typeof document.createTeerWalker == "function");
 ```
 
 ##### NodeIterator
+=======
+####遍历
+- 定义深度优先的遍历操作
+```js
+var suportsTraversals = document.implementation.hasFeature("Traversal","2.0");    
+var supertsNodeIterator = (typeof document.createNodeIterator == "function");   
+var supertsNodeTreeWalker = (typeof document.createNodeTreeWalker == "function");   
+```
+#####NodeIterator
++ var nodeIterator = document.createNodeIterator(root, whatToShow, filter[,entityReferenceExpansion]);       
+      - root 搜索作为搜索起点的树中节点
+      - whatToShow 表示要访问哪些节点的**数字代码**,访问哪些节点，参数是常量形式在NodeFilter类型中定义
+        - NodeFilter.SHOW_ALL 显示所有节点
+        - NodeFilter.SHOW_ELEMENT 显示元素节点
+        - NodeFilter.SHOW_ATTRIBUTE 显示特性节点
+        - NodeFilter.SHOW_TEXT 显示文本节点
+      - filter 是一个NodeFilter对象，或者是一个表示应该接收还是拒绝某种特定节点的函数，或者直接null
+        - 每个nodefilter对象都只有一个方法，即acceptNode();如果访问节点，该方法返回NodeFilter.FILTER_ACCEPT;不需要访问的节点该方法返回NodeFilter.FILTER_SKIP；或者直接就是该函数体
+```js 
+var filter = {
+   acceptNode : function(node){
+    retern node.tagName.toLowerCase() == "p" ?
+           NodeFilter.FILTER_ACCEPT :
+           NodeFilter.Filter_SKIP;
+   }
+}
+
+```
+   - entityReferenceExpansion  实体对象扩展，html不支持
+ ```js
+ //nodeIterator                                                                                              
+ //创建适配器，注意尽量用nodeName而非tagName
+  var filter = function (node) {
+      return node.nodeName.toLowerCase() == "li" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+  }
+  // 创建遍历器，并且有一个指向初始节点的指针，通过nextNode指向第一个
+  var iterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, filter);
+  //nextNode指针向后移动
+  var curentNode = iterator.nextNode();
+  //先深度后横向的遍历，无节点的时候返回null，nextNode() 返回下一个节点，previousNode()返回前一个节点
+  while(currentNode != null){
+      console.log(currentNode.nodeName);
+  }
+ ```
+##### TreeWalker
+NodeIterator的高级版本，包含方法：    
+- nextNode()
+- previousNode()
+- parentNode()
+- firstChild()
+- lastChild()
+- nextSibling()
+- previousSibling()
+- document.createTreeWalker(node,whatToShow,filter)
+- filter支持NodeFilter.FILTER_ACCEPT   NodeFilter.FILTER_SKIP , 并且支持 NodeFilter.FILTER_REJECT直接跳过整个子树
+#### 范围    
+通过范围可以选择文档中的一个区域，而不必考虑节点的界限，可以用来修改文档
+##### DOM中的范围
+检测是否支持      
+```js
+var supportRange = document.implement.hasFeature("Range","2.0");
+var alsoSupportRange = (typeof document.createRange == "function");
+```
+使用： var range =  document.createRange();此时range包含的属性有，      
+- startContainer 包含范围起点的节点，一般为包含range的父节点
+- startOffset     如果startContainer是文本节点、注释或者CDATA，offset是跳过的字符的数量，否则就是范围中第一个节点的索引
+- endContainer   包含范围起点的节点，一般为包含range的父节点
+- endOffset     终点在父节点的childNodes中的索引位置
+- commonAncestorContainer       
+上面的属性都是可以直接读写的
+1. Dome的简单选择
+range.selectNode(node);        选择包含node节点在内的所有节点和子节点         
+range.selectNodeContents(node); node节点的所有子节点      
+
+
+range.setStartBefore(relNode);         
+range.setStartAfter(relNode);     
+range.setEndBefore(relNode2);    
+renge.setEndAfter(relNode2);    
+
+
+包前不包后  
+range.setStart(startNode, startOffset);   包含offset      
+range.setEnd(endNode, endOffset);       不包含offset
+
+可以选择范围指的是一段代码，并且不是只有标签，当有子节点的时候选择是按照子节点的索引来选择的，子节点没有的话就是按照文本的位来选择了
+
+创建范围后，在dom底层会生成完整的dom结构
+
