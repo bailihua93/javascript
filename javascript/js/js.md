@@ -1333,4 +1333,45 @@ function getBoundingClientRect(element){
 ```
 
 ####遍历
+- 定义深度优先的遍历操作
+```js
+var suportsTraversals = document.implementation.hasFeature("Traversal","2.0");    
+var supertsNodeIterator = (typeof document.createNodeIterator == "function");   
+var supertsNodeTreeWalker = (typeof document.createNodeTreeWalker == "function");   
+```
 #####NodeIterator
++ var nodeIterator = document.createNodeIterator(root, whatToShow, filter[,entityReferenceExpansion]);       
+      - root 搜索作为搜索起点的树中节点
+      - whatToShow 表示要访问哪些节点的**数字代码**,访问哪些节点，参数是常量形式在NodeFilter类型中定义
+        - NodeFilter.SHOW_ALL 显示所有节点
+        - NodeFilter.SHOW_ELEMENT 显示元素节点
+        - NodeFilter.SHOW_ATTRIBUTE 显示特性节点
+        - NodeFilter.SHOW_TEXT 显示文本节点
+      - filter 是一个NodeFilter对象，或者是一个表示应该接收还是拒绝某种特定节点的函数，或者直接null
+        - 每个nodefilter对象都只有一个方法，即acceptNode();如果访问节点，该方法返回NodeFilter.FILTER_ACCEPT;不需要访问的节点该方法返回NodeFilter.FILTER_SKIP；或者直接就是该函数体
+```js 
+var filter = {
+   acceptNode : function(node){
+    retern node.tagName.toLowerCase() == "p" ?
+           NodeFilter.FILTER_ACCEPT :
+           NodeFilter.Filter_SKIP;
+   }
+}
+
+```
+   - entityReferenceExpansion  实体对象扩展，html不支持
+ ```js
+ //nodeIterator                                                                                              
+ //创建适配器，注意尽量用nodeName而非tagName
+  var filter = function (node) {
+      return node.nodeName.toLowerCase() == "li" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+  }
+  // 创建遍历器，并且有一个指向初始节点的指针，通过nextNode指向第一个
+  var iterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, filter);
+  //nextNode指针向后移动
+  var curentNode = iterator.nextNode();
+  //先深度后横向的遍历，无节点的时候返回null，nextNode() 返回下一个节点，previousNode()返回前一个节点
+  while(currentNode != null){
+      console.log(currentNode.nodeName);
+  }
+ ```
