@@ -1432,5 +1432,9 @@ range.setEnd(endNode, endOffset);       不包含offset
 创建范围后，在dom底层会生成完整的dom结构
 
 + 操作范围
- - range.deleteContents()    单楚楚范围包含的所有内容
+ - range.deleteContents()    删除范围包含的所有内容,删除后原文自动形成闭合的文档结构，好像是优先执行的，DOM解析到之前就能操作了
+ - range.extractContents()        提取，删除并返回范围的东西，返回的是文档片段，
+ - range.cloneContents()     
+ - range.insertNode()             把node添加到range的开头，用于添加一些帮助信息
+
  
