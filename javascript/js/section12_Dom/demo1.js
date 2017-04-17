@@ -81,7 +81,7 @@ window.onload = function () {
         endContainer,
         endOffset,
         commonAncestorContainer;
-    startContainer = range.startContainer;
+    startContainer = range.startContainer; //
     startOffset = range.startOffset;
     endContainer = range.endContainer;
     endOffset = range.endOffset;
