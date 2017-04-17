@@ -66,15 +66,16 @@ window.onload = function () {
 
     while (currentNode = nodeIterator.nextNode()) {
         pars.push(currentNode);
-    }*/
-    var ul = document.getElementsByTagName("ul")[0];
-    console.log(ul);
-    console.log(typeof document.createRange);
-    console.log(document.implementation.hasFeature("Range","2.0"));
-    var range = document.createRange();
-     console.log(typeof range.selectNode);
-    range.selectNodeContents(ul);
+    // }*/
+    // var ul = document.getElementsByTagName("ul")[0];
+    // console.log(ul);
+    // console.log(typeof document.createRange);
+    // console.log(document.implementation.hasFeature("Range","2.0"));
+    // var range = document.createRange();
+    //  console.log(typeof range.selectNode);
+    // range.selectNodeContents(ul);
   
+<<<<<<< HEAD
     // var child = range.selectNodeContents(ul);
     var startContainer,
         startOffset,
@@ -86,9 +87,33 @@ window.onload = function () {
     endContainer = range.endContainer;
     endOffset = range.endOffset;
     console.log(startContainer.nodeName+ " "+ startOffset+" " +endContainer.nodeName+ " "+ endOffset );
+=======
+    // // var child = range.selectNodeContents(ul);
+    // var startContainer,
+    //     startOffset,
+    //     endContainer,
+    //     endOffset,
+    //     commonAncestorContainer;
+    // startContainer = range.startContainer;
+    // startOffset = range.startOffset;
+    // endContainer = range.endContainer;
+    // endOffset = range.endOffset;
+    // console.log(startContainer.nodeName+ " "+ startOffset+" " +endContainer.nodeName+ " "+ endOffset );
+>>>>>>> a92b55a613c898b081badc109975c814bb593777
     // startContainer = child.startContainer;
     // startOffset = child.startOffset;
     // endContainer = child.endContainer;
     // endOffset = child.endOffset;
     // console.log(startContainer+ " "+ startOffset+" " +endContainer+ " "+ endOffset );
+    var a =  document.querySelectorAll("ul li a")[0].firstChild;
+    var ul = document.getElementsByTagName("ul")[0];
+    var p = document.querySelectorAll("ul li p")[1].firstChild;
+    var range = document.createRange();
+    range.setStart(a,2);
+    range.setEnd(p,4);
+    console.log(ul);
+    console.log(range);
+    range.deleteContents();
+    console.log(ul);
+
 }
