@@ -1417,8 +1417,8 @@ range.selectNode(node);        选择包含node节点在内的所有节点和子
 range.selectNodeContents(node); node节点的所有子节点      
 
 
-range.setStartBefore(relNode);         
-range.setStartAfter(relNode);     
+range.setStartBefore(relNode);         起点设在节点的前面，范围包含节点
+range.setStartAfter(relNode);          起点设在节点的后面，范围不包含节点
 range.setEndBefore(relNode2);    
 renge.setEndAfter(relNode2);    
 
@@ -1436,5 +1436,36 @@ range.setEnd(endNode, endOffset);       不包含offset
  - range.extractContents()        提取，删除并返回范围的东西，返回的是文档片段，
  - range.cloneContents()     
  - range.insertNode()             把node添加到range的开头，用于添加一些帮助信息
+ - range.surroundContent(node)    将范围添加到node标签里面        
+ - range.collapse(true)           折叠范围，就是范围未选择任何文档，将开始和结束设置在同一个位置即可，此方法，true的话就折叠到前面，false折叠到后面
+ - compareBoundaryPoints(Range.START_TO_START,range2);  第一个参数是比较哪个点，可以比较的项目有，Range.START_TO_START, Range.START_TO_END,Range.END_TO_END,Range.END_TO_END.   返回-1，表示在前面；0相等，1在后面     
+ - range.cloneRange()
+ - range.detach()    从文档中分离出来，之后range = null ,这样最后就消除这个范围了
 
- 
+
+##### IE中的范围
+ie8只支持文本范围     
+var range = document.body.createTextRange();
+var found = range.findText("hello");  返回true代表找到文本，返回false表示没找到，found.text为文本中的内容。 并可以传入另一个参数表示向哪个方向继续搜索数值。负值表示向后搜索，正值表示向前搜索。  这是通过文本内容来搜索的 
+var foundagain = range.findText("hello",1);
+
+var found = range.moveToElementText(node);   和dom中的selectNode相同 ，访问内容的话，用range.htmlText     
+range.parentElement()   返回文本选取的父节点
+
+**复杂的选择**       
+moveStart("word",2)移动起点  向前移动两个单词  
+moveEnd() 移动终点    
+expand("word");扩展范围     
+move("word",3); 先折叠后移动，所以最终得到的是折叠的东西
+
+上面的word指的是单位，可选属性有character、word、sentence、textedit      
+**编辑**
+range.text = "haha";    
+range.pasteHTMl("<em>hah</em>") ;  标签替换     
+**折叠**     
+range.collapase(true);    
+range.boundingWidth  == 0 ;表示折叠成功     
+**比较**     
+range.compareEndPoint("StartToStart",range2);     
+**复制**     
+range.duplicate()
