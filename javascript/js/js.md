@@ -1612,4 +1612,225 @@ var EventUtil = {
 
 
 
-+ load
+##### load
+页面、图片、js文件都会除服load事件： 
++ 页面  
+```js
+EventUtil.addHandler(window,"load",funciton(event){
+    event = EventUtil.getEvent(event);
+    //  在兼容DOM的浏览器中，event.target指向document,而 ie则不会为这个时间设置srcElement
+})
+```
++ body   
+所有浏览器都支持window，所有少用body触发    
++ img   
+在创建新的img元素的时候，可以为其指定一个事件处理程序，以便图像加载完毕后给出提示，最重要的是**在指定src属性前指定事件**。
+```js
+EventUtil.addHandler(window,"load",function(){
+    var image = document.createElement("img");
+    EventUtil.addHandler(image,"load",function(event){
+        event = EventUtil.getEvent(event);
+        //do something
+    });
+    document.body.appendChild(image);
+    image.src = 'haha';
+});
+```
+首先为window指定load事件，向DOM添加元素的话，所有元素必须加载完毕，页面加载完前操作，document.body 会出错； 新图像元素不一定是要从添加到文档后才开始下载，只要设置了src属性就会下载   。    
+在不属于DOM文档的图像（未添加到文档的img元素和image对象）上触发load时，ie8 不会生成event对象       
++ script  
+<script>只有在设置了src属性并添加到文档后才会开始下载，也就是指定事件和src的顺序不是很重要</script> IE8不支持
+##### unload 
+文档完全卸载后触发，只要从一个页面切换到另一个页面就会发生，多用于清除引用，多在window上个触发
+##### resize
+浏览器最大化、最小化、改变大小的时候会在window上触发， ie、chrome会在变化1像素后触发，fireFox则只会在用户停止调整后触发，因此这个事件的处理程序中不要存在大计算量的代码  
+```js
+EventUtil.addHandler(window,"resize",function(event){
+   // ie8未设置srcElement
+})；
+```
+##### scroll
+window上触发，混杂模式，通过body元素的scrollTop/scrollLeft监控，标准模式通过html来检测。
+```js
+EventUtil.addHandler(window,"scroll",function(event){
+    if(document.compatMode == "CSS!Compat"){
+        document.documentElement.scrollTop
+    }else{
+        document.body.scrolTop
+    }
+})
+```
+滚动期间不停触发，少计算   
+####焦点事件
+document.hasFocus()   返回布尔值确认当前文档是否获得焦点       
+document.activeElement   返回获取焦点的元素  
+焦点事件的触发顺序       
+focusout 失去焦点时触发，冒泡   
+focusin 元素获取焦点时触发，冒泡  
+blur 元素失去焦点师触发，不会冒泡    
+focus 元素获取焦点时触发，不会冒泡     
+检测是否支持     
+var isSupported = document.implementation.hasFeature('FocusEvent','3.0');
+
+####鼠标和滚轮  
+mousedown :  按下鼠标任意键触发,键盘触发不了  
+mouseup   键盘不触发，松开键的时候用   
+click:单机鼠标左键或者回车键   
+dbclick : 双击左键     
+   
+mouseenter : 鼠标从外部进入到元素内部时触发，不冒泡，进入子元素不会触发     
+mouseleave ： 鼠标从内部移动到外部的时候触发，不冒泡，移动到后代元素也不触发     
+
+
+mousemove  鼠标指针在元素内部移动时触发 ，键盘不触发 
+
+
+//下面的是穿越边界就会触发的
+mouseout   从一个元素移动到另一个元素上时触发，可能是外部元素也可能是内部元素 键盘不触发      
+mouseover  鼠标指针位于元素外部，进入子元素也会触发。键盘不触发   
+
+   
+同时触发mousedown和mouseup才能触发 click。其中一个被取消就没办法触发。 dbclick需要触发两次才行      
+
+检测所有事件是否支持  
+var isSupported  =  document.implementation.hasFeature("MouseEvent","3.0");
+
+#####客户区坐标  
+event.clientX      
+event.clientY
+##### 页面坐标
+
+```js
+var pageX = event.pageX,
+    pageY = event.pageY;
+  //IE8
+if(pageX === undefined){
+    pageX = event.clientX +event.body.scrollLeft||event.documentElement.scrollLeft;
+}
+if(pageY === undefined){
+    pageY = event.clientY +event.body.scrollTop||event.documentElement.scrollTop;
+}
+```
+##### 屏幕坐标
+event.screenX     
+event.screenY
+##### 修改键
+ctrl、alt、shift、cmd键与鼠标组合使用的话，在触发鼠标事件之后，在event属性中，后有对应的ctrlKey、altKey、shiftKey、mataKey等的属性中的一个布尔值会为true。用于确认哪个是对的
+##### 相关元素  
+mouseover和mouseout事件会涉及两个元素。 并且event中会保存target元素和relateTarget记录双方。   
+```js
+var EventUtil = {
+    getRelateTarget: function(event){
+        if(event.relateTarget){
+            return event.relateTarget;
+        }else if(event.toElement){
+            return event.toElement;
+        }else if(event.fromElement){
+            return event.fromeElement;
+        }else{
+            return null;
+        }
+    }
+}
+```
+#####鼠标按钮  
+对于mousedown和mouseup的事件还有一个button的属性，0 表示左键，1表示中间，2表示右键。兼ie8   
+```js
+getButton : function(event){
+        if(document.implementation.hasFeature('MouseEvents',"2.0")){
+            return event.button;
+        }else{
+            switch(event.button){
+                case 0 :
+                case 1 :
+                case 3 : 
+                case 5 :
+                case 7 :
+                   return 0;
+                case 2 :
+                case 6 :
+                   return 2;
+                case 4 :
+                   return 1;
+            }
+        }
+    }
+```
+
+##### 更多信息
+detail属性，记录在给定位置上单击了多少次，同一位一次mousedown和mouseup算作一次单机，detail属性从1开始计算，每次单击后递增，
+如果在mousedown和mouseup之间移动了位置，detail就重置为0
+
+##### 鼠标滚轮事件      
+向下滚动的话，获取的是负的值，向上滚动的话获取的是正的值  
+```js
+var EventUtil = {
+    getWheelDelta:function(event){
+        if(event.wheelDelta){
+            return (client.engine.opera&&client.engine.opera < 9.5 ? -event.wheelDelta : event.wheelDelta);
+        }else{
+            return -event.detail*40;
+        }
+    }
+}
+```
+使用方法   
+```js
+(function(){
+    function handleMouseWheel(event){
+        event = EventUtil.getEvent(event);
+        var delta = EventUtil.getWheelDelta(event);
+    }
+    EventUtil.addhandler(document,"mousewheel",handleMouseWheel);
+    EventUtil.addhandler(document,"DOMMouseScroll",handleMouseWheel);
+})()
+```
+
+##### 触摸设备
+没有dbclick，双击会放大          
+单击元素会触发 mousemove  ,如果操作会导致内容变化，将不再有其他事件发生；如果没有发生变化，就会触发，mousedown/mouseup/click;轻击不可单击的元素不会触发任何事件（默认操作所的元素和指定click的元素）
+mousemove也会触发mouseover和mouseout事件     
+两手指放在屏幕上并岁手指移动会触发mousewheel和scroll
+#### 键盘和文本事件  
+keydown 按下任意键触发，按住不放的话，会重复触发此事件      
+keypress 按下 字符键触发，不放的话，重复触发
+keyup 释放任意键触发     
+只有用户通过文本框输入文本时才常用到     
+textInput 最为对keypress的补充，用意是在将文本显示给用户之前更容易拦截文本。 文本插入文本框前会触发textInput     
+
+如果按下字符键的时： keydown、keypress位于文本框发生变化前被触发，如果不松开，这两个事件会一直触发，keyup松开后触发，在文本框内容变了之后   
+
+如果按下非字符键，先触发keydown，不松开的话，会一直触发，松开后触发keyup
+
+**同样支持组合键**
+
+##### 键码 
+在发生keydown、keyup的时候，event对象的keyCode属性会包含一个代码，用于标记对应的键。有特殊的情况返回的不同
+
+#####字符编码  
+当keypress键按下时，意味着按下的键会影响屏幕中文本的显示。 在浏览器中，按下能够插入或者删除字符的键都会触发keypress事件，并且y有个属性 charCode只有在这时才有值，ie有问题，所以，需要兼容
+```js
+getCharCode : function(event){
+    if(typeof event.charCode == "number"){
+        return event.charCode;
+    }else{
+        return event.keyCode;
+    }
+}
+```
+获取字符编码后，可以使用String.fromCharCode()将其转化为实际的字符
+##### textInput 事件
+DOM3 中引入，textInput.  
+所有可以获得焦点的元素都可以触发keypress，但只有编辑区域才能触发textInput.textInput只有在用户按下实际能输入的键才会触发，keyPress事件则在按下那些能够影响文本显示的键师才触发（ps 退格)   
+textInput属性有一个属性data记录用户输入的字符
+还有一个 inputMethod记录输入的方法，只有ie支持
+####复合事件
+输入物理键盘上没有的字符的时候（日文）需要按住多个键，和textInput差不多，
+compositionstart:在IME（input method editor）打开时触发    
+compositionupdate: 在向输入字段中插入新字符时触发
+compositionend  ： 在ime的文本符合系统关闭时触发，表示返回正常键盘输入状态  
+其属性data包含改变量的内容
+#### 变动事件 
+DOM2定义的    
+   - DOMSubtreeModified : 在dom中发生任何变化后都会触发，在其他任何事件触发后都会触发。不要在这里操作dom会产生循环
+   - DOMNodeInserted ： 在一个节点作为子节点插入到另一个节点的时候触发
