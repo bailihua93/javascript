@@ -1469,3 +1469,147 @@ range.boundingWidth  == 0 ;表示折叠成功
 range.compareEndPoint("StartToStart",range2);     
 **复制**     
 range.duplicate()
+
+## 13事件
+###事件流
+事件捕获阶段、处于目标阶段、事件冒泡阶段，Dom2要求处于阶段归为冒泡阶段，但是IE9及以上把他放在了冒泡和捕获阶段都有
+###事件处理程序
+####html 事件处理程序
+不推荐用，直接在标签上定义，类似于  <button onclick = "showMessage()">点我</button>    ，     
+this指向事件的目标元素   ，       
+并且可以在函数内部访问document对象，    
+如果是表单元素的话，还会保存表单的对象，**this.form**     
+**不推荐上面的元素定义法**    
+#### DOM0
+element.onclick =function(){};    
+element["on"+type]  = function(){};    
+元素级属性，this指向元素本身，事件的处理会在冒泡阶段处理的     
+element.onclick = null ;删除事件处理程序
+#### DOM2 （IE9)
+element.addEventListener(type,handler,false);         
+element.removeEventListener(type,handler,false);      
+type : click,     
+handler :  处理函数的引用，亦可以是匿名函数 ，但是匿名函数无法移除的是
+false： 冒泡阶段处理，  true  捕获阶段处理   ,一般不建议捕获阶段处理
+元素级别的作用域，this指向本身，一种type可以添加多个函数，按照添加顺序执行  
+#### IE8
+attachEvent(type,handler);   
+detachEvent(type,handler);     
+默认冒泡阶段处理，执行顺序与添加顺序相反      
+this指向的是window   
+#### 跨浏览器
+
+```js
+var EventUtil = {
+    addHandler : function(element,type,handler){
+          if(element.addEventListener){ //dom 2
+              element.addEventListener(type,handler,false);
+          }else if(element.attachEvent){
+              element.attachEvent("on"+type,handler);//ie8
+          }else{//dom0
+              element["on"+type] = handler;
+          }
+    },
+    removeHandler : function(element,type,handler){
+          if(element.removeEventListener){
+              element.removeEventListener(type,handler,false);
+          }else if(element.detachEvent){
+              element.detachEvent("on"+type,handler);//ie8
+          }else{
+              element["on"+type] = null;
+          }
+    }
+}
+
+
+//使用
+EventUtil.addHandler(element,"click",handler);
+```
+###事件对象
+
+事件触发的时候，会有一个事件对对象传输到处理函数中，即event，如：  
+```js    
+btn.addEventListener("click",function(event){
+    alert(event.type);
+},false);
+```
+但是DOM0 的IE中需要window.event才能取得event。Dom2的没有这个问题
+
++ 事件对象的属性
+      - bubbles         boolean  只读       表明事件是否冒泡（没用）
+      - cancelable      boolean  只读       表明事件是否可以取消默认行为（没用)   
+      - currentTarget   element  只读       事件处理程序注册的位置，一定是this指向的相同
+      - defaultPrevented        为TRUE的时候表示已经调用了preventDefault()    
+      - eventPhase       1 表示捕获阶段，2表示处理阶段，3表示冒泡阶段
+      
+      - preventDault()   cancelable为true的时候可以调用，取消默认事件
+      - returnValue      ie8中的东西，设置为true后，实现了preventDefault()    
+
+      - stopPropagation()   取消事件进一步冒泡，bubble为true才能用
+      - cancelBubble      设置为true实现stopPropagation()
+
+      - target      element   事件的目标
+      - srcElement       IE8   时间的目标
+
+      - type     事件的类型  string
+
+
+**兼容性**
+```js
+var EventUtil = {
+    addHandler: function (element, type, handler) {
+        if (element.addEventListener) { //dom 2
+            element.addEventListener(type, handler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent("on" + type, handler); //ie8
+        } else { //dom0
+            element["on" + type] = handler;
+        }
+    },
+    removeHandler: function (element, type, handler) {
+        if (element.removeEventListener) {
+            element.removeEventListener(type, handler, false);
+        } else if (element.detachEvent) {
+            element.detachEvent("on" + type, handler); //ie8
+        } else {
+            element["on" + type] = null;
+        }
+    },
+    getEvent: function (event) {
+        return event ? event : window.event;
+    },
+    getTarget: function (event) {
+        return event.target ? event.target : event.srcElement;
+    },
+    preventDefault: function (event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    },
+    stopPropagation: function (event) {
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        } else {
+            event.cancelBubble = true;
+        }
+    }
+}
+```
+
+
+###事件类型
+
+####UI事件
++ load 页面完全加载后在window上触发，框架加载完毕后在框架集上触发，图像加载完后在<img>上触发。    
++ unload 页面框架卸载后对应触发
++ abort  终止，用户停止下载过程时，如果嵌入的内容没有加载完，在<object>上面触发
++ error   js错误在window上触发，无法加载图像在<img>触发，无法加载嵌入的内容在<object>,框架无法加载的时候在框架集上触发   
++ select  用户选择文本框中一个或者多个字符的时候触发
++ resize  窗口大小改变window或者框架上触发
++ scroll  用户滚动滚动个条的时候触发，在元素上面触发，<body>元素包含页面的滚动条
+
+
+
++ load

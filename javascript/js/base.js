@@ -4,12 +4,23 @@ function isHostMethod(object, property) {
     return t == 'function' ||
         (!!(t == 'object' && object[property])) || t == 'unknown';
 }
+
 //  不是最好的，需要修改可能                                                         
 function isHostMethod(object, property) {
     var t = typeof object[property];
     return t == 'function' ||
         (!!(t == 'object' && object[property])) || t == 'unknown';
 }
+
+
+
+
+
+
+
+/**
+ * 浏览器检测对象
+ */
 var client = function () {
 
     //呈现引擎
@@ -174,6 +185,9 @@ var client = function () {
     };
 
 }();
+
+
+
 /**
  * 类数组转化为数组的方法
  * @param {*} args 
@@ -191,8 +205,9 @@ function convertToArrey(args) {
     return arr;
 }
 
+
 /**
- * outputAttributes(element)
+ * outputAttributes(element)，遍历属性
  */
 function outputAttributes(element) {
     var pairs = new Arrey(),
@@ -211,6 +226,8 @@ function outputAttributes(element) {
     }
     return pairs.join(" ");
 }
+
+
 if (client.browser.ie && client.browser.ie <= 7) {
     //必须用下面的方法创建对应的元素
     //创建含有name属性的iframe
@@ -227,10 +244,20 @@ if (client.browser.ie && client.browser.ie <= 7) {
     var radio2 = document.createElement("<input type=\"radio\" name=\"choice\" value=\"2\">");
 }
 
+
+/**
+ * 获取元素内容
+ * @param {*} element 
+ */
 function getInnerText(element) {
     return (typeof element.textContent == "string") ? element.textContent : element.innerText;
 }
 
+/**
+ * 设置元素的文本内容
+ * @param {*} element 
+ * @param {*} text 
+ */
 function setInnerText(element, text) {
     if (typeof element.textContent == "string") {
         element.textContent = text;
@@ -261,6 +288,9 @@ function getElementTop(element) {
     }
     return actualTop;
 }
+
+
+
 /**
  * getViewport  获取视口
  */
@@ -281,8 +311,8 @@ function getViewport() {
  * 获取元素相对视口的位置
  * @param {*} element 
  */
-function getBoundingClientRect(element){
-    if(typeof arguments.callee.offset != "number"){
+function getBoundingClientRect(element) {
+    if (typeof arguments.callee.offset != "number") {
         var scrollTop = document.documentElement.scrollTop;
         var temp = document.createElement("div");
         temp.style.cssText = "position:absolute;left:0;top:0;";
@@ -290,45 +320,46 @@ function getBoundingClientRect(element){
     }
 }
 
-  /**
-     * 取得元素的styleSheet
-     * @param {*} element 
-     */
-    function getStyleSheet(element){
-        return element.sheet||element.styleSheet;
-    }
+/**
+ * 取得元素的styleSheet
+ * @param {*} element 
+ */
+function getStyleSheet(element) {
+    return element.sheet || element.styleSheet;
+}
 /**
  * 取得文档的大小
  */
-function docHeight(){
-    if(document.documentElement){
+function docHeight() {
+    if (document.documentElement) {
         return Math.max(document.documentElement.scrollHeight,
-        document.documentElement.clientHeight);
-    }else{
+            document.documentElement.clientHeight);
+    } else {
         return Math.max(document.body.scrollHeight,
-        document.body.clientHeight)
+            document.body.clientHeight)
     }
 }
-function docWidth(){
-    if(document.documentElement){
+
+function docWidth() {
+    if (document.documentElement) {
         return Math.max(document.documentElement.scrollWidth,
-        document.documentElement.clientWidth);
-    }else{
+            document.documentElement.clientWidth);
+    } else {
         return Math.max(document.body.scrollWidth,
-        document.body.clientWidth)
+            document.body.clientWidth)
     }
 }
 
 /**
  * 确定元素的大小,也就是距离视口各边的距离
  */
-function getBoundingClientRect(element){
+function getBoundingClientRect(element) {
 
     var scrollTop = document.documentElement.scrollTop;
     var scrollLeft = document.documentElement.scrollLeft;
 
-    if(element.getBoundingClientRect){
-        if(typeof arguments.callee.offset.offset != "number"){
+    if (element.getBoundingClientRect) {
+        if (typeof arguments.callee.offset.offset != "number") {
             var temp = document.createElement("div");
             temp.style.cssText = "position:absolute;left:0;top:0";
             document.body.appendChild(temp);
@@ -339,19 +370,63 @@ function getBoundingClientRect(element){
         var rect = element.getBoundingClientRect();
         var offset = argument.callee.offset;
         return {
-            left : rect.left + offset,
-            right : rect.right + offset,
-            top : rect.top + offset,
-            bottom : rect.botton + offset
+            left: rect.left + offset,
+            right: rect.right + offset,
+            top: rect.top + offset,
+            bottom: rect.botton + offset
         };
-    }else{
+    } else {
         var actualLeft = getElementLeft(element);
         var actualTop = getElementTop(element);
         return {
-            left : actualLeft -scrollLeft,
-            right : actualLeft + element.offsetWidth -scrollLeft,
-            top : actualTop - scrollTop,
-            bottom : actualTop + element.offsetHeight -scrollTop
+            left: actualLeft - scrollLeft,
+            right: actualLeft + element.offsetWidth - scrollLeft,
+            top: actualTop - scrollTop,
+            bottom: actualTop + element.offsetHeight - scrollTop
+        }
+    }
+}
+
+/**
+ * 事件处理程序对象
+ */
+var EventUtil = {
+    addHandler: function (element, type, handler) {
+        if (element.addEventListener) { //dom 2
+            element.addEventListener(type, handler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent("on" + type, handler); //ie8
+        } else { //dom0
+            element["on" + type] = handler;
+        }
+    },
+    removeHandler: function (element, type, handler) {
+        if (element.removeEventListener) {
+            element.removeEventListener(type, handler, false);
+        } else if (element.detachEvent) {
+            element.detachEvent("on" + type, handler); //ie8
+        } else {
+            element["on" + type] = null;
+        }
+    },
+    getEvent: function (event) {
+        return event ? event : window.event;
+    },
+    getTarget: function (event) {
+        return event.target ? event.target : event.srcElement;
+    },
+    preventDefault: function (event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    },
+    stopPropagation: function (event) {
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        } else {
+            event.cancelBubble = true;
         }
     }
 }
