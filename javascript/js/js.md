@@ -1834,3 +1834,167 @@ compositionend  ： 在ime的文本符合系统关闭时触发，表示返回正
 DOM2定义的    
    - DOMSubtreeModified : 在dom中发生任何变化后都会触发，在其他任何事件触发后都会触发。不要在这里操作dom会产生循环
    - DOMNodeInserted ： 在一个节点作为子节点插入到另一个节点的时候触发
+   - DOMNodeRemoved  节点在父节点被移除
+   - DOMNodeInsertedIntoDocument  一个节点字节插入文档或者通过子树间接插入文档后触发，发生在DOMNodeInserted后
+   - DOMNodeRemovedFromDocument  一个节点被直接从文档中移除或者通过子树简介移除之前触发，在DOMNodeRemoves后触发
+   - DOMAttrModified 在修改特性后触发
+   - DOMCharacterDataModified  文本节点值发生变化后触发
+IE8不支持任何变动事件  ，并且有些在DOM3中被移除了
+#####删除节点
+removeChild()或者replaceChild()在DOM中删除节点时，首先触发DOMNodeRemoved事件，event.target是删除的节点，event.relateNode是目标的父节点，事件触发时还未移除，因此parentNode属性依然存在，与event.relateNode相同。事件会冒泡，因此可以在任何层次上处理他。    
+如果该节点包含子节点，那么，自身和子节点都会触发DOMNodeRemovedFromDocument，事件不会冒泡，因此只能在子节点上指定处理程序。此时的目标就是本身或者相应子节点，event中不包含其他信息  
+最后触发，DOMSubtreeModified事件,目标是被移除节点的父节点
+
+
+#####插入节点 
+appendChild()  repalceChild()  insertBefore()   插入节点会触发DOMNodeInserted. 目标是插入的节点，relateNode是父节点。触发时节点已经被插入父节点中了。冒泡，可以在个个层次处理     
+之后触发DOMNodeInsertedIntoDocument不冒泡，子节点定义
+最后在父节点触发DOMSubtreeModified
+
+#### h5事件
+#####contextmenu 右键事件
+在页面右键的时候触发，会出现默认的选项，可以阻止默认事件，存在bug，目前只有火狐支持还
+##### beforeunload 
+window上触发，可以让页面在卸载前被阻止，只是弹出一条alert，显示的内容设置为event.returnValue并设置成返回值
+```js
+EventUtil.addHandler(window,"beforeunload",function(event){
+    event = EventUtil.getEvent(event);
+    msg = "不要离开我";
+    event.returnValue = msg;
+    return msg;
+})
+```
+##### DOMContentLoaded   DOM树形成后触发
+ie9以上支持，触发后可以处里dom并添加事件。对于不支持的浏览器，设置一个0毫秒的超时调用无法确保在load前使用
+##### readystatechage
+ie中支持很久的东西，用于替代DOMContentLoaded；替代的方法,一本只有ie支持
+```js
+EventUtil.addHandler(document,"readystatechange",function(event){
+    if(document.readyState == "interactive" || document.readyState == "conplete"){
+    EventUtil.removeHandler(document,"readystatechange",arguments.callee);
+    //这里的arguments.callee指向的是最开始的，也就是最初的匿名处理函数
+    }
+})
+```
+##### pageshow和pagehide
+新浏览器中有个往返缓存 back-forward cache，保存着页面的所有数据，让用户 “后退”和“前进”更快一些。从缓存中读取的页面不会触发load事件。     
+pageshow  页面显示的时候触发，不论是否来自缓存，新页面会在load后触发，旧的页面会在页面完全显示后触发，必须安置在window上使用，刷新会重新加载页面。  在这个事件中，event.persisted 属性布尔值true表示页面被缓存了。   
+pagehide 在页面unload前触发，event.persisted保存着页面信息，如果页面在卸载后保存到了bfcache中，persisted就会被保存为true。  
+第一次pageshow的时候，persisted一定是false，第一次pagehide也一定是persisted为true    
+对于制定了unload事件的页面一定被排除在bfcache之外
+##### haschange 
+url 变化的时候触发，用于通知开发人员，保存状态和导航信息用。   window上触发这个事件，event包含额外的oldURL和newURL。但是ie不支持，所以最好还是用location来确定参数列表    
+#### 设备事件
+主要介绍旋转和重力的控制问题
+#### 触摸与手势事件
+##### 触摸事件
+  - touchstart   手指触摸屏幕时触发，即使一个手指已经放在屏幕上也会触发      
+  - touchmove    手指在屏幕上滑动的时连续触发。可以通过preventDefault()可以阻止滚动，target与start相同
+  - touchend     手指从屏幕移开的时候触发，target必定和touchstart的相同
+  - touchcancel  系统停止跟踪时触发，突发弹框，从document移动到了浏览器的边框，突然增加了一个手指
+  - touches      表示当前跟踪的触摸操作的Touch对象的数组
+  - targetTouches   特定于事件目标的Touch对象数组
+  - changeTouches  上次触摸以来发生了什么改变的Touch对象的数组  
+  
+  - Touch对象包含的属性  
+      - clientX
+      - pageX
+      - screenX
+      - identifier 标识触摸的唯一ID
+      - target  触摸DOM节点目标      
+ **当touchend发生时，touches集合中就没有热表格Touch对象了，因为不存在活动的触摸操作，应该转而使用changeTouches集合**     
+
+
+```js
+function handleTouchEvent(event){
+     //只追踪一次触摸
+    if(event.touches.length == 1){
+        var output = document.getElementById("output");
+        switch(event.type){
+            case "touchstart":
+                output.innerHTML = "touch start ("+ event.touches[0].clientX;
+                break;
+            case "touchend":
+                break;
+           case "touchmove":
+               event.preventDefault();
+               output.innerHTML = event.changedTouches[0].clientX
+
+        }
+    }
+}
+```
+
+
+触摸发生的事件顺序   ： touchstart 、mouseover、mousemove、mousedown、mouseup、click、touchend   
+
+
+
+#####手势事件
+两个手指触摸屏幕的时候产生手势事件 ，冒泡的是
+gesturestart   一个手指已经按在屏幕上面而另一个手指又触摸屏幕上时触发    
+gesturechange  当触摸后另一个手指位置发生变化时触发   
+gestureend     任何一个手指移开时触发  
+
+在一个事件上设置事件处理程序，意味着两个手指必须同时位于该元素的范围内。   
+touch和手势事件的关系     
+当一个手指放在屏幕上的时候，触发touchstart事件，如果另一个手指又放在了屏幕上，则会触发gesturestart，随后触发该手指的touchstart，如果有一个手指移动name就会触发gesturechange，只要有一个手指移开，就会触发gestureend事件，紧接着触发该手指的touchend   
+
+gesture事件包含两个额外的属性 rotation和scale 记录着转过的角度和手指尖距离变化。  
+### 内存和性能
+####事件委托  
+给父级元素指定事件处理程序，然后通过target识别相应的元素，并操作相应的函数，可以减少添加事假处理程序。
+####移除事件处理程序
+
+### 模拟事件（ie9+）  
+最好不用
+
+## 表单脚本   
+
+###基础
+html表单由<form>元素表示，而在js中对应的是HTMLFormElement类型，继承了HTMLElement对象，自己有些独有的属性和方法   
+    - acceptCharset     服务器能够处理的字符集，等价于HTML中的accept-charset
+    - action    接收请求的url
+    - enctype  请求的编码类型
+    - elements   表单中所有控件的集合
+    - length     表单中控件的数量
+    - method     get post
+    - name    
+    - reset() 将所有表单重置为默认值
+    - submit()   提交表单
+    - target   发送请求和接收响应的窗口  
+
+获取方法，$()    ，    document.forms 可以取得页面所有表单
+#### 提交表单
+```html
+<input type = "submit" value = "Submit"/>    
+<button type = "submit">Submit</button>   
+<input type = "image"  src ="sibmit.gif">
+```
+以上按钮提交的时候，浏览器会在将请求发送给服务器前触发submit事件，我们有机会验证表单数据，并决定是否允许表单提交。阻止这个事件的默认行为可以取消提交表单   
+```js
+var form = document.getELementById("form1");
+EventUtil.addHandler(form,"submit",function(event){
+    event = EventUtil.getEvent(event);
+    EventUtil.preventDefault(event);
+})
+```
+
+也可以直接   
+form.submit()  提交表单 ，但是这时不会触发submit事件，所以需要先验证表单之后再调用此方法  
+
+**防止重复提交#**  
+第一次提交后就禁用提交按钮，或者用onsubmit取消后续的表单提交操作
+
+####重置表单
+
+```html
+<button type = "reset" >reset</button>  
+<input type = "reset" value = "reset">
+```
+可以通过取消默认行为来阻止重置 
+也可以直接 form.reset().但是这里会触发 reset事件  
+
+#### 表单字段
+表单元素可以直接按照dom方法访问，也可以，用elements 按照顺序或者name属性来访问每个元素。 相同的name的话会返回一个nodelist   
+##### 共有的变淡字段属性
