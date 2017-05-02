@@ -1984,7 +1984,7 @@ EventUtil.addHandler(form,"submit",function(event){
 form.submit()  提交表单 ，但是这时不会触发submit事件，所以需要先验证表单之后再调用此方法  
 
 **防止重复提交#**  
-第一次提交后就禁用提交按钮，或者用onsubmit取消后续的表单提交操作
+第一次提交后就禁用提交按钮，必须是在submit事件上disabled = true ，或者用onsubmit取消后续的表单提交操作，因为submit和click先后顺序不一定的是
 
 ####重置表单
 
@@ -1997,4 +1997,385 @@ form.submit()  提交表单 ，但是这时不会触发submit事件，所以需�
 
 #### 表单字段
 表单元素可以直接按照dom方法访问，也可以，用elements 按照顺序或者name属性来访问每个元素。 相同的name的话会返回一个nodelist   
-##### 共有的变淡字段属性
+##### 共有表单字段属性  
+ - disabled 当前表单是否被禁用  
+ - form   志昂当前字段所属表单的指针，只读
+ - name
+ - readOnly   是否只读
+ - tabIndex   当前字段的切换序号  
+ - type        checkbox radio等 
+ - value       当前字段提交给服务器的值，文件字段来说给的是文件在计算机中路径，只读 
+
+把焦点设置到当前字段  
+input1.focus()       
+input1.disabled   = true   ;  禁用当前字段  
+##### 共有的 方法  
+focus()、blur()   
+focus后可以触发键盘事件    
+并且type = hidden的元素不能设置焦点  
+h5 添加了一个属性， autofocus 会自动设置焦点，因此在设置focus前先要检查一下， 
+```js
+ if(element.autofocus !== true){
+     element.focus();
+ }
+```
+
+
+##### 共有的事件  
+- blur  当前字段失去焦点的时候触发  
+- change 对于inout 和 textarea 当他们失去焦点，并且value值改变的时候触发；对于select元素只有其选项改变时才会触发 
+- focus 获得焦点的时候触发  
+focus和blur事件都会触发对应的事件。  change对于select事件不需要失去焦点也可以触发的    
+
+focus和blur通常用来改变用户界面，要么给出视觉提醒，要么向界面添加额外的功能
+blur和change不能指定先后顺序  
+### 文本框脚本  
+
+单行文本框必须把<input>的type设置为text，通过设置size指定现实的字符数，通过value属性设置初始值，而maxlength 可以设置接收的最大字符数    
+textarea元素始终呈现多行文本，指定文本框大小，rows 行  和 cows列   
+处理文本框内容的时候最好用value而不是setattribute，因为dom的修改不一定会显示  
+####  选择文本    
+文本框都支持select() 方法，这个方法会选中文本框中的所有文本，多数浏览器都会将焦点设置到文本框中， 可以通过focus事件中调用select方法来使用户可以直接修改文本框里的内容，节省操作
+ 
+#####  选择事件  select
+用户选择了文本框的文本并释放鼠标后才会触发，让我们知道什么时候用户选择了文本；select方法也可以触发select事件。  
+
+##### 取得选择的文本  （用户选了什么）
+h5添加了两个属性，selecStart和selectEnd来记录选择的位置； 然后
+
+```js
+function getSelectedText(textbox){
+    if(typeof textbox.selectionStart == "number"){
+        return textBox.value.substring(textbox.selectionStart,textbox.selectionEnd);
+    }else if(document.selection){
+        //ie8
+        return document.selection.createRange().text;
+    }
+}
+```
+##### 选择部分文本  （开发人员选）
+h5中所有文本框会有个setSelectionRange方法    
+```js
+function selectText(textbox,startIndex,stopIndex){
+    if(textbox.setSelectionRange){
+        textbox.setSelectionRange(startIndex,stopIndex);
+    }else if(textbox.createTextRange){
+        var range = textbox.createTextRange();
+        range.collapse(true);
+        range.moveStart("character",startIndex);
+        range.moveEnd("character",stopIndex-startIndex);
+        range.select();
+    }
+    textbox.focus();
+}
+```
+
+####过滤输入   
+#####屏蔽字符 
+例如只输入数字  
+```js
+EventUtil.addHandler(textbox,"keypress",function(event){
+    //输入内容最好用keypress来处理
+    event = EventUtil.getEvent(event);
+    var target = EventUtil.getTarget(event);
+    var charCode = EventUtil.getCharCode(event);
+
+    if(!/\d/.test(String.FromCharCode(charCode)&&charCode>9&&！event.ctrlKey){
+        //这里charCode>9是为了补充keypress，屏蔽了退格删除上下键等，但是这里有问题不能修改了啊
+        //最后不屏蔽ctrl键
+        EventUtil.preventDefault(event);
+    }
+})
+```
+
+
+##### 操作剪贴板
+存在6个剪贴板事件  
+beforecopy   
+copy     
+beforecut    
+cut     
+beforepaste  
+paste    
+在实际的事件发生前可以通过这些before事件来修改剪贴板里的数据，取消这些事件并不会取消实际发生的事件，只有取消实际的事件才能取消   
+剪切板对象 clipboardData    
+```js
+var EventUtil = {
+      getClipboardText : function(event){
+        var clipboardData = (event.clipboardData||window.clipboardData);
+        return cllipboardData.getData(event);
+    },
+    setClipboardText:function(event,value){
+        if(event.clipboardData){
+            return event.clipboardData.setData("text/plain",value);
+        }else if(window.clipboardData){
+            return window.clipboardData.setData("text",value);
+        }
+    },
+    clearClipboard:function(event){
+         var clipboardData = (event.clipboardData||window.clipboardData);
+        cllipboardData.clearData();
+    }
+}
+```  
+
+在确保文本框内容是包含某些字符的时候，剪贴板事件很有用的     
+```js
+EventUtil.addHandler(textbox,"paste",function(event){
+    event = EventUtil.getEvent(event);
+    var text = EventUtil.getClipboardText(event);
+    if(!/^\d*$/.test(text)){
+        Event.preventDefault(event);
+    }
+})
+```
+#### 自动切换焦点  
+实现文本框达到最大数量后自动将焦点切换到下一个文本框   
+
+电话的例子
+
+```html
+<input type = "text" name = "tel1" id = "txtTel1" maxlength = "3">
+<input type = "text" name = "tel2" id = "txtTel2" maxlength = "3">
+<input type = "text" name = "tel3" id = "txtTel3" maxlength = "4">
+```
+对应的输入  
+```js
+(function(){
+    function tabForward(event){
+        event = EventUtil.getEvent(event);
+        var target = EventUtil.getTarget(event);
+        if(target.value.length == target.maxLength){
+            var form = target.form;
+            for(var i = 0,len = form.elements.length;i<len;i++){
+                if(form.elements[i+1]){
+                    form.elements[i+1].focus();
+                }
+                return;
+            }
+        }
+    }
+    var textbox1 = document.getElementById("txtTel1");
+    var textbox2 = document.getElementById("txtTel2");
+    var textbox3 = document.getElementById("txtTel3");
+
+    EventUtil.addHandler(textbox1,"keyup",tabForward);
+})();
+
+```
+#### H5约束验证API
+##### required 
+必填内容的属性，input、textarea 和select 可以选用  
+```html
+<input type = "text" name ="username" required>
+```
+js可以直接访问该属性，检查是否是必填的字段，text1.required  布尔值  
+
+##### 输入类型  
+input中type可选 email 、url
+##### 数值范围 
+input的type可选的有number 、 range 、 datetime 、datetime-local 、 date 、month、week、time  ，
+这些数值类型的输入元素，可以指定min属性（最小的可能值）max（最大的可能值）和step属性（从min到max之间的差值），例如输入0~100的值，并且是5的倍数  
+```html
+<input type="number" min="0" max="100" step="5">
+```
+
+##### 输入模式 pattern
+属性的值是一个正则表达式，用于匹配文本框中值。例如
+```html
+<input type="text" pattern="\d+" name="count">
+```
+不用加上^$  
+##### 检测有效性
+checkValidity()防范可以检测表单中某个字段是否有效，返回布尔值  
+
+通过validity属性获取详细的信息
+
+这个属性包含很多属性 
+   - customError 如果设置了setCustomValidity() ，则为true
+   - patternMismatch   输入与指定不服，返回true
+   - rangeOverflow      比max大
+   - rangeUnderflow     比min小   
+   - stepMisMatch
+   - tooLong             输入超过了maxLength 返回true
+   - typeMismatch     number的type中有了其他的
+   - valueMissing  require属性没有value  
+   - valid          有效，前面的都是false的时候这里才true
+
+```js
+if（input.validity && !input.validity.valid){
+    if(input.validity.valueMissing){
+        alert("Please specify a value");
+    }else if(input.validity.typeMismatch){
+        alert("Please enter an number")
+    }
+}
+```
+
+#####禁用验证 
+告诉表单不用验证
+```html
+<form method="post" action="signup.php" novalidate>
+</form>
+```
+也可以js取得和设置这个值  
+document.forms[0].novalidate = true;
+
+也可以通过提交按钮设置formnovalidate 来禁用验证  
+```html
+<input type = "submit"  formnovaldate name="hah" value="hah">
+```
+当然也可以通过js来获取和设置这个属性
+
+
+###下拉框脚本
+```html
+<!-- The second value will be selected initially -->
+<select name="select">
+  <option value="value1">Value 1</option> 
+  <option value="value2" selected>Value 2</option>
+  <option value="value3">Value 3</option>
+</select>
+``` 
+
+HTMLSelectElement类型还提供了额外的属性和方法  
+- add(newOption,relOption)    
+- multiple   是否允许多选
+- options    控件中所有option的集合
+- remove(index) 
+- selectedIndex  被选中项的索引，没有的话-1 
+- size    选择框可见的行数             
+选择框的type属性  select-one 或者 select-multiple  
+value  属性，没有选中的项的时候是空，有选中的是第一个的value，没设置value的就是文本内容  
+
+HTMLOptionElement  ：    
+ -  index 
+ - label 
+ - selected
+ - text 
+ - value 
+
+#### 选择选项
+   **显示被选中的项**        
+   var selectedOption =  selectbox.options[selectbox.selectedIndex];   
+   selectedOption.text    selectedOption.value   
+
+  **设置选中项**     
+  selectbox.selectedIndex = index;  或者   
+  selectbox.options[index].selected = true ;  
+
+#### 添加选项  
+```js
+var newOption = document.createElement("option");
+newOption.appendChild(document.createTextNode("new Option"));
+newOption.setAttribute("value","newVlue");
+selectbox.appendChild(newOption);
+```
+
+或者  
+```js
+var newOption = new Option("text","value");
+select.add(newOption,undefined);
+//DOM的appendChild(ie8有问题),insetBefore()都可以用
+```
+#### 移除选项 
+这里options应该是一个Nodelist
+```js
+selectbox.removeChild(selectbox.options[0]);
+
+selectbox.remove(0); 移除第一个项，之后的项会自动补充成第一个   
+
+selectbox.option[0] = null;
+```
+
+####移动和重排 
+
+appendChild()传入一个**文档中**已经有的元素，会将原来的元素删除，然后添加到指定的位置    
+selectbox.insertBefore(nodetomove,option);
+
+### 表单序列化  
+利用type、name、value 把数据转化成可以保存传输的形式     
+发送给服务器的数据   
+- 对表单的名称和值进行 URL编码，使用&分割  
+- 不发送禁用的表单字段  
+- 只发送勾选的复选和单选按钮 
+- 不发送type为submit和reset的按钮
+- 多选框每种选中框单独一个条目  
+- 在单机提交按钮提交表单的情况下，也会发送提交按钮，包含input的type为image的元素  
+
+序列化的代码  
+
+```js
+function serialize(form) {
+    var parts = [],
+        field = null,
+        i,
+        len,
+        j,
+        optLen,
+        option,
+        optValue;
+
+    for (i = 0, len = form.elememts.length; i < len; i++) {
+        field = form.elements[i];
+        switch (field.type) {
+            case "select-one":
+            case "select-multiple":
+
+                if (field.name.length) {
+                    for (j = 0, optLen = field.options.length; j < optLen; j++) {
+                        option = field.options[j];
+                        if (option.selected) {
+                            optValue = "";
+                            if (option.hasAttribute) {
+                                optValue = (option.hasAttribute("value") ? option.value : option.text);
+                            } else {
+                                optValue = (option.attributes["value"].specified ? option.value : option.text);
+                            }
+                            parts.push(encodeURIComponent(field.name) + "=" + encodeURIComponent(optValue));
+                        }
+
+                    }
+                }
+                break;
+            case undefined: //字段集
+            case "file":
+            case "submit":
+            case "reset":
+            case "button":
+                break;
+            case "radio":
+            case "checkbox":
+                if (!field.checked) {
+                    break;
+                }
+            default:
+                if (field.name.length) {
+                    parts.push(encodeURIComponent(field.name) + "=" + encodeURIComponent(field.value));
+                }
+        }
+    }
+    return parts.join("&");
+}
+```
+### 富文本编辑  
+所见即所得,很多内容没看，用到了再添加吧
+在页面中嵌入一个包含空HTML页面的iframe，通过只能代码加载的属性，designMode  = “on” 就可以了  
+```js
+<iframe name = "rechedit" style = "height:100px;width:100px;" src="blank.html"></iframe>
+
+<script type = "text/javascript">
+EventUtil.addHandler(window,"load",function(){
+    frames["rechedit"].document.designMode = "on";
+});
+</script>
+```  
+
+
+submit的时候   
+```js
+target.elements["comments"].value = recheditelement.innerHtml;
+```  
+
+
+
