@@ -2379,3 +2379,15 @@ target.elements["comments"].value = recheditelement.innerHtml;
 
 
 
+## Canvas 
+<canvas id="drawing" width="200" height="200">如果不支持canvas你会看到这段话</canvas> 
+跳过，以后补充  
+
+```js
+var drawing = document.getElementById("drawing");
+if(drawing.getContext){
+    var context = drawing.getContext("2d");
+}
+``` 
+这里传入"2d"、"3d"来确定 想要画什么东西，  
+使用toDataURL可以导出canvas的图像

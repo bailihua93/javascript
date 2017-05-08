@@ -543,8 +543,23 @@ function serialize(form) {
 
                     }
                 }
-               break; 
+                break;
+            case undefined: //字段集
+            case "file":
+            case "submit":
+            case "reset":
+            case "button":
+                break;
+            case "radio":
+            case "checkbox":
+                if (!field.checked) {
+                    break;
+                }
+            default:
+                if (field.name.length) {
+                    parts.push(encodeURIComponent(field.name) + "=" + encodeURIComponent(field.value));
+                }
         }
     }
-
+    return parts.join("&");
 }
