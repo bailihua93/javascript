@@ -334,6 +334,7 @@ function isHostMethod(object,property){
 ```
 
 ## DOM
+文档对象模型(Document Object Model)
 ### 节点层次
 +  文档节点 ：  document
 +  文档元素 ： 文档最外层的元素，只能有一个     在 HTML 中为html ，在xml中可以是任何节点， 
@@ -3373,3 +3374,177 @@ finally 字句无论如何都会执行，就算存在return语句也不能阻止
  ###   ie错误 
  1. script一定要直接在body直接子标签上 
  2. 闭包有问题
+
+ ## 18 XML 
+ ### xml支持
+ DOM2开始支持，IE9
+ #### 创建xml  
+
+```js
+   if(document.implementation.hasFeature("XML","2.0")){
+         var xmldom = document.implementation.createDocument("namespace",rootName,doctype);
+         //这里的namespace可以直接传空字符串，doctype传null     
+        var child = xmldom.createElement("child");
+        //此处的document就是xmldom
+        xmldom.documentElement.appendChild(child);
+        //documentElement指向文档的首元素
+     }
+``` 
+#### DOMPaeser 
+将xml解析为DOM文档 ，首先创建实例，让后使用parseFromeString方法解析xml字符串。 只能解析格式良好的xml所以解析不了html文档，解析错误的话就会返回一个parseerror的文档，内容为错误描述
+```js
+  var parser = new DOMParser();
+   var xmldom = parser.parseFromString("<root><child/></root>","text/xml");
+   //这样就创建了一个xmldom的文档了
+```
+加强版
+```js
+
+    var parser = new DOMParser(),
+        xmldom,
+        errors;
+
+    try {
+        xmldom = parser.parseFromString("<root><child/></root>", "text/xml");
+        errors = xmldom.getElementsByTagName("parsererror");
+        if (errors.length > 0) {
+            throw new Error("Parsing Error");
+        }
+    } catch (error) {
+        console.log(error.message);
+    }
+``` 
+#### XMLSerializer 类型 
+使用时先创建实例，然后调用serializeToString  
+```js
+var serializer  = new XMLSerializer();
+var xml = serializer.serializeToString(xmldom); 
+``` 
+可以序列化任何dom对象，HTML也支持 ，传入不是DOM对象的话出错
+
+#### IE8 
+IE支持XML是通过activeX对象实现的，通过ActiveXObject可以在js中创建ActiveX对象的实例，创建xml的实例，
+也要使用这个函数并传入一个表示xml文档的字符串，实际创建并解析的方法  
+
+```js 
+function createDocument(){
+    if(typeof arguments.callee.activeXString != "string"){
+        var versions = ["MSXML2.DOMDocument.6.0","MSXML2.DOMDocument.3.0","MSXML2.DOMDocument"],
+         i,len;
+         for(i = 0,len = version.length;i<len;i++){
+             try{
+                 new ActiveXObject(versions[i]);
+                 arguments.callee.activeXString = versions[i];
+                 break;
+             }catch(error){
+                 //跳过，不做处理
+             }
+         }
+    }
+    return new ActiveXObject(arguments.callee.activeXString);
+}
+//创建空白 文档
+var xmldom = createDocument();
+//parseFromString
+xmldom.loadXML("<root><child/></root>"); 
+//error
+if(xmldom.parseError != 0){
+    console.log(
+        "An error occurred:\n Error Code:"
+        +xmldom.parseError.errorCode+"\n"
+        +"line"+xmldom.parseError.line +"\n"
+        +"linePos" + xmldom.parseError.linepos +"/n"
+        + "Reason:"+xmldom.parseError.reason);
+}
+
+// 序列化 直接用xml就可以了
+xmldom.xml
+
+```
+
+#### 跨浏览器处理xml
+
+```js
+//解析xml通用版，需要和createDocument使用
+function parseXml(xml){
+    var xmldom = null;
+
+    if(typeof DOMParser != "undefind"){
+        xmldom = (new DOMParser()).parseFromString(xml,"text/xml");
+        var errors = xmldom.getElementsByTagName("parsererrror");
+        if(errors.length!=0){
+           throw new Error("XML parse error"+errors[0].textContent);
+        }
+    }else if(typeof ActiveXObject != "undefined"){
+        xmldom = createDocument();
+        xmldom.loadXML(xml);
+        if(xmldom.parseError!=0){
+            throw new Errror("XML parse error"+xmldom.parseError.reason);
+        }
+    }else{
+        throw new  Error("NO XML parser available");
+    }
+    return xmldom;
+}
+
+//并且使用的时候最好和try-catch联合使用
+
+
+//序列化xml
+function serializeXML(xmldom){
+    if(typeof XMLSerializer != "undefined"){
+        return (new XMLSerializer()).serializeToString(xmldom);
+    }else if(typeof xmldom.xml != "undefined"){
+        return xmldom.xml;
+    }else{
+        throw new Error("NO serializer available");
+    }
+}
+```
+
+
+### XPath  
+
++ XPath 使用路径表达式来选取 XML 文档中的节点或者节点集。    
++ XPath  有7中类型的节点（node）：  元素、属性、文本、命名空间、处理指令、注释以及文档（根）节点    
++ 基本值    无父或无子的节点  
+
++ 项目Item   项目是基本值或者节点            
++ 关系 ： Parent children  sibling ancestor(先辈)  Descendant(后代)
+####选取节点 : 
+ XPath使用路径表达式在XML文档中选取节点，节点是通过沿着路径或者step来选的     
+####表达式 
+1. 基本介绍 
++ nodename  选取此节点的所有自己子节点      
++  /      从根节点选取
++  //从匹配选择的当前节点选择文档中的节点，不考虑他们的位置
++    . 选取当前节点       
++   ..   选取父节点
++   @选取属性
+
+
+例子： 
+bookstore   选取bookstore标签的所有子节点  
+/bookstore   绝对路径下的bookstore   
+bookstore/book 选取bookstore下的所有book元素  
+//book       选取所有book元素，不论在什么位置       
+bookstore//book    选取bookstore的后代元素中所有的book元素   
+//@lang       选取名为lang的所有属性      
+
+2. 谓语 ：放在方括号中，产选出特定节点或者指定值得节点   
+
+/bookstore/book[n]    bookstore子元素第n个book元素     
+/bookstore/book[last()]     bookstore的最后一个book子元素（last()-1)倒数第二个    
+/bookstore/book[postion()<3]  前两个，position从1开始的？     
+//title[@lang]          有lang属性的title元素     
+//title[@lang="eng"]         
+/bookstore/book[price>35.00]    bookstore 的所有book元素，并且其子元素中price的值>35  
+//bookstore/book[price>35.00]/title    
+
+3. 通配符  
+  -  \* 所有元素 
+  - @*  所有属性
+  - node()  所有节点 
+4. 选取若干路径 
+  "|"使用或元素达到不同的路径 
+  

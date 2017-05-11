@@ -574,3 +574,54 @@ function addQueryStringArg(url, name, value) {
     url += encodeURIComponent(name) + "=" + encodeURIComponent(value);
     return url;
 }
+
+//创建IE解析xml的方法  
+
+function createDocument(){
+    if(typeof arguments.callee.activeXString != "string"){
+        var versions = ["MSXML2.DOMDocument.6.0","MSXML2.DOMDocument.3.0","MSXML2.DOMDocument"],
+         i,len;
+         for(i = 0,len = version.length;i<len;i++){
+             try{
+                 new ActiveXObject(versions[i]);
+                 arguments.callee.activeXString = versions[i];
+                 break;
+             }catch(error){
+                 //跳过，不做处理
+             }
+         }
+    }
+    return new ActiveXObject(arguments.callee.activeXString);
+}
+
+//解析xml通用版，需要和createDocument使用
+function parseXml(xml){
+    var xmldom = null;
+
+    if(typeof DOMParser != "undefind"){
+        xmldom = (new DOMParser()).parseFromString(xml,"text/xml");
+        var errors = xmldom.getElementsByTagName("parsererrror");
+        if(errors.length!=0){
+           throw new Error("XML parse error"+errors[0].textContent);
+        }
+    }else if(typeof ActiveXObject != "undefined"){
+        xmldom = createDocument();
+        xmldom.loadXML(xml);
+        if(xmldom.parseError!=0){
+            throw new Errror("XML parse error"+xmldom.parseError.reason);
+        }
+    }else{
+        throw new  Error("NO XML parser available");
+    }
+    return xmldom;
+}
+//序列化xml
+function serializeXML(xmldom){
+    if(typeof XMLSerializer != "undefined"){
+        return (new XMLSerializer()).serializeToString(xmldom);
+    }else if(typeof xmldom.xml != "undefined"){
+        return xmldom.xml;
+    }else{
+        throw new Error("NO serializer available");
+    }
+}
