@@ -451,7 +451,7 @@ alert(someNode.lastChild == newNode);         //true
   
   所有的版本浏览器都可以访问HTMLDocument 但是ie可能无法访问Document
 1. 文档的子节点
-  + document .documentElement  指向html的整个页面
+  + document .documentElement  指向html的整个页面  根节点，xml中的最外层节点
   + document.firstChild == document.childNodes[0] == <Doctype>
   + document.body    <body>标签
   + document.head    <head>标签
@@ -3276,7 +3276,100 @@ effectAllowed属性，在dragstart中设置，和dropEffect配合，表示支持
 
 
 
-###媒体元素                                                                                                                                                                                                                                                                                                                     ### 历史状态管理      
-                                                                                                                                                                  history対像 
+###媒体元素                                                                                                                                                                                                                                                               ### 历史状态管理      
+history対像 
 
 ## 错误和调试  
+### try-catch 
+```js
+try{
+    //可能导致错误的代码
+}catch(error){
+     //在错误发生的时候怎么处理
+}
+``` 
+error对象包含一个message属性。   
+
+1. finally  
+```js
+   try {
+            return 4;
+        } catch (error) {
+            return 1;
+        }finally{
+           return 7;
+        }
+```
+finally 字句无论如何都会执行，就算存在return语句也不能阻止，当同时存在return语句的时候，会导致前面的return 失效 。finally不存在return的话，漆面的return还是有效的. 但是好像会直接导致   
+2. 错误类型 
+  + Error    基本类型，主要用于开发人员抛出错误
+  + EvalError   没有把eval当做函数调用的时候会出这个错误
+  + RangeError  超出范围  
+  + RefrenceError 找不到对象  
+  + SyntaxError    eval中传入不合适的字符串，语法错误等
+  + TypeError    保存类型不符合，对象不存在相应的方法  
+
+  **处理错误**  
+  ```js
+  try{
+
+  }catch(error){
+      if(error instanceof TypeError){
+
+      }else if(errro instanceof ReferenceError){
+
+      }else{
+
+      }
+  }
+  ```
+  对于看不到源码的未知库函数调用这个函数是个不错的选择
+
+  ### throw  
+  用于抛出自定义错误，后面可以跟任何东西，  
+  在设计一个函数的时候，可以通过if语句配合 typeof、instanceof 来判断传入参数是否满足条件，不满足的话可以抛出一个自己定义的错误。 多用于常用函数的编写   
+  ### error 事件  
+  只能DOM0方法处理  
+  ```js
+  window.onerror = function(message,url,line){
+      console.log(message);
+      return false; //通过返回false可以阻止浏览器的默认行为
+  }
+  ```  
+  图片也支持error事件，并且发生错误的时候表示图片下载停止了  
+
+  ###常见错误类型  
+  1. 类型转化错误   
+  在  == 、！= 、 if 、while、for等判断语句中，使用费布尔值的时候  
+  多用=== 、typeof 、instanceof等转化为布尔值 
+  2. 通讯错误  
+  查询语句必须用encodeURIComponent();
+
+
+  ```js
+ function addQueryStringArg(url,name,value){
+     if(url.indexOf("?")==-1){
+         url+=?;
+     }else{
+         url+=&;
+     }
+     url+=encodeURIComponent(name)+"="+encodeURIComponent(value);
+     return url;
+ }
+ ```
+
+ ### 错误添加到服务器那里  
+ ```js
+ function logError(sev,msg){
+     var img =  new Image();
+     img.src = "log.php?sev"+encodeURIComponent(sev)+"&msg="+encodeURIComponent(msg);
+ }
+ ```
+
+ 用img发送请求很好用  
+
+ 
+
+ ###   ie错误 
+ 1. script一定要直接在body直接子标签上 
+ 2. 闭包有问题

@@ -563,3 +563,14 @@ function serialize(form) {
     }
     return parts.join("&");
 }
+
+//将查询语句添加到url中
+function addQueryStringArg(url, name, value) {
+    if (url.indexOf("?") == -1) {
+        url +="?";
+    } else {
+        url += "&";
+    }
+    url += encodeURIComponent(name) + "=" + encodeURIComponent(value);
+    return url;
+}
