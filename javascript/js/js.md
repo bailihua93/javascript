@@ -3786,3 +3786,99 @@ function selectNodes(context, expression, namespace) {
 
 
 ##E4X没看
+
+##JSON  
+javascript Object Notation一种数据结构，与XML相互竞争的是;
+###语法 
+JSON支持三种类型的值   
++ 简单值 : 字符串、数值、布尔、null不支持undefined，字符串必须用双引号来包含
++ 对象 
++ 数组     
+不支持变量、函数或者对象实例 ,这个需要字节改成别的然后怎么操作呢 ，属性必须加上双引号  ,数组和对象通常是JSON数据结构的最外层结构
+###解析和序列化
+JSON对象，有两个方法，stringify()和parse() ; 序列化后不包含任何缩进；重新解析后的对象和原来的对象相互独立  
+#### JSON.stringify(value[, replacer[, space]])
+```js
+var book = {
+     "titile":"Professional Javascript",
+     "authors": ["bai","lan"],
+     "edition":3,
+     "year":2011
+}
+
+/**
+*直接使用看起来就是把对象直接变成了一个去除了缩进的字符串 , 数组合值该是什么样子还是原来的样子
+*/
+var jsontext1 = JSON.stringify(book);
+// {"titile":"Professional Javascript","authors":["bai","lan"],"edition":3,"year":2011}
+
+
+/**
+ * replacer 可是数组的话，就会只输出，特定的几个属性了
+ */
+var jsontext2 = JSON.stringify(book,["titile","year"]);
+//{"titile":"Professional Javascript","year":2011}
+
+
+/**
+*  replacer 是函数的话可以控制各种值得返回情况，返回什么就是什么，并且返回undefined的话就省略该项了
+*/
+var jsonText = JSON.stringify(book,function(key,value){
+    switch(key){
+        case "authors":
+        return value.join(",");
+        case "year":
+        return 5000;
+        case "edition":
+        return undefined;
+        default:
+        return value;
+    }
+},);
+//{"titile":"Professional Javascript","authors":"bai,lan","year":5000}
+
+
+
+/**
+ * space可以传入数字表示缩进几个空格，传入字符串表示用该字符串间隔,从开头传入的
+ */
+var jsontext3 = JSON.stringify(book,["titile","year"]," 间隔 ");
+/*
+{
+ 间隔 "titile": "Professional Javascript",
+ 间隔 "year": 2011
+}
+*/
+
+/**
+*toJSON()方法是定义在对象内部的方法，在调用JSON.stringigfy的时候会直接调用，其返回值就是我们的结果，可以作为repalcer的补充 ，很坑
+*/
+```
+
+
+**JSON.stringify()序列化的顺序如下**
++  存在toJSON()方法而且能通过他的取得有效的值，则调用他方法，否则返回对象本身  
++  如果提供第二个参数，则用这个函数过滤器，传入函数的的值是第一步返回的值
++  对第二步返回的每个值进行序列化
++  如果提供了第三个参数，执行相应的序列化
+
+#### JSON.parse(text[, reviver])
+
+```js
+/**
+*将字符串转化为json对象
+*/
+var bookCopy1 = JSON.parse(jsonText);
+
+
+/**
+*转化回来的东西都是字符串，尤其日期需要在reviver中还原为对象
+*/
+var bookCopy2  = JSON.parse(jsonText,funciton(key,value){
+    if(key == "releaseDate"){
+        return new Date(value);
+    }else{
+        return value;
+    }
+})
+```
