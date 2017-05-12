@@ -3548,3 +3548,237 @@ bookstore//book    选取bookstore的后代元素中所有的book元素
 4. 选取若干路径 
   "|"使用或元素达到不同的路径 
   
+#### XPath轴 
+轴可以定义相对于当前节点的节点集   
++ ancestor  当前节点的所有先辈（父、祖父） 
++ ancestor-or-self  当前节点以及所有先辈 
++ attribute   当前节点的所有属性 
++ child   所有子元素 
++ descendant   所有后代元素 
++ descendant-or-self  当前节点和子节点
++ following   当前节点的结束标签之后的所有节点 
++ namespace   当前节点所有的命名空间 
++ parent
++ preceding   当前节点开始标签之前的所有节点
++ preceding-sibling   当前节点之前的同级节点
++ self  自己 
+#### 步   
+轴名称::节点测试[谓语]      例子  
++ child::book
++ attribute::lang
++ child::*
++ child::text()
++ child::node()
++ descendant::book     当前节点的所有book后代 
++ ancestor::book  当前节点的所有book先辈 
++ child::*/child::price  当前节点的所有price孙节点 
+
+#### 运算符 
+    |    合集 
+    +    加          
+    -    减   
+    *    乘     
+    div  除     8 div 4
+    mod  取余  
+    =    等于   
+    ！=   不等于 
+    <    小于
+    <=   小于等于
+    >    大于
+    >= 
+    or   或  
+    and  与  
+
+
+
+#### DOM3中的XPath 
+XPath最重要的两个类型   XPathEvaluation 和XPathResult  ，最重要的方法  
+```js
+//求职
+var xpathResult = document.evaluate(
+ xpathExpression, //上面的那堆表达式
+ contextNode, //一般是一个节点，应该是最上边的那个xmldom.documentElement
+ namespaceResolver, //没有命名空间的话就是null，有的话就是其他的，我不知道
+ resultType, 
+ result  //一般是null
+);
+```
+
+上面的resultType  最常用的是        
++ XPathResualt.ORDERED_NODE_ITERATOR_TYPE    返回匹配节点集合，次序与文档中的次序一致  
++ XPathResualt.UNORDERED_NODE_ITERATOR_TYPE    返回匹配的节点集合，但是集合中节点的次序不一定与他们在文档中次序一致     
++ XPathResualt.ANY_UNORDERED_NODE_TYPE        返回匹配的节点集合，但是集合中节点的次序不一定与他们在文档中次序一致  
++ XPathResualt.FIRST_ORDERED_NODE_TYPE        返回只包含一个节点的集合，包含匹配的第一个节点   
++ XPathResualt.ANY_TYPE                        返回域XPath表达式匹配的数据类型  
++ XPathResualt.NUMBER_TYPE                    返回数值  
++ XPathResualt.STRING_TYPE                   返回字符串  
++ XPathResault.BOOLEAN_TYPE                   返回布尔值   
++ XPathResault.ORDERED_NODE_SNAPSHOT_TYPE    返回快照，次序与文本中一致 ，修改不会影响到原来的东西  
++ XPathResault.UNORDERED_NODE_SNAPSHOT_TYPE    返回快照，次序与文本中不一致 
+
+
+####例子   
+```js
+//节点迭代器必须用  iterateNext()
+var result = xmldom.evaluate("employee/name",xmldom.documentElement,null,XPathResual.ORDERED_NODE_ITERATOR_TYPE,null);
+if(resualt!==null){
+    var element = resualt.iterateNext();
+    while(element){
+        //deal(element)
+        element =resualt.iterateNext();
+    }
+}
+
+// 快照形式的话用   snapshotItem
+
+var result = xmldom.evaluate("employee/name",xmldom.documentElement,null,XPathResual.ORDERED_NODE_SNAPSHOT_TYPE,null);
+if(resualt!==null){
+    for(var a=i ,len = result.snapshotLength;i<len;i++){
+        result.snapshotItem(i);
+    }
+}
+
+
+// 单节点形式 
+var result = xmldom.evaluate("employee/name",xmldom.documentElement,null,XPathResual.FIRST_ORDERED_NODE_TYPE,null);
+if(result!=null){
+    result.singleNodeValue ;
+}
+
+
+
+//简单类型结果 
+//XPath可以获取简单的肥姐店数据类型   通过 booleanValue、numberValue、stringValue 属性返回值  
+var result = xmldom.evaluate("employee/name",xmldom.documentElement,null,XPathResual.BOOLEAN_TYPE,null);
+result.booleanValue   
+
+
+// 对于数值类型，必须在表达式参数上指定一个可以返回数值的Xpath函数   例如: 计算匹配数量的count（）  
+var result = xmldom.evaluate("count(employee/name)",xmldom.documentElement,null,XPathResual.NUMBER_TYPE,null);
+result.numberValue 
+//字符串类型会返回匹配节点的第一个相符的中的文本内容 
+
+
+
+
+
+//ANY_TYPE  返回的结果可能是简单类型也可能是无序迭代器需要通过结果的resultType与对应来行比较确认返回的到底是什么 
+```
+####命名空间的支持   
+
+1. createNSResolver()来创建对象  
+
+文档的总结点包含命名空间定义的节点传进去  ,然后在表达式中也加上前缀就可以确认相应的命名空间是否能用
+```js
+var nsresolver = xmldom.createNSResolver(xmldom.documentElement); 
+
+var result = xmldom.evaluate("wrox:book/wrox:author",xmldom.documentElement,nsresolver,
+XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+```
+
+2. 定义一个函数，接收命名空间的前缀，返回关联的url 
+
+```js
+var nsresulver = function(prefix){
+    switch(prefix){
+        case "wrox" : return "http://www.wrox.com/";
+        //其他前缀
+    }
+}
+```  
+
+
+####IE 
+IE9 以前activeX 实现  
+```js
+var element = xmldom.documentElement.selectSingleNode("bookstore/book");
+if(element!=null){
+    element.xml
+}
+
+var element = xmldom.documentElement.selectNodes("bookstore/book");
+//返回nodelist  
+
+
+
+//命名空间支持  
+xmldom.setProperty("SelectionNamespaces","xmln:prefix1='url1' xmln:prefix2='url2" );
+var result = xmldom.documentElement.selectNodes("wrox:book/wrox/author")
+```
+
+### 跨浏览器使用XPath  
+IE能支持的方法很少，所以只要重写selectSingleNode() selectNodes()   就可以了，接收的参数  
+上下文节点、XPath表达式、可选的命名空间对象    {prefix1：“url”， prefix2：“url2”}这样的形式 
+```js
+function selectSingleNode(context, expression, namespace) {
+    var doc = ((context.nodeTyepe != 9) ? context.ownerDocument : context);
+    if (typeof doc.evaluate != "undefined") {
+        var nsresolver = null;
+        if (namespace instanceof Object) {
+            nsresolver = function (prefix) {
+                return namespace[prefix];
+            };
+        };
+        var result = doc.evaluate(expression, context, nsresoler, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return (result !== null ? result.singleNodeValue : null);
+    } else if (typeof context.selectSingleNode != "undefined") {
+        if (namespace instanceof Object) {
+            var ns = "";
+            for (var prefix in namespace) {
+                if (namespace.hasOwnProperty(prefix)) {
+                    ns += "xmln:" + prefix + "='" + namespace[prefix] + "'";
+                }
+            }
+            doc.setProperty("SelectionNamespace", ns);
+        }
+        return context.selectSingleNode(expression);
+
+    } else {
+        throw new Error("No XPath engine found");
+    }
+}
+
+
+function selectNodes(context, expression, namespace) {
+    var doc = ((context.nodeTyepe != 9) ? context.ownerDocument : context);
+    if (typeof doc.evaluate != "undefined") {
+        var nsresolver = null;
+        if (namespace instanceof Object) {
+            nsresolver = function (prefix) {
+                return namespace[prefix];
+            };
+        };
+        var result = doc.evaluate(expression, context, nsresoler, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var nodes = new Array();
+        if (result !== null) {
+            for (var i = 0, len = result.snapshotLength; i < len; i++) {
+                nodes.push(result.snapshotItem(i));
+            }
+        }
+        return nodes;
+    } else if (typeof context.selectNodes != "undefined") {
+        if (namespace instanceof Object) {
+            var ns = "";
+            for (var prefix in namespace) {
+                if (namespace.hasOwnProperty(prefix)) {
+                    ns += "xmln:" + prefix + "='" + namespace[prefix] + "'";
+                }
+            }
+            doc.setProperty("SelectionNamespace", ns);
+        }
+        var result = context.selectNodes(expression);
+        var nodes = new Array();
+        for (var i = 0, len = result.length; i < len; i++) {
+            nodes.push(result[i]);
+        }
+        return nodes;
+
+
+    } else {
+        throw new Error("No XPath engine found");
+    }
+}
+```
+
+
+###XSLT没看   

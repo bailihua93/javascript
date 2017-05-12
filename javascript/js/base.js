@@ -567,7 +567,7 @@ function serialize(form) {
 //将查询语句添加到url中
 function addQueryStringArg(url, name, value) {
     if (url.indexOf("?") == -1) {
-        url +="?";
+        url += "?";
     } else {
         url += "&";
     }
@@ -577,51 +577,126 @@ function addQueryStringArg(url, name, value) {
 
 //创建IE解析xml的方法  
 
-function createDocument(){
-    if(typeof arguments.callee.activeXString != "string"){
-        var versions = ["MSXML2.DOMDocument.6.0","MSXML2.DOMDocument.3.0","MSXML2.DOMDocument"],
-         i,len;
-         for(i = 0,len = version.length;i<len;i++){
-             try{
-                 new ActiveXObject(versions[i]);
-                 arguments.callee.activeXString = versions[i];
-                 break;
-             }catch(error){
-                 //跳过，不做处理
-             }
-         }
+function createDocument() {
+    if (typeof arguments.callee.activeXString != "string") {
+        var versions = ["MSXML2.DOMDocument.6.0", "MSXML2.DOMDocument.3.0", "MSXML2.DOMDocument"],
+            i, len;
+        for (i = 0, len = version.length; i < len; i++) {
+            try {
+                new ActiveXObject(versions[i]);
+                arguments.callee.activeXString = versions[i];
+                break;
+            } catch (error) {
+                //跳过，不做处理
+            }
+        }
     }
     return new ActiveXObject(arguments.callee.activeXString);
 }
 
 //解析xml通用版，需要和createDocument使用
-function parseXml(xml){
+function parseXml(xml) {
     var xmldom = null;
 
-    if(typeof DOMParser != "undefind"){
-        xmldom = (new DOMParser()).parseFromString(xml,"text/xml");
+    if (typeof DOMParser != "undefind") {
+        xmldom = (new DOMParser()).parseFromString(xml, "text/xml");
         var errors = xmldom.getElementsByTagName("parsererrror");
-        if(errors.length!=0){
-           throw new Error("XML parse error"+errors[0].textContent);
+        if (errors.length != 0) {
+            throw new Error("XML parse error" + errors[0].textContent);
         }
-    }else if(typeof ActiveXObject != "undefined"){
+    } else if (typeof ActiveXObject != "undefined") {
         xmldom = createDocument();
         xmldom.loadXML(xml);
-        if(xmldom.parseError!=0){
-            throw new Errror("XML parse error"+xmldom.parseError.reason);
+        if (xmldom.parseError != 0) {
+            throw new Errror("XML parse error" + xmldom.parseError.reason);
         }
-    }else{
-        throw new  Error("NO XML parser available");
+    } else {
+        throw new Error("NO XML parser available");
     }
     return xmldom;
 }
 //序列化xml
-function serializeXML(xmldom){
-    if(typeof XMLSerializer != "undefined"){
+function serializeXML(xmldom) {
+    if (typeof XMLSerializer != "undefined") {
         return (new XMLSerializer()).serializeToString(xmldom);
-    }else if(typeof xmldom.xml != "undefined"){
+    } else if (typeof xmldom.xml != "undefined") {
         return xmldom.xml;
-    }else{
+    } else {
         throw new Error("NO serializer available");
+    }
+}
+
+
+/**
+ * XPath跨浏览器使用，定义了两个函数，selectSingleNode()和selectNodes()
+ * 接收的参数：context 、expression 、namespace
+ * 其中namespace采用字面量对象即可
+ */
+function selectSingleNode(context, expression, namespace) {
+    var doc = ((context.nodeTyepe != 9) ? context.ownerDocument : context);
+    if (typeof doc.evaluate != "undefined") {
+        var nsresolver = null;
+        if (namespace instanceof Object) {
+            nsresolver = function (prefix) {
+                return namespace[prefix];
+            };
+        };
+        var result = doc.evaluate(expression, context, nsresoler, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return (result !== null ? result.singleNodeValue : null);
+    } else if (typeof context.selectSingleNode != "undefined") {
+        if (namespace instanceof Object) {
+            var ns = "";
+            for (var prefix in namespace) {
+                if (namespace.hasOwnProperty(prefix)) {
+                    ns += "xmln:" + prefix + "='" + namespace[prefix] + "'";
+                }
+            }
+            doc.setProperty("SelectionNamespace", ns);
+        }
+        return context.selectSingleNode(expression);
+
+    } else {
+        throw new Error("No XPath engine found");
+    }
+}
+
+
+function selectNodes(context, expression, namespace) {
+    var doc = ((context.nodeTyepe != 9) ? context.ownerDocument : context);
+    if (typeof doc.evaluate != "undefined") {
+        var nsresolver = null;
+        if (namespace instanceof Object) {
+            nsresolver = function (prefix) {
+                return namespace[prefix];
+            };
+        };
+        var result = doc.evaluate(expression, context, nsresoler, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var nodes = new Array();
+        if (result !== null) {
+            for (var i = 0, len = result.snapshotLength; i < len; i++) {
+                nodes.push(result.snapshotItem(i));
+            }
+        }
+        return nodes;
+    } else if (typeof context.selectNodes != "undefined") {
+        if (namespace instanceof Object) {
+            var ns = "";
+            for (var prefix in namespace) {
+                if (namespace.hasOwnProperty(prefix)) {
+                    ns += "xmln:" + prefix + "='" + namespace[prefix] + "'";
+                }
+            }
+            doc.setProperty("SelectionNamespace", ns);
+        }
+        var result = context.selectNodes(expression);
+        var nodes = new Array();
+        for (var i = 0, len = result.length; i < len; i++) {
+            nodes.push(result[i]);
+        }
+        return nodes;
+
+
+    } else {
+        throw new Error("No XPath engine found");
     }
 }
