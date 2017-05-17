@@ -512,7 +512,7 @@ function selectText(textbox, startIndex, stopIndex) {
 
 //序列化表单
 
-function serialize(form) {
+function serializeForm(form) {
     var parts = [],
         field = null,
         i,
@@ -565,13 +565,9 @@ function serialize(form) {
 }
 
 //将查询语句添加到url中
-function addQueryStringArg(url, name, value) {
-    if (url.indexOf("?") == -1) {
-        url += "?";
-    } else {
-        url += "&";
-    }
-    url += encodeURIComponent(name) + "=" + encodeURIComponent(value);
+function addURLParam(url, name, value) {
+    url += (url.indexOf("?") == -1 ? "?" : "&");
+    url += encodeURIComponent(name) + "=" + encodeURIComponent("value");
     return url;
 }
 
@@ -700,3 +696,234 @@ function selectNodes(context, expression, namespace) {
         throw new Error("No XPath engine found");
     }
 }
+
+
+/**
+ * 原生ajax封装
+ */
+function ajax(data) {
+    //data={data:"",dataType:"xml/json",type:"get/post"，url:"",asyn:"true/false",success:function(){},failure:function(){}}
+    //data:{username:123,password:456}
+    //data = 'username=123&password=456';
+    //第一步：创建xhr对象
+    var xhr = null;
+    if (window.XMLHttpRequest) { //标准的浏览器
+        xhr = new XMLHttpRequest();
+    } else {
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    //第二步：准备发送前的一些配置参数
+    var type = data.type == 'get' ? 'get' : 'post';
+    var url = '';
+    if (data.url) {
+        url = data.url;
+        if (type == 'get') {
+            //       分装原装的ajax，get需要加上不同的数据来清理缓存，或者是通过不同的请求来重新向客户端发送
+            url += "?" + data.data + "&_t=" + new Date().getTime();
+        }
+    }
+
+
+    //第四步：指定回调函数
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                if (typeof data.success == 'function') {
+                    var d = data.dataType == 'xml' ? xhr.responseXML : xhr.responseText;
+                    data.success(d);
+                }
+            } else {
+                if (typeof data.failure == 'function') {
+                    data.failure();
+                }
+            }
+        }
+    }
+    var flag = data.asyn == 'true' ? 'true' : 'false';
+    xhr.open(type, url, flag);
+
+    //第三步：执行发送的动作
+    if (type == 'get') {
+        xhr.send(null);
+    } else if (type == 'post') {
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(data.data);
+    }
+
+
+
+}
+
+//跨浏览器的CORS  
+function createCORSRequest(method,url){
+    var xhr =  new XMLHttpRequest();
+    if("withCredentials" in xhr){
+        xhr.open(method,url,true);
+    }else if(typeof XDomainRequest != "undefined"){
+        xhr = new XDomainRequest();
+        xhr.open(method,url);
+    }else{
+        xhr = null;
+    }
+   return xhr ;
+} 
+/*var request = createCORSRequest("get","baidu");
+if(request){
+    request.onload = function{
+        request.responseText;
+    };
+    request.send(null);
+}*/
+
+
+// JQuery中的JSONP
+$(function(){
+$.ajax({
+    type : "get",
+    url: "bai.com",
+    async : "false",
+    dataType : "jsonp",
+    success :function(data){
+
+    },
+    error :function(){
+
+    }
+})
+});
+
+
+//commet中的流  函数创建方法  
+function createStreamClient(url,processFunction,finishFunction){
+    var xhr = new XMLHttpRequest();
+    received = 0;
+    xhr.onreadystatechange = function(){
+        var result ;
+        if(xhr.readyState == 3){
+            result = xhr.responseText.substring(received);
+            received += result.length;
+            processFunction(result);
+        }else if(xhr.readyState == 4){
+            finishFunction(xhr.responseText);
+        }
+    }
+
+    xhr.open("get",url,true);
+    xhr.send(null);
+    return xhr;
+}
+// var client = createStreamClient() ;使用的时候直接创建就行
+
+
+//惰性加载XHR
+function createXHR(){
+    if(typeof XMLHttpRequest != "undefined"){
+         //第一个调用的时候重写函数体
+        createXHR = function(){
+            return new XMLHttpRequest();
+        }
+    }else if(typeof ActiveXObject != "undefined"){
+        createXHR = function(){
+            if(typeof arguments.callee.activeXString != "string"){
+                var version = ["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP"],
+                i,len;
+
+                for(i=0,len = version.length;i<len;i++){
+                    try{
+                        new ActiveXObject(version[i]);
+                        arguments.callee.activeXString = version[i];
+                        break;
+                    }catch(e){
+
+                    }
+                }
+            }
+             return new ActiveXObject(arguments.callee.activeXString);
+        }
+    }else{
+        createXHR = function(){
+            //erro
+        }
+    }
+    return createXHR();
+}
+
+// 惰性加载createXHR的时候每次if语句都会覆盖原函数，
+// 最后一步调用新的函数（第一次调用必须要调用一次新返回的函数的），下次调用的时候直接调用的是新的函数
+
+var createXHR1 = (function(){
+     if(typeof XMLHttpRequest != "undefined"){
+         //第一个调用的时候重写函数体
+        return  function(){
+            return new XMLHttpRequest();
+        }
+    }else if(typeof ActiveXObject != "undefined"){
+        return  function(){
+            if(typeof arguments.callee.activeXString != "string"){
+                var version = ["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP"],
+                i,len;
+
+                for(i=0,len = version.length;i<len;i++){
+                    try{
+                        new ActiveXObject(version[i]);
+                        arguments.callee.activeXString = version[i];
+                        break;
+                    }catch(e){
+
+                    }
+                }
+            }
+             return new ActiveXObject(arguments.callee.activeXString);
+        }
+    }else{
+        return  function(){
+            //erro
+        }
+    }
+})();
+
+
+//函数绑定
+function bind(fn,context){
+   return function(){
+       return fn.apply(context,arguments);
+   }
+}
+
+ //函数柯理化
+
+ function curry(fn){
+    var fn = Array.prototype.slice.call(arguments)[0];
+    var args  =Array.prototype.slice.call(arguments,1);
+    return function(){
+        var innerArgs = Array.prototype.slice.call(arguments);
+        var finalArgs = args.concat(innerArgs);
+        return fn.apply(null,finalArgs);
+    }
+
+}
+
+/*function add(num1,num2){
+    return num1+num2;
+}
+var curriedAdd = curry(add,5);
+console.log(curriedAdd(4));*/
+
+//利用柯理化构造更加复杂的bind 
+function bind(fn,context){
+    var args = Array.prototype.slice.call(arguments,2);
+    return function(){
+        var innerArgs = Array.prototype.slice.call(arguments);
+        var finalArgs = args.concat(innerArgs);
+        return fn.apply(context,finalArgs);
+    }
+}
+
+//链式setTimeout  
+setTimeout(function(){
+    //do something
+
+   if(boolean){
+       setTimeout(arguments.callee,1000);
+   }
+},1000);

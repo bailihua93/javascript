@@ -3873,7 +3873,7 @@ var bookCopy1 = JSON.parse(jsonText);
 
 /**
 *转化回来的东西都是字符串，尤其日期需要在reviver中还原为对象
-*/
+*/ 
 var bookCopy2  = JSON.parse(jsonText,funciton(key,value){
     if(key == "releaseDate"){
         return new Date(value);
@@ -3882,3 +3882,844 @@ var bookCopy2  = JSON.parse(jsonText,funciton(key,value){
     }
 })
 ```
+
+
+## ajax
+### XMLHttpRequest
+####创建XHR
+IE8和以上
+```js
+var xhr = new XMLHttpRequest();
+```  
+####XHR用法 
+1. open
+> xhr.open("get/post","example.php",false);    
+open方法只是启动一个请求
++ 第一个参数为请求方法 
++ 第二个为相对于当前页面的（也可以用绝对路径），只能向同一个域的相同端口的和协议的URL发送请求
+
+2. send
+>xhr.send(null);   
+若果是get这里传入null，如果是post这里传入序列化的form内容  
+3. 当JS等到服务器响应后，会自动填充XHR属性  
+  + responseText  作为响应主体返回的文本  
+  + responseXML   如果响应内容类型为“text/xml”或者“application/xml”   相应数据的XML DOM 文档
+  + status        响应的HTTP状态，200表示成功，304表示自愿并没有修改，可以直接使用浏览器中缓存的版本  200< x < 300 或 304表示有效
+  + statusText   具体的内容   
+
+4. 多数情况下需要异步请求，检查XHR对象readyState属性   
+  +  0 : 未初始化，尚未调用open()
+  +  1 : open()调用 
+  +  2 ： send() 调用了
+  +  3 ： 已经接受到部分信息 
+  +  4 ： 已经接受到所有信息并且可以使用了
+ 注意： 在open前指定onreadyStatechange处理方法 ，并且最好使用DOM0 ，XHR对象处理数据最好，因为this会出错，没有event对象 
+
+
+5. 不想请求的时候可以中断 
+ > xhr.abort()    
+ 之后注意XHR的解引用  
+
+ #### HTTP请求头信息  
+1. 浏览器自动发送的请求头信息  
+  + Accept  浏览器可以处理的数据类型 
+  + Accept-Charset  浏览器可以显示的字符集
+  + Accept-Encoding   能够处理的压缩编码 
+  + Accept-language   浏览器当前语言 
+  + Connection         浏览器和服务器的链接类型 
+  + Host   发送请求页面的域　　　
+  + Referer  发出请求的页面的URi 单词是错的，错着来用就行了 
+  + User-Agent   浏览器的用户代理字符串   
+
+2. setRequestHeader 设置请求头    
+在open后send前设置，并且是按照键值对来设置的   ，也可以发送自定义的信息， 建议发送自定义的东西，否在可能会导致出错  
+> xhr.setRequestHeader("name","value");    
+3. 获取响应头信息  
+```js
+var myHead = xhr.getResponseHeader("myhead");// 获取某个属性的值 
+var  allhead  = xhr.getAllResponseHeaders()
+```
+
+
+```js
+
+/**
+ * 原生ajax封装
+ *data={method:"get/post"，url:""，asyn:"true/false",data:"",dataType:"xml/json",success:function(){},failure:function(){}}
+ */
+function ajax(data) {
+    //data={method:"get/post"，url:""，asyn:"true/false",data:"",dataType:"xml/json",success:function(){},failure:function(){}}
+    //data:{username:123,password:456}
+    //data = 'username=123&password=456';
+    //第一步：创建xhr对象
+    var xhr = null;
+    if (window.XMLHttpRequest) { //标准的浏览器
+        xhr = new XMLHttpRequest();
+    } else {
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    //第二步：准备发送前的一些配置参数
+    var method = data.method == 'get' ? 'get' : 'post';
+    var url = '';
+    if (data.url) {
+        url = data.url;
+        if (method == 'get') {
+            //      分装原装的ajax，get需要加上不同的数据来清理缓存，或者是通过不同的请求来重新向客户端发送
+            url += "?" + data.data + "&_t=" + new Date().getTime();
+        }
+    }
+
+
+    //第四步：指定回调函数
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status >= 200 && xhr.status <300 ||xhr.status == 304) {
+                if (typeof data.success == 'function') {
+                    var d = data.dataType == 'xml' ? xhr.responseXML : xhr.responseText;
+                    data.success(d);
+                }
+            } else {
+                if (typeof data.failure == 'function') {
+                    data.failure();
+                }
+            }
+        }
+    }
+    var flag = data.asyn == 'true' ? 'true' : 'false';
+    xhr.open(type, url, flag);
+
+    //第三步：执行发送的动作
+    if (method == 'get') {
+        xhr.send(null);
+    } else if (method == 'post') {
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(data.data);
+    }
+
+
+
+}
+
+```
+
+#### get
+多数用于查询 ，需要对内容进行编码，然后放在url后面      
+
+```js
+//将查询语句添加到url中
+function addURLParam(url, name, value) {
+    url += (url.indexOf("?") == -1 ? "?" : "&");
+    url += encodeURIComponent(name) + "=" + encodeURIComponent("value");
+    return url;
+}
+```  
+#### post 
+data是个字符串，可以是序列化的XML、json、表单或者任意字符串 
+并且需要设置请求头   ,open后，send前  
+```js
+xhr.setRequestHeader("Content-Type","applicaton/x-www-form-urlencoded");
+```
+
+
+
+
+### XMLHttpRequest  2级 
+发展出得新规定，部分实现了
+#### FormData（form）
+序列化表单用的，两种用法，作为数据的时候不用设置请求头信息了也
+
+```js
+//直接插入键值对的时候
+var data = new FormData();
+data.append("name","value");
+
+
+//或者  
+var data = new FormData(document.getElementById("formid"));
+```  
+#### 超时请求
+XHR对象添加一个timeout属性，在open后添加，表示请求等待相应多少秒后停止，触发timeout事件  ，请求终止的时，才是readystate可能已经变成4了，一位置会调用onreadystatechange事件，这是方位status会导致错误，因此需要把包含status的语句放在一个try-catch中    
+```js
+var xhr = createXHR();
+xhr.onreadystatechange = function(){
+    if(xhr.readystate === 4){
+        try{
+            if(xhr.status >=200&&xhr.status<300||xhr.status == 304){
+                xhr.responseText;
+            }else {
+                //no  data
+            }
+        }catch(e){
+
+        }
+    }
+};
+
+xhr.open("get","baidu",true);
+xhr.timeout =10000;
+xhr.ontimeout = function(){
+
+}
+xhr.send(null);
+```
+
+####overrideMimeType()
+在send前指定数据类型，将返回的"text/plain"中实际包含的是XML的，强制用xml来解析  ，
+xhr.overrideMimeType("text/xml")
+
+
+###进度事件  
+
+####loadstart 
+接收响应数据的第一个字节时触发
+
+#### load 
+接受到服务器响应 就会触发，
+#### progress事件 
+
+
+###跨域问题 
+
+
+#### CORS(Cross-Origin Resouce Sharing,跨域资源共享)
+
+添加一个请求头，包含页面的源信息（协议、域名、端口） ，  以便服务器根据头部信息决定是否响应   ，如  
+Oringin:http:www.baidu.com   
+
+如果服务器认为之歌请求可以接受，就在   Access-Control-Allow-Origin  头部中回发相同的源信息（如果是公共资源，可以接受发"*")   
+Access-Control-Allow-Origin : http://www.baidu.com  
+
+如果没有头部，或者信息不匹配，浏览器会驳回请求。请求和响应都不应该包含cookie 
+
+
+##### IE8 对CORS的实现  
+
+XDomainRequest类型  ， cookie不会发送和响应，只能设置请求头中的Content-Type字段（用来post）,不能访问请求头 ,只支持get和post   
+只能异步请求 ，并且请求返回后会触发load事件，，响应数据会保存在responseText中,能用的信息比较少  
+
+```js
+var xdr = new XDomainRequest();
+xdr.onload = function(){
+    xdr.responseText ;
+    //返回的数据里面只能访问原始文本，没有其他东西
+}
+xdr.onerror =  function(){
+    //什么东西都不返回，只能告诉你出错了
+}
+
+xdr.timeout =1000;
+xdr.ontimeout =  function(){
+    //超时了
+}
+//get 的 
+xdr.open("get","http://baidu.com/aa");//只支持异步 
+xdr.send(null);
+
+//post的 
+xdr.open("post","http://www.baidu.com");
+xdr.contentType = "application/x-www-form-urlencoded"
+xdr.send(data);
+
+```
+
+##### 其他浏览器 CROS  
+原生的XHR就行了，open中传入绝对地址   
+不能使用使用setRequestHeader()来设置自定义头部   
+不能发送和接收cookie  
+调用getAllResponseHeaders()返回的是空值
+
+
+##### Preflighted  Request 
+
+不懂  
+##### 带凭据的请求  
+跨域一般不提供凭据（cooki/http认证ssl证明）    
+通过将  withCredentials属性设置为true，可以指定某个请求应该发送凭据    
+
+####跨浏览器的CORS 
+```js
+//跨浏览器的CORS  
+function createCORSRequest(method,url){
+    var xhr =  new XMLHttpRequest();
+    if("withCredentials" in xhr){
+        xhr.open(method,url,true);
+    }else if(typeof XDomainRequest != "undefined"){
+        xhr = new XDomainRequest();
+        xhr.open(method,url);
+    }else{
+        xhr = null;
+    }
+   return xhr ;
+} 
+var request = createCORSRequest("get","baidu");
+if(request){
+    request.onload = function{
+        request.responseText;
+    };
+    request.send(null);
+}
+```
+
+### 其他跨域技术  
+
+####图像ping  
+数据通过查询字符串的形式范松，响应可以是任意内容，通常是204或者像素  
+
+
+```js
+var img = new Image();
+img.onload = img.onerror = function(){
+    console.log("done");
+};
+img.src = "http://www.baidu.com?name=bai";
+```
+在设置src的时候就发送了一个请求了    
+通常用于跟踪用户点击页面或动态广告曝光次数  。   
+只能get并无法访问服务器的响应文本，只能单向通信 
+#### JSONP  
+JSON with padding  参数式JSON ;被包含在函数中调用的JSON  ，callback（{"name":"bai"}）; 
+
+通过script发送请求，url也包含回调函数的指定，服务器返回的数据（JSON格式）会直接使得回到函数执行   
+
+
+由事件触发创建一个script。其中src中定义要访问的地址，并且添加属性键值对，
+_jsonp=functionName  或者  callback=functionName（书上写的）
+来触发本地的函数解析结果（返回的数据自动放到函数中了）
+
+```js
+window.onload = function(){
+   var city = document.getElementById('city');
+   city.onchange = function(){
+      document.getElementById('info').innerHTML = '';
+   }
+   var btn = document.getElementById('btn');
+   
+   btn.onclick = function(){
+      var cityCode = city.value;
+      var url = 'http://cdn.weather.hao.360.cn/api_weather_info.php?app=hao360&_jsonp=abc&code='+city.value;
+      var script = document.createElement('script');
+      script.src = url;
+      document.body.appendChild(script);
+   }
+
+}
+
+
+
+function abc(data){
+   var d = data.weather;
+   var info = document.getElementById('info');
+   info.innerHTML = '';
+   
+   for(var i=0;i<d.length;i++){
+      var date = d[i].date;
+      var day = d[i].info.day;
+      var night = d[i].info.night;
+   
+      info.appendChild(div);
+      
+   }
+}
+
+```
+
+
+jQuery中对JSONP的使用
+```js
+$(function(){
+
+   $.ajax({
+      type : "get",
+      async: false,
+      url : "./jsonp.php",
+      dataType : "jsonp",
+      //jsonp: "qwe",//传递给请求处理程序或页面的，用以获得jsonp回调函数名的参数名(默认为:callback)
+      //jsonpCallback:"liudehua",
+      //自定义的jsonp回调函数名称，默认为jQuery自动生成的随机函数名(类似：jQuery110201563(["zhangsan", "lisi", "wangwu"]);)
+
+     //只制定datatype；不写jsonp 和jasoncallback，可以直接用success就可以了
+      success : function(data){
+          console.log(data);
+      },
+      error:function(){
+          console.log('fail');
+      }
+   });
+
+});
+```
+
+
+数据可靠性不能保证  
+
+
+####Comet  
+服务器推送，两种方式 
+
+1. 长轮询  
+浏览器一次请求，服务器不立即回应，只有当存在有效数据的时候才会返回  
+
+
+2. 流    
+一次请求后，服务器保持连接打开 ，然后周期性发送数据  
+浏览器端，通过监测readystatechange事件，并在readystate 为3的时候进行相应操作就行  
+
+```js
+//commet中的流  函数创建方法  
+function createStreamClient(url,processFunction,finishFunction){
+    var xhr = new XMLHttpRequest();
+    received = 0;
+    xhr.onreadystatechange = function(){
+        var result ;
+        if(xhr.readyState == 3){
+            result = xhr.responseText.substring(received);
+            received += result.length;
+            processFunction(result);
+        }else if(xhr.readyState == 4){
+            finishFunction(xhr.responseText);
+        }
+    }
+
+    xhr.open("get",url,true);
+    xhr.send(null);
+    return xhr;
+}
+// var client = createStreamClient() ;使用的时候直接创建就行
+```  
+
+#####SSE
+由于以上的需求，社区开发了SSE(Sever-Sent Event 服务器发送事件)   ，   
+SSE Api用于创建单向链接  ，服务器相响应的数据MIME必须是text/event-stream ;   
+
+```js
+var source = new EventSource(url);
+//URL必须和创建对象的页面同源，请求接收方，EventSource有一个readystate属性，0表示正在 链接服务器，1表示链接，2表示关闭了链接
+source.onopen = function(event){
+   // 链接建立的时候触发 open事件  
+}
+source.onmessage = function(event){
+    var data = event.data; 
+    //有新数据的时候触发
+}
+source.onerror = function (event){
+    //  无法建立链接的时候触发
+}
+//断开后会自动重新链接,适合长训论和流  
+source.close()   //强制关闭  
+```
+
+服务器端的数据纯文本的  
+data : foo     
+
+data : bar 
+
+data :for
+data :you   
+
+每个空行隔开的是一次事件，event.data能访问到事件内容， 最后一个是 for\nyou 、
+
+
+
+
+最好加上一个id  ，用于记录触发了多少了
+data：for 
+id：1
+
+
+#### web  sockets双向通道  
+
+适用于数据较少的通信
+
+```js
+var socket = new WebSocket(url);
+//这里的URL必须以 ws://或者wss://开始的绝对路径   
+
+
+socket.send(message);
+//message只支持string,发送消息 
+
+
+
+//接收消息的话有message事件
+socket.onmessage =function(event){
+    event.data
+}
+
+
+//open事件在建立链接的时候触发
+//error在发生错误的时候触发
+//close关闭的时候触发
+```  
+
+
+ajax和SSE也可以实现双向通讯  
+
+####安全
+
+SSL链接访问可以通过XHR请求的链接   
+每次请求都要附带经过响应算法计算得到的验证码的  
+
+
+#### 不安全  
+post换成get    很容易改变  
+来源URL是否可信   很容易伪造 
+cookie          容易伪造 
+不要发送用户名和密码，  JS调试器常看变量就能发现纯文本的内容了  
+
+
+
+##模板
+
+模板引擎
+Lacal软件
+原理剖析
+流行模板引擎
+artTemplate、JsRender、baiduTemplate、Mustache、Hanldebars
+artTemplate
+
+查询天气，需要先查询城市编码一个ajax，网络查编码（）
+然后在 由城市编码查另外的城市天气（另外的编码）
+
+
+用id标注编码的位置，数据在后面传入
+
+例子
+数组
+var data = {
+   title: '基本例子',
+   isAdmin: true,
+   list: ['文艺', '博客', '摄影', '电影', '民谣', '旅行', '吉他']
+};
+var html = template('test', data);
+document.getElementById('content').innerHTML = html;
+
+<script id="test" type="text/html">
+{{if isAdmin}}
+
+<h1>{{title}}</h1>
+<ul>
+    {{each list as value i}}
+        <li>索引 {{i + 1}} ：{{value}}</li>
+    {{/each}}
+</ul>
+{{/if}}
+</script>
+
+
+
+
+
+
+
+处理时间
+var data = {
+   time: 1408536771253,
+};
+var html = template('test', data);
+document.getElementById('content').innerHTML = html;
+
+
+<script id="test" type="text/html">
+{{time | dateFormat:'yyyy年 MM月 dd日 hh:mm:ss'}}
+</script>
+
+
+
+没有数据的时候讲返回渲染函数
+var source = '<ul>'
+   +    '{{each list as value i}}'
+   +        '<li>索引 {{i + 1}} ：{{value}}</li>'
+   +    '{{/each}}'
+   + '</ul>';
+var render = template.compile(source);
+var html = render({
+list: ['摄影', '电影', '民谣', '旅行', '吉他']
+});
+document.getElementById('content').innerHTML = html;
+
+
+
+百度搜索
+
+<script type="text/javascript">
+   $(function(){
+      /*输入完成注册keyup事件*/
+      $('#keyWord').keyup(function(e){
+         var kd = $('#keyWord').val();
+         /*百度搜索用的借口地址*/
+         var url ='https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd='+kd;
+         querySUG(url);
+      });
+   });
+
+   function querySUG(url){
+      document.getElementById('list').innerHTML = '';
+//    异步的jsonp
+      $.ajax({
+         type : "get",
+         async: true,
+         url : url,
+         dataType : "jsonp",
+         jsonp: "cb",//传递给请求处理程序或页面的，用以获得jsonp回调函数名的参数名(默认为:callback)
+ //  jsonpCallback:"callback",//自定义的jsonp回调函数名称，默认为jQuery自动生成的随机函数名(类似：//jsonp一般不可省略，callback一般可以省略
+jQuery1102016820125747472048_1450147653563(["zhangsan", "lisi", "wangwu"]);)
+         success : function(data){
+            var tag = '<ul>';
+            for(var i=0;i<data.s.length;i++){
+               tag += '<li>'+data.s[i]+'</li>';
+            }
+            tag += '</ul>';
+            $('#list').html(tag).show();
+            $('#list').find('li').hover(function(){
+               $(this).css('background','lightGreen');
+            },function(){
+               $(this).css('background','lightGray');
+            });
+         },
+         error:function(){
+             console.log('fail');
+         }
+      });
+   }
+</script>
+
+
+
+##高级技巧  
+###高级函数  
+#### 安全的类型检测  
+```js
+typeof regexp        //object     
+regexp instanceof RegExp   //true
+typeof functionname  //function
+functionname instanceof Function  //true
+typeof json  //object
+```
+instanceof 操作符在多个全局作用域的时候会出错 ，（多个iframe），var isArray = value instanceof Array；是错的  ，Array是window的属性，
+夸多个全局作用域会出错了就      
+
+总的解决方法，在任何值上调用Object原生的toString()方法，都会返回一个[object NativeConstructorName]  ,每个类的内部都有一个[[Class]]属性，之歌属性指定了上面的字符串中的构造函数名字  ,还是无法确认JSON     
+```js
+function isArray(value){
+    return Object.prototype.toString.call(value) === "[object Array]";
+}
+function isFunction(value){
+    return Object.prototype.toString.call(value) === "[object Function]";
+}
+function isRegExp(value){
+    return Object.prototype.toSatring.call(value) ==="[obj RegExp]";
+}
+//Object.prototyape.toString.call(value);  //[object NativeConstructorNmae]
+//ObjecttoString.call(value);  //输出的是定义的完整内容
+//Object 是个函数
+```  
+
+
+####作用域安全的构造函数
+直接调用构造函数，没有使用new的话，构造函数将值赋予给window对象，向下面这样改造下函数     
+```js
+function Polygon(sides){
+    if(this instanceof Polygon){
+        this.sides = sides;
+        this.getArea = function(){
+            return 0;
+        }
+    }else{
+        return new Polygon(sides);
+    }
+}
+```
+这样有个弊端构造函数切确继承不能用了 ,加上原型链继承最好  
+
+```js
+function Rectangle(width,height){
+    Polygon.call(this,2); 
+    this.width = width;
+    this.height = height;
+    this.getArea = function(){
+        return this.width*this.height;
+    }
+}
+//直接这样继承的话，不会返回this的sides属性，返回的是一个new 出来的对象，并不会添加到对象中  
+//需要加上原型继承，这样 RectAngel实例，也就是Polygon的实例  
+Rectangle.prototype = new Polygon();
+var rect = new Rectangle(5,10);
+console.log(rect.sides);
+```
+
+
+####惰性载入函数  
+为避免JS函数为适应各种情况每次调用的时候都会执行大量的判断，通过惰性载入函数，让函数自适应对应的浏览器， 
+通过改变函数体来实现最简化的函数    
+
+1. 函数调用的时候处理函数  
+```js 
+//惰性加载XHR
+function createXHR(){
+    if(typeof XMLHttpRequest != "undefined"){
+         //第一个调用的时候重写函数体
+        createXHR = function(){
+            return new XMLHttpRequest();
+        }
+    }else if(typeof ActiveXObject != "undefined"){
+        createXHR = function(){
+            if(typeof arguments.callee.activeXString != "string"){
+                var version = ["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP"],
+                i,len;
+
+                for(i=0,len = version.length;i<len;i++){
+                    try{
+                        new ActiveXObject(version[i]);
+                        arguments.callee.activeXString = version[i];
+                        break;
+                    }catch(e){
+
+                    }
+                }
+            }
+             return new ActiveXObject(arguments.callee.activeXString);
+        }
+    }else{
+        createXHR = function(){
+            //erro
+        }
+    }
+    return createXHR();
+}
+
+// 惰性加载createXHR的时候每次if语句都会覆盖原函数，
+// 最后一步调用新的函数（第一次调用必须要调用一次新返回的函数的），下次调用的时候直接调用的是新的函数
+```  
+
+2. 在加载的时候，通过匿名，自执行函数给函数赋值  
+```js
+var createXHR1 = (function(){
+     if(typeof XMLHttpRequest != "undefined"){
+         //第一个调用的时候重写函数体
+        return  function(){
+            return new XMLHttpRequest();
+        }
+    }else if(typeof ActiveXObject != "undefined"){
+        return  function(){
+            if(typeof arguments.callee.activeXString != "string"){
+                var version = ["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP"],
+                i,len;
+
+                for(i=0,len = version.length;i<len;i++){
+                    try{
+                        new ActiveXObject(version[i]);
+                        arguments.callee.activeXString = version[i];
+                        break;
+                    }catch(e){
+
+                    }
+                }
+            }
+             return new ActiveXObject(arguments.callee.activeXString);
+        }
+    }else{
+        return  function(){
+            //erro
+        }
+    }
+})();
+```
+#### 函数绑定  
+函数绑定要创建一个函数，可以在特定的this环境中以指定和参数调用另一个函数。该技巧常常和回调函数与事件处理诚信度一起使用，
+以便将函数作为变量传递的同时保留代码的执行环境  .   
+只要是将某个函数指针以值得形式进行传递，同时该函数必须在特定的环境里面运行，绑定函数的作用就显示出来了，主要用于事件处理及setTimeout和setInterval 
+```js
+var handler = {
+    message : "Event handled",
+    handlerClick : function(event){
+        alert(this.message);
+    }
+};
+var btn = document.getElementById("my-btn")；
+
+//这里this指的是window  
+EventUtil.addHandler(btn,"click",handler.handleClick); 
+
+//想要保留原来执行环境可以使用闭包
+EventUtil.addHandler(btn,"click",function(event){
+    handler.handleClick(event);
+})
+
+
+
+//使用绑定函数 
+
+function bind(fn,context){
+   return function(){
+       return fn.apply(context,arguments);
+   }
+}
+
+EventUtil.addHandler(btn,"click",bind(handler.handlerClick,handler));
+
+//ES5自带原声的bind  
+EventUtil.addHandler(btn,"click",handler.handlerClick.bind(handler));
+```
+#### 函数科里化   
+用于创建已经设置好一个或者多个参数的函数 ，**闭包返回一个函数**    
+
+```js
+function curry(fn){
+    var fn = Array.prototype.slice.call(arguments)[0];
+    var args  =Array.prototype.slice.call(arguments,1);
+    return function(){
+        var innerArgs = Array.prototype.slice.call(arguments);
+        var finalArgs = args.concat(innerArgs);
+        return fn.apply(null,finalArgs);
+    }
+
+}
+
+function add(num1,num2){
+    return num1+num2;
+}
+var curriedAdd = curry(add,5);
+console.log(curriedAdd(4));
+```
+
+
+###防篡改对象  
+[[Configurable]]  [[Writable]]  [[Enumerable]]  [[Value]]   [[Get]] [[Set]] 作为ES3的特性   
+ES5 添加了一些，一旦把对象定义为防篡改，就无法撤销  
+
+
+#### 不可扩展对象  
+
+Object.preventExtensions(object);     调用后就不能给对象添加方法和属性了  ，严格模式下出错，非严格模式下，失败，undefined     
+但仍可以修改和删除属性     
+Objcect.isExtensible(oject);   是否可以扩展  
+#### 密封的对象  
+密封对象不可扩展，而且已有成员的[[configurable]]设置为false  ，不能删除属性和方法，不能用Object.defineProperty()把数据属性改为访问器属性，
+属性值可以修改的还是 
+
+Object.seal(object);  
+ Object.isSealed(object);
+#### 冻结对象  
+对象不可扩展，密封，数据属性的[[writable]]false,如果定义了[[set]]函数，访问器属性仍然可以写     
+Object.freeze(object)   
+Object.isFrozen(object);  
+
+###高级定时器 
+####链式setTimeout
+定时器的作用，指定的事件间隔将代买添加到队列里，并不是执行  
+  
+setInterval ()可以保证代码规则的插入队列，但是可能导致前次代码没执行完，新的代码就在此插入了队列，导致连续运行很多次，JS引擎让队列中没有相同的代码是实例的时候才能添加，但是某些间隔可能会跳过，多个定时器diamante间隔可能比预期小
+
+解决办法 链式setTimeout  
+```js 
+setTimeout(function(){
+    //do something
+
+   if(boolean){
+       setTimeout(arguments.callee,1000);
+   }
+},1000);
+```
+
+####Yielding Processes  
+为防止恶意代码，代码运行超过了   时间或者语句数量 就不会让他执行了  
