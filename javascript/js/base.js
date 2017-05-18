@@ -755,18 +755,18 @@ function ajax(data) {
 }
 
 //跨浏览器的CORS  
-function createCORSRequest(method,url){
-    var xhr =  new XMLHttpRequest();
-    if("withCredentials" in xhr){
-        xhr.open(method,url,true);
-    }else if(typeof XDomainRequest != "undefined"){
+function createCORSRequest(method, url) {
+    var xhr = new XMLHttpRequest();
+    if ("withCredentials" in xhr) {
+        xhr.open(method, url, true);
+    } else if (typeof XDomainRequest != "undefined") {
         xhr = new XDomainRequest();
-        xhr.open(method,url);
-    }else{
+        xhr.open(method, url);
+    } else {
         xhr = null;
     }
-   return xhr ;
-} 
+    return xhr;
+}
 /*var request = createCORSRequest("get","baidu");
 if(request){
     request.onload = function{
@@ -777,38 +777,38 @@ if(request){
 
 
 // JQuery中的JSONP
-$(function(){
-$.ajax({
-    type : "get",
-    url: "bai.com",
-    async : "false",
-    dataType : "jsonp",
-    success :function(data){
+$(function () {
+    $.ajax({
+        type: "get",
+        url: "bai.com",
+        async: "false",
+        dataType: "jsonp",
+        success: function (data) {
 
-    },
-    error :function(){
+        },
+        error: function () {
 
-    }
-})
+        }
+    })
 });
 
 
 //commet中的流  函数创建方法  
-function createStreamClient(url,processFunction,finishFunction){
+function createStreamClient(url, processFunction, finishFunction) {
     var xhr = new XMLHttpRequest();
     received = 0;
-    xhr.onreadystatechange = function(){
-        var result ;
-        if(xhr.readyState == 3){
+    xhr.onreadystatechange = function () {
+        var result;
+        if (xhr.readyState == 3) {
             result = xhr.responseText.substring(received);
             received += result.length;
             processFunction(result);
-        }else if(xhr.readyState == 4){
+        } else if (xhr.readyState == 4) {
             finishFunction(xhr.responseText);
         }
     }
 
-    xhr.open("get",url,true);
+    xhr.open("get", url, true);
     xhr.send(null);
     return xhr;
 }
@@ -816,32 +816,32 @@ function createStreamClient(url,processFunction,finishFunction){
 
 
 //惰性加载XHR
-function createXHR(){
-    if(typeof XMLHttpRequest != "undefined"){
-         //第一个调用的时候重写函数体
-        createXHR = function(){
+function createXHR() {
+    if (typeof XMLHttpRequest != "undefined") {
+        //第一个调用的时候重写函数体
+        createXHR = function () {
             return new XMLHttpRequest();
         }
-    }else if(typeof ActiveXObject != "undefined"){
-        createXHR = function(){
-            if(typeof arguments.callee.activeXString != "string"){
-                var version = ["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP"],
-                i,len;
+    } else if (typeof ActiveXObject != "undefined") {
+        createXHR = function () {
+            if (typeof arguments.callee.activeXString != "string") {
+                var version = ["MSXML2.XMLHTTP.6.0", "MSXML2.XMLHTTP.3.0", "MSXML2.XMLHTTP"],
+                    i, len;
 
-                for(i=0,len = version.length;i<len;i++){
-                    try{
+                for (i = 0, len = version.length; i < len; i++) {
+                    try {
                         new ActiveXObject(version[i]);
                         arguments.callee.activeXString = version[i];
                         break;
-                    }catch(e){
+                    } catch (e) {
 
                     }
                 }
             }
-             return new ActiveXObject(arguments.callee.activeXString);
+            return new ActiveXObject(arguments.callee.activeXString);
         }
-    }else{
-        createXHR = function(){
+    } else {
+        createXHR = function () {
             //erro
         }
     }
@@ -851,32 +851,32 @@ function createXHR(){
 // 惰性加载createXHR的时候每次if语句都会覆盖原函数，
 // 最后一步调用新的函数（第一次调用必须要调用一次新返回的函数的），下次调用的时候直接调用的是新的函数
 
-var createXHR1 = (function(){
-     if(typeof XMLHttpRequest != "undefined"){
-         //第一个调用的时候重写函数体
-        return  function(){
+var createXHR1 = (function () {
+    if (typeof XMLHttpRequest != "undefined") {
+        //第一个调用的时候重写函数体
+        return function () {
             return new XMLHttpRequest();
         }
-    }else if(typeof ActiveXObject != "undefined"){
-        return  function(){
-            if(typeof arguments.callee.activeXString != "string"){
-                var version = ["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP"],
-                i,len;
+    } else if (typeof ActiveXObject != "undefined") {
+        return function () {
+            if (typeof arguments.callee.activeXString != "string") {
+                var version = ["MSXML2.XMLHTTP.6.0", "MSXML2.XMLHTTP.3.0", "MSXML2.XMLHTTP"],
+                    i, len;
 
-                for(i=0,len = version.length;i<len;i++){
-                    try{
+                for (i = 0, len = version.length; i < len; i++) {
+                    try {
                         new ActiveXObject(version[i]);
                         arguments.callee.activeXString = version[i];
                         break;
-                    }catch(e){
+                    } catch (e) {
 
                     }
                 }
             }
-             return new ActiveXObject(arguments.callee.activeXString);
+            return new ActiveXObject(arguments.callee.activeXString);
         }
-    }else{
-        return  function(){
+    } else {
+        return function () {
             //erro
         }
     }
@@ -884,21 +884,21 @@ var createXHR1 = (function(){
 
 
 //函数绑定
-function bind(fn,context){
-   return function(){
-       return fn.apply(context,arguments);
-   }
+function bind(fn, context) {
+    return function () {
+        return fn.apply(context, arguments);
+    }
 }
 
- //函数柯理化
+//函数柯理化
 
- function curry(fn){
+function curry(fn) {
     var fn = Array.prototype.slice.call(arguments)[0];
-    var args  =Array.prototype.slice.call(arguments,1);
-    return function(){
+    var args = Array.prototype.slice.call(arguments, 1);
+    return function () {
         var innerArgs = Array.prototype.slice.call(arguments);
         var finalArgs = args.concat(innerArgs);
-        return fn.apply(null,finalArgs);
+        return fn.apply(null, finalArgs);
     }
 
 }
@@ -910,20 +910,125 @@ var curriedAdd = curry(add,5);
 console.log(curriedAdd(4));*/
 
 //利用柯理化构造更加复杂的bind 
-function bind(fn,context){
-    var args = Array.prototype.slice.call(arguments,2);
-    return function(){
+function bind(fn, context) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    return function () {
         var innerArgs = Array.prototype.slice.call(arguments);
         var finalArgs = args.concat(innerArgs);
-        return fn.apply(context,finalArgs);
+        return fn.apply(context, finalArgs);
     }
 }
 
 //链式setTimeout  
-setTimeout(function(){
+setTimeout(function () {
     //do something
 
-   if(boolean){
-       setTimeout(arguments.callee,1000);
-   }
-},1000);
+    if (boolean) {
+        setTimeout(arguments.callee, 1000);
+    }
+}, 1000);
+
+
+/**
+ * 当一个数组循环需要很多时间并且不是很着急一次性加载玩，可以使用数组分块技术，   
+ * 使用的时候  array.concat()可以返回原数组的克隆体
+ * @param {*要循环的数组} array 
+ * @param {*处理每一项的函数} process 
+ * @param {*这个函数的运行环境} context 
+ */
+function chunk(array, process, context) {
+    setTimeout(function () {
+        var item = array.shift();
+        process.call(context, item);
+        if (array.length > 0) {
+            setTimeout(arguments.callee, 100);
+        }
+    }, 100)
+}
+// chunk(data.concat(),proccess,null)
+
+
+/**
+ * 函数节流，节流函数  
+ * @param {*实际执行函数} method 
+ * @param {*执行函数的环境} context 
+ */
+function throttle(method, context) {
+    clearTimeout(method.tId);
+    method.tId = setTimeout(function () {
+        method.call(context);
+    }, 100);
+}
+
+
+
+
+/**
+ * 自定义事件的构造函数
+ */
+function EventTarget() {
+    this.handlers = {};
+}
+
+EventTarget.prototype = {
+    constructor: EventTarget,
+    addHandler: function (type, handler) {
+        if (typeof this.handlers[type] == "undefined") {
+            this.handlers[type] = [];
+        }
+        this.handlers[type].push(handler);
+    },
+    fire: function (event) {
+        if (!event.target) {
+            event.target = this;
+        }
+        if (this.handlers[event.type] instanceof Array) {
+            var handlers = this.handlers[event.type];
+            for (var i = 0, len = handlers.length; i < len; i++) {
+                handlers[i](event);
+            }
+        }
+    },
+    removeHandler: function (type, handler) {
+        if (this.handlers[type] instanceof Array) {
+            var handlers = this.handlers[type];
+            for (var i = 0, len = handlers.length; i < len; i++) {
+                if (handlers[i] === handler) {
+                    break;
+                }
+            }
+            handlers.splice(i, 1);
+        }
+    }
+}
+
+
+
+
+/*直接使用这个事件 
+var target = new EventTarget();
+function fn(){};
+target.addHandler("hi",fn);
+target.fire({type:"hi",other:"other"});
+target.removeHandler("hi",fn);  
+
+
+
+因为这种行为被封装在单独的类里面，所以，可以通过继承来获得该行为  
+
+function Perspon (name,age){
+    EventTarget.call(this);
+    this.name = name;
+    this.age = age;
+}
+inhertPrototype(Person,EventTarget);
+Person.protoType.say = function(message){
+    this.fire({type:"hello",massage:message})
+}
+
+调用fire通常是不公开调用的  
+
+function fn2(event){};
+var person = new Person();
+person.addHandler("hello",fn2);
+person.say("message");*/

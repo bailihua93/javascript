@@ -4721,5 +4721,236 @@ setTimeout(function(){
 },1000);
 ```
 
-####Yielding Processes  
-为防止恶意代码，代码运行超过了   时间或者语句数量 就不会让他执行了  
+####数组分块 
+为防止恶意代码，代码运行超过了 时间或者语句数量 就不会让他执行了      
+原因：  
+过长过深的嵌套函数调用或者处理大量的循环     
+
+1.处理大量循环的方法:  如果该循环不处理不会造成其他的运行的阻塞  ，并且不需要按照顺序执行    
+```js
+/**
+ * 当一个数组循环需要很多时间并且不是很着急一次性加载玩，可以使用数组分块技术，   
+ * 使用的时候  array.concat()可以返回原数组的克隆体
+ * @param {*要循环的数组} array 
+ * @param {*处理每一项的函数} process 
+ * @param {*这个函数的运行环境} context 
+ */ 
+function chunk(array,process,context){
+    setTimeout(function(){
+       var item = array.shift();
+       process.call(context,item);
+       if(array.length>0){
+           setTimeout(arguments.callee,100);
+       }
+    },100)
+}
+
+
+// chunk(data.concat(),proccess,null)
+``` 
+数组分块技术  
+
+数组直接使用没有传入参数的concat方法，会返回克隆体  
+ 
+
+####函数节流   
+高频率的调用一个方法或者计算可能导致浏览器崩溃，函数节流就是很好的方法      
+
+**函数节流** 某些代码不能没间断的反复连续执行，第一次调用的时候创建一个定时器，在制定的间隔后运行代码；当第二次调用的时候，会清除前一次的定时器并设置另外一个；如果第一个已经执行了，那没问题，如果前一个未执行，就会讲其替换为一个新的；目的是为了在执行函数的请求停止一段时间后才执行       
+
+
+基本模式   
+```js
+var processor = {
+    timeoutId : null,
+    preformProcessing :function(){
+        //实际执行的代码
+    }，
+    process : function(){
+        cleatTimeout(this.timeoutId);
+        var that  = this;//setTimeout的对象是window
+        this.timeoutId =  setTimeout(function(){
+               that.performProcessing();
+        },100);
+    }
+}
+
+//开始执行   
+processor.process();
+
+```
+
+
+函数简化    
+```js
+function throttle(method,context){
+    clearTimeout(method.tId);
+    method.tId = setTimeout(function(){
+        method.call(context);
+    },100);
+}
+
+
+//使用  
+window.onresize = function(){
+    throttle(resizeDiv)
+}
+```
+
+###自定义事件  
+事件是一种观察者模式的设计模式，发布事件的是主体（如DOM元素），事件处理函数就是观察者  
+
+自定义事件是创建管理事件的对象，让其他对象监听那些事件    
+
+对于同一个事件上需要进行多种操作的时候，在其中添加自定义事件，然后在外部添加额外的操作会更加明了简单  
+
+
+```js
+//事件注册和管理的主体
+function EventTarget() {
+    this.handlers = {};
+}
+
+EventTarget.prototype = {
+    constructor: EventTarget,
+    addHandler: function (type, handler) {
+        if (typeof this.handlers[type] == "undefined") {
+            this.handlers[type] = [];
+        }
+        this.handlers[type].push(handler);
+    },
+    fire: function (event) {
+        if (!event.target) {
+            event.target = this;
+        }
+        if (this.handlers[event.type] instanceof Array) {
+            var handlers = this.handlers[event.type];
+            for (var i = 0, len = handlers.length; i < len; i++) {
+                handlers[i](event);
+            }
+        }
+    },
+    removeHandler: function (type, handler) {
+        if (this.handlers[type] instanceof Array) {
+            var handlers = this.handlers[type];
+            for (var i = 0, len = handlers.length; i < len; i++) {
+                if (handlers[i] === handler) {
+                    break;
+                }
+            }
+            handlers.splice(i, 1);
+        }
+    }
+}
+
+
+
+
+
+//直接使用这个事件 
+var target = new EventTarget();
+function fn(){};
+target.addHandler("hi",fn);
+target.fire({type:"hi",other:"other"});
+target.removeHandler("hi",fn);  
+
+
+
+//因为这种行为被封装在单独的类里面，所以，可以通过继承来获得该行为  
+
+function Perspon (name,age){
+    EventTarget.call(this);
+    this.name = name;
+    this.age = age;
+}
+inhertPrototype(Person,EventTarget);
+Person.protoType.say = function(message){
+    this.fire({type:"hello",massage:message})
+}
+
+//调用fire通常是不公开调用的
+```
+
+
+####拖放功能
+
+
+```js
+var DragDrop = function () {
+    var dragdrop = new EventTarget(),
+        dragging = null,
+        diffX = 0,
+        diffY = 0;
+
+    function handleEvent(event) {
+
+        //获取对象
+        event = EventUtil.getEvent(event);
+        var target = EventUtil.getTarget(event);
+
+        //确定事件类型  
+
+        switch (event.type) {
+            case "mousedown":
+                if (target.className.indexOf("draggable") > -1) {
+                    dragging = target;
+                    diffX = event.clientX - event.offsetLeft;
+                    diffY = event.clientY - event.offsetTop;
+                    dragdrop.fire({
+                        type: "dragstart",
+                        target: dragging,
+                        x: clientX,
+                        y: clientY
+                    });
+
+                }
+                break;
+            case "mousemove":
+                if (dragging != null) {
+                    dragging.style.left = (event.clientX - diffX) + "px";
+                    dragging.style.top = (event.clientY - diffY) + "px";
+                    dragdrop.fire({
+                        type: "drag",
+                        target: dragging,
+                        x: event.clientX,
+                        y: event.clientY
+                    });
+
+                }
+                break;
+            case "mouseup":
+                dragdrop.fire({
+                    type: "dragend",
+                    target: dragging,
+                    x: event.clientX,
+                    y: event.clientY
+                });
+                break;
+        }
+    };
+    //公共接口  
+   dragdrop.enable = function(){
+       EventUtil.addHandler(document,"mousedown",handleEvent);
+       EventUtil.addHandler(document,"mousemove",handleEvent);
+       EventUtil.addHandler(document,"mouseup",handleEvent);
+   }
+   dragdrop.disable = function(){
+       EventUtil.removeHandler(document,"mousedown",handleEvent);
+       EventUtil.removeHandler(document,"mousemove",handleEvent);
+       EventUtil.removeHandler(document,"mouseup",handleEvent);
+   }
+}();
+
+//事件的触发还是依赖与原始的事件根据不同的条件来触发的，
+//触发函数中的type名字是自己定义的，目的是在触发滚动的同时，可以添加其他的额外代码，进行不同的协作用的  
+// var c = function(){return y}()  ==var c = (funcition(){})();最终c是函数的返回值
+```  
+
+
+
+## 离线应用和客户端存储  （H5）
+
+需要支持的条件 ： 
+  * 知道设备能否上网
+  * 能访问一定的资源
+  * 有一块本地空间存储数据
