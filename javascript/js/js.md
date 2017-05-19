@@ -5538,3 +5538,13 @@ innerHtml比js快的多
 ### 部署  
 构建过程尽量分成多个文件 ，多个注释    
 部署的时候，需要把代码合并成一个，并进行压缩
+
+
+## 新兴API 
+###File
+####File类型 
+实例只包含 name  size type（MIME） lastModefied 属性  
+通过检测change事件可以访问file
+
+#### FileReader
+类似于XMLHttpRequest
