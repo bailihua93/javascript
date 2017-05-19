@@ -4954,3 +4954,587 @@ var DragDrop = function () {
   * 知道设备能否上网
   * 能访问一定的资源
   * 有一块本地空间存储数据
+
+###离线检测   
+**navigator.online** 用于检测是否在线，是的话返回true，否则返回false；       
+chrome和safria在链接不到移动网络或者路由的时候返回false,其他任何时候都会显示true  
+移动端貌似可以很好的支持这个       
+
+
+其次，存在online和offline两个事件可以检测网络的变化，在window上触发的  
+```js
+EventUtil.addHandler(window,"online",function(){
+
+})  ;
+EventUtil.addHandler(window,"offline",function(){
+
+});
+```
+
+如何兼容呢   ？？？？？
+
+
+
+### 应用缓存 appcache 
+
+1. 从浏览器缓存中分出来一块缓存区域，需要缓存的文件可以列在一个 *.manefest|(.appcache也行)文件中，格式如下，并且文件的MIME类型必须是text/cache-manifest  
+```
+CACHE MANIFEST
+#Comment  
+
+file.js 
+file.css 
+```
+并且在"<html>"中指定manifest属性<html manifest = "/offline.manifest">     
+
+2. 对应的API核心是applicationCache对象   
+  + applicationCache.status 显示应用缓存的状态  
+      - 0： 无缓存，
+      - 1 : 闲置，缓存没有更新
+      - 2  检查中，正在下载描述文件看看有没有缓存 
+      - 3  下载缓存中  
+      - 4  更新完成 ，用applicationCache.swapCache()，就可以使用了 
+      - 5   废弃，应用缓存的描述文件已经不见了，页面无法访问应用缓存了  
+ + 事件  
+      - checking 查找更新的时候触发  2                                           
+      - error    检查更新，或者下载资源出错的时候触发    2 3    
+      - noupdate  检查发现没有变化  
+      - downloading 开始下载的缓存资源的时候  
+      - progress    正在下载的时候  
+      - updateready 下载完毕，并且可以通过swapCache来更新的时候触发 
+      - cached     应用缓存完整的时候触发 
+
+
+### 数据存储  
+登录信息，偏好设定，其他数据   都可以存储在本地   
+
+#### cookie  
+最初是存储会话信息的，要求，首先服务器的响应头中存在 Set-Cookie:name-value  ,name和value为url编码的  
+，浏览器会存储这个cookie信息，之后，请求头通过 Cookie:name-value来指出信息来自哪里    
+
+1. 限制   
+**cookie在性质上是绑定在特定域名下的**,一旦设置，之后的访问都会带有这个标志，防止没有权限的访问者访问   
+
+每个域名做多有30个cookie（兼容最小的），并且整个cookie长度限制在4095b（<4k)       
+
+2. 构成  
+
+```
+Set-Cookie : name=value; expires = Mon,22-Jan-07 07:10:24 GTM; domain=.baidu.com;path = /;  secure
+``` 
+  * name value 键值对  ,必填的
+  * expires  失效日期，必须是GMT格式  （Wdy，DD-Mon-YYYY HH-MM-SS GMT）;可选，不填表示关闭浏览器就失效  
+  * domain   域名  PS子域名 www.baidu.com   总域名: .baidu.com  可选
+  * path    域名下的路径 可选
+  * secure   是否使用SSL传输协议  https    
+
+注意： 浏览器只会发送键值对，其他的限制都是服务器发送个浏览器的 
+3. js中的cookie 
++ 获取   
+document.cookie 可以返回页面当前可用的所有cookie信息（键值对），并且都是编码过得，需要decodeURLComponent()    
+
++ 设置            
+设置值的时候，document.cookie 属性可以设置为一个新的cookie字符串  ，这个字符串会被解释和添加到现有的集合中，
+设置document.cookie并不会覆盖所有cookie，除非cookie的名字已经存在，那么会覆盖相应的cookie；     
+直接像服务器设置那样添加就行了     
+```js
+document.cookie = encodeURLComponent("name")+"="+encodeURLComponent("value")+";domain=.baidu.com;path=/"
+``` 
+并且后面的可以没有  
+
+
++ 简化函数  读取/写入/删除  
+```js
+var CookieUtil = {
+    //只能返回value不会返回设置信息
+    get : function(name){
+        var cookieName = encodeURIComponent(name)+"=",
+            cookieStart = document.cookie.indexOf(cookieName),
+            cookieValue = null;
+        if(cookieStart > -1){
+            var cookieEnd = document.cookie.indexOf(";",cookieStart);
+            if(cookieEnd == -1){
+                cookieEnd = document.cookie.length;
+            }
+            cookieValue = decodeURIComponent(document.cookie.substring(cookieStart+cookieName.length,cookieEnd)); 
+        }
+    },
+    /**
+     * secure 最好传入布尔值
+     */
+    set  : function(name,value,expires,domain,path,secure){
+        var cookieText = encodeURIComponent(name)+"="+encodeURIComponent(value);
+        if(expires instanceof Date){
+            cookieText += ";expires="+expires.toGMTString();
+        }
+        if(domain){
+            cookieText+=";domain="+domain;
+        }
+        if(path){
+            cookieText += ";path="+path;
+        }
+        if(secure){
+            cookie+= ";secure";
+        }
+    },
+    /**
+     * 没有直接删除已有cookie 的方法，所以需要相同路径 域 安全选项 再次重置cookie并讲value致空/data设置为过去的时间 
+     */
+ remove:function(name,domain,path,secure){
+      this.set(name,"",new Date(0),path,secure);
+ }
+}
+```  
+
+4. 子cookie 
+为了绕开cookie数量的限制，用了子cookie;子cookie是存放在单个cookie中的更小段的数据 ，也就是使用cookie值来存储多个键值对  ，常见的格式  
+name=name1=value&name2=value2&name3=value3      
+子cookie一般也是以查询字符串的格式化 。这些值可以使用单个cookie进行存储和访问，而非对每个键值对使用不同的cookie存储      
+为更好的操作zicookie，建立新的方法，  
+```js
+//子cookie的方法 
+var SubCookieUtil = {
+    //name是一串的名字，subname是一串中的一个名字 
+    get: function (name, subName) {
+        var subCookies = this.getAll(name);
+        if (subCookies) {
+            return subCookies[subName]
+        } else {
+            return null;
+        }
+    },
+    //返回的就是那一串东西解析后的对象了，属性作为键
+    getAll: function (name) {
+        var cookieName = encodeURIComponent(name) + "=";
+        var cookieStart = document.cookie.indexOf(cookieName),
+            cookieValue,
+            cookieEnd,
+            subCookies,
+            i,
+            len,
+            parts,
+            result;
+        if (cookieStart > -1) {
+            cookieEnd = document.cookie.indexOf(";", cookieStart);
+            if (cookieEnd == -1) {
+                cookieEnd = document.cookie.length;
+            }
+            cookieValue = document.cookie.substring(cookieStart + cookieName.length, cookieEnd);
+            if (cookieValue.length > 0) {
+                var subCookies = cookieValue.split("&");
+                for (i = 0, len = subCookies.length; i < len; i++) {
+                    parts = subcookies[i].split("=");
+                    result[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+                }
+                return result;
+            }
+        }
+        return null;
+    },
+    set: function (name, subName, value, expires, domain, path, secure) {
+        var subcookies = getAll(name) || {};
+        subcookies[subName] = value;
+        setAll(name, subcookies, expires, domain, path, secure);
+    },
+    setAll: function (name, subcookies, expires, domain, path, secure) {
+        var cookieText = encodeURIComponent(name) + "=",
+            var subCookiesArray = new Array(),
+                subName;
+        for (subName in subcookies) {
+            if (subName.length > 0 && subcookies.hasOwnProperty(subName)) {
+                subCookiesArray.push(encodeURIComponent(subName) + "=" + encodeURIComponent(subCookies[subName]));
+            }
+        }
+        if (subCookiesArray.length > 0) {
+            cookieText += subCookiesArray.join["&"];
+            if (expires instanceof Date) {
+                cookieText += ";expires=" + expires.toGMTString();
+            }
+            if (path) {
+                cookieText += ";path=" + path;
+            }
+            if (domain) {
+                cookieText += ";domain=" + domain;
+            }
+            if (secure) {
+                cookie += ";secure";
+            }
+        } else {
+            cookieText += ";expires=" + (new Date(0)).toGMTString();
+        }
+        document.cookie = cookieText;
+    },
+    remove : function(name,subName,domain,path,secure){
+        var subCookies = this.getAll(name);
+        if(subCookies){
+            delete subCookies[subName];//删除对象的某个属性可以这么干？？
+            this.setAll(name,subCookies,null,domain,path,secure);
+            //上面可能影响了部分cookie的寿命，我也不知道怎么解决
+        }
+    },
+    removeAll : function(name,domain,path,secure){
+        this.setAll(name,null,new Date(0),domain,path,secure);
+    }
+}
+```
+
+**一定不要在cookie中存储重要的信息，身份/财务/地址等**     
+
+###web存储机制  
+提供一种cookie之外存储回话数据的途径，提供存贮大量可以跨会话存在的数据的机制  
+
+
+1. Storage类型  
+提供最大的存储空间来存储键值对，只能存储字符串，Storage的实例与其他对象类似 ，有如下方法  
+  * clear()   删除所有值
+  * key(index)  获取对应index处的name属性
+  * getItem(name) 获取对应的Value 
+  * removeItem(name) 删除键值对
+  * setItem(name) 设置键值对 
+这些方法可以直接调用亦可以通过storage随想简介调用，因为每一个项目都作为属性存储在对象上，通过 点语法或者方括号语法访问和修改属性，或者通过delete操作符进行删除   建议使用方法操作，也可以通过length来判断有多少键值对放在storage上 
+
+
+2. sessionStorage  
+用于存储特定于某个会话的数据，只保持到浏览器关闭,标签页关闭， 数据可以跨页面刷新存在，部分浏览器崩溃后重新进入也是支持的，     
+存储在sessiong中的数据只能由最初给对象存储数据的页面访问到，多页面应用有限制;
+是Storage的一个实例，所以方法完全相同的  
+只是多出一个removeItem(name);迭代通过length 和 key()或者直接for-in即可  ，window的属性
+
+
+3. globalStorage（很多没有实现，并且zeal介绍都没有） 
+
+4. localStorage 
+永久保存信息 ，要访问同一个localStorage需要来自同一个域名（子域名无效），使用相同的协议和端口，window的属性，大小限制在2.5MB
+
+5. storage 事件 
+任何对Storage对象的修改都会触发storage对象，删除 修改 清空等   
+document.addEventListener("storage",function(event){});  event包含的信息很少 
+  * domain  存储空间的域名 
+  * key  
+  * newValue    新值或者null
+  * oldValue    旧值  
+
+
+
+###IndexedDB 保存结构话数据的一种数据库  
+
+IndexedDB的设计操作完全是异步的，因此，每次操作，都需要你注册onerror和onsuccess事件 ；indexedDB作为所有Api宿主的全局对象
+
+```js
+var indexedDB = window.indexedDB||window.msIndexedDB||window.mozIndexedDB||window.webkitIndexedDB;//新的浏览器已经支持第一个
+```
+
+1. 数据库 
+使用对象保存数据  ，一个数据库就是一组位于相同命名空间下的对象的集合     
+打开数据库 ,有的话就会直接发送请求；数据库不存在的话，发送一个创建并打开的请求   
+```js
+var request,database;
+request = indexDB.open("DBName");
+request.onerror = function(event){
+    console.log(event.target.errorCode);
+}
+request.onsuccess = function(event){
+    database = event.target.result;
+    //所有的event.Target都指向request
+}
+```
+默认情况下，IndexedDB数据库是没有版本号的 ，最好一开始就为数据库指定一个版本号
+
+```js
+var dbVersion;
+if (database.version != "1.0"){
+    request = database.setVersion("1.0");
+    request.onerror = function(event){
+        console.log(event.target.errorCode);
+    }；
+    request.onsuccess = function(event){
+       dbversion = database.version;
+    }
+}else{
+    dbversion = database.version;
+};
+//有版本号就表示对象已经被初始化过了
+``` 
+2. 对象存储空间(表)
+
+```js
+//创建表,这里传入的第一个参数是表名，存储空间名，第二个参数指定了猪键
+var store = database.createObjectStore("users", {
+    keyPath: "username"
+});
+```
+表创建了之后可以向表中添加东西。add(object)和put(object)方法都可以，在已经存在相同键的时候，add会报错，put则是重写这个对象 
+```js
+//添加或者减少
+var users = [user1,user2];
+
+var i = 0,
+    len = users.length,
+    requests =[];
+while(i<len){
+    request = store.add(users[i]);
+    request.onerror = function(event){
+        console.log(request.errorCode);
+    }
+    request.onsuccess = function(){
+
+    }
+    requests.push(request);
+}
+```
+3. 事务  
+创建对象存储空间后，接下来的所有操作都是事务来完成的    
+
+```js
+
+//通过transaction指定在哪些库中查找，只在一个库的话，直接传入字符串就行了，之后的模式，需要传入指定的值
+var IDBTransaction = window.IDBTransaction||window.webkitIDBTransaction;
+var transaction = database.transaction(["users","anthorestore"],IDBTransaction.READ_WRITE);
+//一个事务可以完成多个请求 ，同时事务本身也有事件处理程序 
+
+transaction.onerror = function(){
+
+}
+transaction.onsuccess = function(event){
+    //每次操作也会产生的东西
+}
+transaction.oncomplete = function(event){
+    //整个事务完成了，不能取得具体值
+}
+
+
+
+//取得事物事务的索引后，使用 objectStore()并传入存储空间的名字，就可以访问特定的存储空间 
+var store = transaction.objsectStore("users"); 
+
+//使用 add  put   get（key）  delete（key）来操作对象  
+request = store.get("007");
+request.onerror = function(){
+
+}
+request.onsuccess = function(event){
+    var result = event.target.result;
+}
+```  
+
+4. 使用游标查询  
+使用事务查询，只能查询单个的， 检索多个对象的时候后就用到了游标，游标是指向结果集的指针    
+
+```js
+//使用游标
+request = store.openCursor();
+request.onerror = function(){
+
+};
+request.onsuccess = function(event){
+    var cursor = event.target.result,
+    value,updateRequest;
+
+    //这里的cursor就是索引成功后返回的IDBCursor实例，
+    if(cursor){
+       if(cursor.key == "1"){
+           value = cursor.value;
+           value.password = "hah";
+
+           updateRequest = cursor.update(value);
+          // updateRequest = cursor.delete();
+          
+           updateRequest.onerror = function(){
+
+           };
+           updateRequest.onsuccess = function(){
+
+           }
+       }
+       cursor.continue();//移动到下一项可以传入一个key
+       //cursor.addvance();可以传入一个index 移动到前一（n）项
+    }
+
+};
+``` 
+IDBCursor实例包含4个属性  
+ * direction 数值，  默认值为IDBCursor.NEXT  (0)，下一项 ；IDBCursor.NEXT_NO_DUPLICATE(1),不重复的下一项，IDBCursor.PREV(2),前一项 ；IDBCursor.PREV_NO_DUPLICATE 前一不重复的项  
+ * key  对象的键
+ * value 实际的对象，输出的时候可以转化为JSON的字符串 
+ * primaryKey  游标使用的键，可能是对象键，也可能是索引键 
+
+
+使用游标也可以操作对应的记录，使用update(value)可以更新对应的value，并且也是一个异步的请求  
+
+5. 键范围  
+由于游标查询的方式有限，所以有了IDBKeyRange的实例，来限制见得范围 
+```js
+var IDBKeyRange = window.IDBKeyRange||window.webkitIDBKeyRang;
+
+var lowerRange = IDBKeyRange.lowerBound("key");//从键key开始，然后可以移动到最后
+//var lowerRange = IDBKeyRange.lowerBound("key"，true);//从键key的下一项开始，然后可以移动到最后
+//var upperRange = IDBKeyRange.upperBound("key"[,true]);//从头开始，到（前一项）key为止 
+//var boundRange = IDBKeyRange.bound(key1,key2[,true[,true]); 范围
+// 使用游标
+ request = store.openCursor(range);
+``` 
+6. 键方向  
+在store.openCursor();还可以传入第二个参数指定键的方向 
+```js
+var IDBCursor = window.IDBCursor||window.webkitIDBCursor;
+store.openCursor(range,IDBCursor.PREV;
+//默认值为IDBCursor.NEXT  (0)，下一项 ；IDBCursor.NEXT_NO_DUPLICATE(1),不重复的下一项，IDBCursor.PREV(2),前一项 ；IDBCursor.PREV_NO_DUPLICATE 前一不重复的项 
+```
+7. 索引一个类似于游标的东西 没看懂
+8. 并发 一个改变的时候另外一个马上关了就好了
+9. 限制 5MB   
+## 最佳事件   
+###可维护性  
+#### 要求 
+可理解性 / 直观性 /可适应性 /可以扩展 / 可调试性  
+#### 代码约定  
+1. 可读性  
+缩进 、 注释：函数、大段代码、复杂的算法   原因和返回值
+2. 函数和变量命名
+3. 变量类型要注释出来
+
+#### 松散耦合 
+js中尽量少用innerHtml这些动态生成html的语句，可以先在HTML中生成，然后隐藏了，到使用的时候，通过js调出来就行了    
+ajax输出数据的时候，可以渲染层（jsp/php）来输出标记
+
+
+尽量少用js来直接修改css的属性，多改变类名来实现 
+
+
+事件处理程序和 应用处理程序接耦合，并且，从事件处理程序呢中，只传出event的具体项目  
+
+
+#### 编程实践 
+
+1. 不是你开发和维护的对象，不要为实例和原型添加属性、方法，并且不要重新定义已经存在的方法  
+  可以 创建包含所需功能的新对象，并通过他与相关对象交互；创建自定义类型，继承和需要修改的类型，然后添加额外的功能 
+2. 避免全局变量  ，用自执行函数和其他对象来隔离这些 
+3. 避免与null比较  
+4. 使用常量： “国际化有用”
+
+
+###性能  
+
+#### 注意作用域  
+访问全局作用域对象属性，一定比局部的慢，因为需要在作用域连上查找
+
+1. 避免全局查找  
+使用全局变量和函数比局部的开销要大很多，看下常见的document的优化  
+
+```js
+function updateUI(){
+    var doc = document;
+    var imgs = doc.getElementByTagname("img");
+    for(var i=0,len=imgs.length;i<len;i++){
+        imgs[i].title = doc.title + "image"+i;
+    };
+    var msg = doc.getElementById("msg");
+    msg.innerHTML = "Update"
+}
+```
+只用了一次全局查找document，函数中尽量全局变量本地化  
+
+2. 避免with
+#### 选择正确的方法 
+1. 避免不必要的属性查找
+数组和常量的操作是O(1),对象是O（n），便利数组也是O（n）；并且使用变量和数组，要比对象的属性更有效率   
+一旦多次用到对象属性，应该将其保存在局部变量中  
+2. 优化循环
+一定要把len初始化，然后传入判断条件   
+简化终止条件  
+简化循环体   
+使用后测试循环  
+3. 展开循环  
+
+  * 对于数据少的循环，可以直接展开他
+  * 如果循环的次数不能确定，可以考虑DUFF装置
+
+```js
+//大数据集的迭代使用DUFF装置迭代要快很多
+
+function Duff(values, fn) {
+    if (values.length > 0) {
+        var iterations = Math.ceil(values.length / 8);
+        var startAt = values.length % 8;
+        var i = 0;
+        do {
+            switch (startAt) {
+                case 0:
+                    fn(values[i++]);
+                case 7:
+                    fn(values[i++]);
+                case 6:
+                    fn(values[i++]);
+                case 5:
+                    fn(values[i++]);
+                case 4:
+                    fn(values[i++]);
+                case 3:
+                    fn(values[i++]);
+                case 2:
+                    fn(values[i++]);
+                case 1:
+                    fn(values[i++]);
+            }
+            startAt = 0;
+        } while (--iterations > 0)
+    }
+
+}
+
+
+//加强版 Speed Up Your site中提出的  
+function ABKDUFF(values, fn) {
+    var iterations = Math.floor(value.length / 8);
+    var leftover = values.length % 8;
+    var i = 0;
+    if (leftover > 0) {
+        do {
+            fn(values[i++]);
+        } while (--leftover > 0);
+    }
+    do {
+        fn(values[i++]);
+        fn(values[i++]);
+        fn(values[i++]);
+        fn(values[i++]);
+        fn(values[i++]);
+        fn(values[i++]);
+        fn(values[i++]);
+        fn(values[i++]);
+    } while (--iterations > 0);
+}
+```
+
+4. 避免用js解析js代码  
+5.  原生方法快（Math中的方法们 ）  ，switch比if-elseif快，   位运算快（去摸，逻辑 与  或）
+#### 最小化语句数  
+完成多个操作的单语句比完成单个操作的多语句快 
+1. 多变量声明     直接用一个var 加多个逗号反应快 
+2. 插入迭代值     var name = values[i];i++;    =>     var name = values[i++];
+3. 使用数组和对象字面量的时候  一次性整体初始化
+
+#### 优化DOM交互
+1. 最小化现场更新  
+页面已经显示了之后，需要更新部分内容成为现场更新，  不管插入还是移除都会拖慢浏览器，因为他需要重新计算整个页面的无数尺寸   
+一旦需要更新dom，请考虑使用文档片段更新 ,文档片段添加的时候只会添加子节点，片段本身不会添加  
+```js
+var list = document.getElementByID("myList"),
+    fragment = document.createDocumentFragment(),
+    item,
+    i;
+for(i=0;i<10;i++){
+    item = document.createElement("li");
+    fragment.appendChild(item);
+    item.appendChild(document.createTextNode("item"+i));
+}
+list.appendChild(fragment);
+```
+2. 使用innerHtml  
+innerHtml比js快的多
+3. 使用事件代理
+4. 注意HTMLCollection  
+循环的时候把length初始化，并将每一项用一个局部变量引用了，再处理    
+### 部署  
+构建过程尽量分成多个文件 ，多个注释    
+部署的时候，需要把代码合并成一个，并进行压缩
