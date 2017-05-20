@@ -1,3 +1,519 @@
+## 简介
+DOM (document object model)：提供访问和操作页面内容的方法和接口 
+BOM   浏览器窗口和框架处理； 提供与浏览器交互的方法和接口 ，例如：弹出窗  、移动缩放关闭浏览器 、 navigator 、location 、 屏幕信息/XHR
+
+## HMTL中加载js
+
+###<script> 
+```html
+<script async defer=“defer” src= "" type="text/javascript"></script>
+``` 
+
+defer在ie8后无效
+script标签是一个阻塞操作 ；
+在js代码中不要出现 \<\/script>字符串 ，需要的话可以转义 ,<\/script>   
+
+js文件的扩展名不是必须的   
+
+
+文档模式 ：标准模式和混杂模式，没有生命的话，自动混杂模式   
+
+
+## 3 基本概念  
+###语法  
+####标识符  
+第一个字符是字母 下划线 或者美元符号   
+其他是字母 数字 下划线 美元符号 
+#### 严格模式
+"use strict"   定义了一种不同的解析和执行模型 ，ES3中不明确的行为得到处理   
+####语句  
+分号不是必须的(得有换行），但是压缩的话一定得有分号,
+
+#### 变量 
+松散类型变两个  var message; 每个变量仅是一个占位符  ；  
+var操作符定义的变量将成为定义该变量的作用域中的局部变量， 在函数内部省略var操作符，
+就变成了全局变量，严格模式下，未经声明的变量赋值会抛出错误
+
+### 数据类型 
+Undefined、Null 、Boolean、Number、String 和Object    
+#### typeof 操作符
+后面的括号不是必须的 typeof name / typeof(name)  相同的   返回的结果是字符串，       
+ * undefined  这个值未定义；
+ * boolean    布尔值
+ * string     字符串
+ * number     数值
+ * object     这个值是对象、null 、正则表达式
+ * function   函数
+
+
+#### Undefined 类型
+声明了对象但是并没有初始化，会自动赋予undefined值，可以显示初始化，没必要  ；    
+undefined值的变量和尚未定义的变量还是不一样的，后者只能进行typeof ，其他会报错  
+
+#### Null类型  
+null表示一个空对象的指针 ，typeof null 返回的是 object ;    
+定义一个变量准备存储对象的时候，可以在定义的时候初始化为null      
+undefined 派生自 null  ，  并且 underfined == null，==会转化操作数  
+
+#### Boolean类型  
+true和false ；所有的类型的值可以转化成这两个， Boolean(name);   
+```
+string  非空的字符串true     空字符串"" false    
+number  任何非0true         o和NaN false
+Object  任何对象true        null false
+Undefined  没有true        undefined false
+```  
+
+#### Number类型  
+八进制以零（0）开头，后面值超过0~7的话，前面的0会被忽略，自动转化为十进制了  
+十六进制 以 零x（0x）开头
+
+1. 浮点数值
+浮点值中必须包含一个小数点，并且小数点后面必须有一位数字（非0的）   
+小数点后面有6个0的时候。  
+浮点值最高是17位小数 ，但是算数计算精度远远不如整数，0.1+0.2结果不是0.3，舍入误差   
+2. 数值的范围  
+Number.MIN_VALUE 和Number.MAX_VALUE  超过这个值得时候，自动转化为正副Infinity的值，   
+使用isFinite(result);能够确认是否是在最大小的值之间  
+3. NaN  
+用于表示一个本来要返回数值操作数未返回熟知的情况，例如任何数值除以0，其他语言报错，js则返回NaN；
+NaN与任何值（自身）不相同，任何操作也返回NaN 
+isNaN（value）  value不是数值对吗，该函数会尝试Number()自动转化 ，number返回的是NaN的话，最终返回true    
+对象调用isNaN（） 会先调用valueOf,
+NaN在比较操作符中总返回false
+4. 数值转化  
++ Number(value) 转化任何类型；  
+    - true转1 false转2；数值转本身；
+    - null转0，undefined转NaN。
+    - 字符串的话  ： 
+       - 空字符串 转为0 
+       - 只包含数字的转化成十进制，前面有0也会被忽略 
+       - 0x开头的十六进制的转化成对应的十进制
+       - 字符串包含数字以外的东西转成  NaN
+  * value对象的话先调用valueof再依照上面的转化。 如果valueOf返回的是一个引用类型的值的话，那么就会调用value的toString；如果toString返回的还是引用类型的话，就会报错 ;   原生的对象会先调用toString, 在按照字符串来处理一遍;都是会将得到的基本类型值处理一遍的（但是加法不是遮掩的，加法只进行最初的一次操作，获取到基本类型就停止了）   
+  **一元加操作符与该函数相同的操作**
++ parseInt(value)     转化为整数 ,只能操作字符串和数字   
+   - 可以识别字符串： 
+   第一个非空字符不是数字或者负号的话返回NaN；空字符串返回NaN
+   是的话，会截取到最后一个非数字的地方；之后按照数字进行解析 ；
+   由于ES3和ES5在处理8进制等问题的时候出现了问题，所以需要在使用parseInt的时候传入第二个参数，表名被解析的是字符串的是什么进制的
+   parseInt(value,10)  ,不会四舍五入  
+   注意： 传入对象的话，会先调用toString,这个函数返回引用类型的话，那么会调用传入对象的valueof
++ parseFloar(value) 只能解析10进制，忽略0，只有第一个小数点有效，在非数字是截止
+
+#### String类型
+ 单双引号的意义是相同的
+ 1. 字符字面量  
+ ```
+\n 换行  
+\t 制表  
+\b 退格  
+\r 回车  
+\\ 斜杠
+\'
+\"
+```
+用在字符串里面输出对应的符号的    
+字符串中空格也算字符  
+2. 特点 
+字符串不可变的，改变的话，只是重新引用了一个实例罢了  
+3. 转化为字符串
++ toSting() 数字/布尔值/对象/字符串都有这方法（字符串返回的是副本），返回的原样的东西； 数值调用toSting的时候，可以传递一个要输出什么进制字符串的数值。   null和undefined没有这个方法；
++ String(value); 有tostring的调用他，并且不会深层调用，没有的null返回“null”，undefined返回“undefined” ;对象是先toString后valueof
++  +“” 就可以返回字符串了 和Stiring（）相同
+
+####Object类型   
+所有类的基类 ，但是DOM和BOM对象属于宿主对象，可能不会继承Object
+实例 的属性和方法：
+ - constructor  指向构造函数  
+ - hasOwnProperty(propertyName)  检查属性是否在实例中存在 传入的是字符串
+ - isPrototypeOf(object)      传入对象是不是当前对象的原型  （？）
+ - propertyIsEnumerable（propertyname） 传入的属性是否可以用for-in
+ - toString()  返回对象的字符串表示  
+ - valueOf()   返回对象的字符串、数值、布尔值表示
+
+
+### 操作符  
+js的操作符可以适用于很多值，字符串、数字、布尔、对象；对象先调用ValueOf再调用toString方法 
+####一元操作符
+1. 自增自减 
+前置自增自减和多数情况一样  
+后置自增 
+```js
+var a = 1,
+    b;
+    b= a++;
+//b = a; a= a+1;
+``` 
+自增运算符是按照Number()函数来转化的非数字信息，然后进行运算的，NaN返回NaN；不管前置还是后置，使用之后，对象会被赋予运算后的值，不在是对象了
+```js
+// console.log(++"1ab");//报错
+var a = "1ad";
+console.log(a++); //NaN
+```  
+自增自减的只能是变量，并且操作后会将转化的值传递给这个变量
+2. 一元加减  
+Number()函数转化数据 ，之后在进行操作
+#### 位操作符 
+JS中所有的数据都是64位的，未操作会先将64位转化成32位，之后在转回64位 ，对开发人员来说，64位存储是透明的 就像一直按照32位来操作的一样  
+负数存的是补码（绝对值反码+1）   
+按位操作  
+与&  或| 非～ 异或 ^  
+有符号左移<<   有符号右移 >>  
+无符号左移<<<   无符号右移 >>>
+#### 布尔操作符
+1. 非 ！value  返回的一定是 !Boolean(value);   
+2. 短路与 &&  返回的值是操作数，判断的时候用布尔值罢了  
+   第一个操作数是真（Boolean函数操作后）的时候，返回的是第二个操作数（这里返回的不是布尔值，是操作数）   
+   第一个操作数是0、null、NaN、undefined的时候，返回的是第一个操作数 0、null、NaN、undefined    
+3. 逻辑或  &&   
+   第一个操作数为真的时候返回第一个操作数
+   第一个操作数为假的时候返回第二个操作数
+
+#### 乘性操作  
+乘* 除/ 求模 %   先用Number函数求得数值  
+#### 加减操作
+ 1. -减法法和前面的相同，先number后操作
+
+ 2. +加号操作 
+    +  两个操作数都是数字的时候会用加法 ；
+      - 一个是NaN结果是NaN
+    +  一个是数字的时候，布尔值返回数字，对象返回valueof（注意：返回值为字符串数字直接相加或者拼接，返回值布尔/null/define 用Number函数）
+       原生对象会返回toString的字符串，之后在按照字符串操作
+    +  如果，其中一个是字符串，其他任何情况都是使用String()函数，然后拼接字符串 ; 
+    - 如果其中一个是对象 、数组或者布尔值,会先调用valueof 没有返回基础类型的话，在调用toString
+    - 如果一个是数字，那么undefined转为NaN，null转为0
+#### 关系操作符
+ 大于（>） 、小于（<）、大于等于（>=)、小于等于(<=)   返回布尔值 ，当操作数
+ - 都是数字的时候，直接比较
+ - 都是字符串，比较编码
+ - 有一个是数字，另一个Number成数字比较
+ - 有一个是布尔值，先转化为数字，在按照一个是数字的比较
+ - 有一个是对象，先valueof在按照前面的去比较 
+ - 有NaN返回false
+
+
+#### 相等操作符
+相等（==）不相等（！=）先转换在比较； 全等（===)不全等（！==）先比较不转化
+
+
+1. 相等不相等操作规则（数字化）
+ - 数字直接比较
+ - 字符串比较编码
+ - 有数子另一个转化成数字（另一个不管是字符串还是布尔值）
+ - 布尔值转化数字
+ - 一个是对象，另一个不是对象的话，对象用valueof
+
+
+ - null等于undefined
+ - NaN！=NaN
+ - 相等性比较多的是偶null和undefined不能进行转化
+ - 两个都是对象的话，比较指针是否指向同一个对象  
+####条件操作符号 （必定有返回值，最好接收一下）
+boolean_expression?true_value:false_value
+####赋值操作符 
+ var a =10;   
+  a+=10;//20
+
+####逗号操作符 
+声明多个变量  
+
+赋值的时候逗号返回最后一项   var num=（1,2,3）；//num = 3；
+###语句
+####if 
+直接调用Boolean
+#### do - while 
+至少执行一次
+#### while 
+#### for
+####for-in 
+在使用前先检查对象不是null或者underfined  
+之后就可以遍历对象的属性  
+
+####label
+```js
+label1：for(){
+    label2:for(){}
+}
+```
+####break continue
+####switch
+比较值的时候执行的是全等操作，不会发生类型转化 ；
+```js
+switch(expression){
+    case value1 : statement;break;
+    case value2 : statement;break;
+    default : statement;break;
+}
+``` 
+想要表达的是expression === value；
+
+js中case的值不一定是常量/可以使变量，甚至表达式  ；但是最终还是要case和expression相等才行   
+
+###函数
+ 用function来声明函数 
+
+#### 理解参数  
+调用函数的时候传入多少个参数都是没有影响的，参数在函数内部是一个类数组arguments存储的，函数接受到的始终都是这个数组   
+命名的参数只提供便利，但不是必须的，   
+arguments对象length属性返回传入参数的个数，可以通过arguments[index]获取对应的参数  
+arguments的值永远与对应的命名参数的值一致，但是内存是独立的，只是值是相同的   
+```js
+function add(num1,num2){
+    arguments[1] =10;
+  console.log(num1+num2);
+}
+add(1,2); //11
+add(1); //NaN
+```
+上面的函数传入两个实参的话，第二个参数始终会被改为10的   
+arguments的长度始终由实参决定的 ，不可修改数量，即使手动修改，也不会映射到对应的形参上   
+没有传值的形参会自动给赋予underfined；  
+
+函数参数传递的永远是数值传递   
+
+####没有重载 
+按照后定义的函数进行运算  ; 如果是函数声明的话，会提前编译，所以即使在两个定义之间执行也是按照后定义的执行的  
+未指定返回值的函数其实是返回一个undefined 的
+
+##4 变量、作用域、内存
+###基本类型了引用类型  
+基本类型： 简单的数据段  、 Undefined、Boolean、Number、string、Null等类型，按值访问的是    
+引用类型： 多个值构成的对象  js不允许访问内存中的位置，也就是不能操作对象内存的空间，实际操作对象的时候操作的是对象的引用  ；js认为字符串不是对象 ,数组也是引用类型  
+#### 只能给引用类型的值添加属性 
+只有对象可以添加属性，基本类型添加了，下次访问的时候也访问不到的  
+#### 变量的赋值  
+赋值操作的时候，基本类型的值赋值操作是独立的，只是将值传递了出去；引用类型的会将指针传递出去，两个变量实际是指向同一个元素的
+####  函数传递参数  
+向参数传递基本类型的值的时候，被传递的值会被复制给一个局部变量（形参，或者叫arguments的项）  
+传递引用数据类型的时候，被传递的是这个值在内存中的地址传递过去，值得变化会反应在外部  
+#### instanceof  
+检测引用数据类型的时候，如果变量是给定的引用类型（根据原型链来识别）的实例，会返回true    
+variable instanceof constructor  
+使用instanceof检测基本类型的话，会返回false     
+注意： 当数据是跨框架的话，instanceof会失效
+### 执行环境和作用域
+执行环境定义了变量或者函数有权访问的其他数据 ，每个执行环境都有一个与之关联的变量对象，环境中定义的所有变量和函数都会保存在这对象中    
+
+**作用域链**：保证对执行环境有权访问的所有变量和函数的有序访问；前端始终是但钱执行的代码所在环境的变量，如果这个环境是函数，其活动对象将作为变量对象，活动对象最初只包含一个变量，即arguments；下一个变量对象来自包含环境的，在下一个变量来自下一个包含环境，最外层为全局执行环境  
+
+```js
+var color = "blue";
+
+//优先局部变量
+function show2(){
+    var color = “blue”；
+    console.log(color);
+}
+show2();//blue
+
+//也可以访问全局变量
+function show1(){
+    color = "red";
+    console.log(color)
+    };
+show1();//red
+console.log(color);//red
+
+
+function show3(color){
+    console.log(color);
+}
+show3();//undefined
+
+function show4(color){
+    console.log(window.color);//只有这样可以访问到全局的变量
+}
+
+```  
+延长作用域链条 try-catch 和with
+
+
+####声明变量   
+- var声明会把变量添加到最近的环境中,所有的声明在文件加载的时候都会提前，但是初始化会留在原地
+- 同一个变量名重复声明没有影响，只在加载的时候用到一次，之后就按各种赋值操作处理就行了     
+- 初始化变量没有使用var的话，该变量就会自动添加到全局变量，这个过程并没有声明发生，只是进行了初始化，
+在初始化前的任何操作都会报错，并且如果是存在函数中的话，只能等函数执行之后才能初始化完毕
+- 当局部变量优先与全局变量使用的时候，可以使用 window.variaty 来访问全局变量
+
+####垃圾收集 
+标记清除和引用计数方法  
+不用的数据，最好将其值设置为null，来解除引用
+
+
+
+
+##第5章 引用类型  
+引用类型：是一种数据结果，将数据和功能组织绑定在一起 ； 对象的定义、类 
+对象 ： 引用类型的实例   
+
+
+### Object类型
+
+所有类的基类 ，但是DOM和BOM对象属于宿主对象，可能不会继承Object
+实例的属性和方法：
+ - constructor  指向构造函数  
+ - hasOwnProperty(propertyName)  检查属性是否在实例中存在 传入的是字符串
+ - isPrototypeOf(object)      传入对象是不是当前对象的原型  （？）
+ - propertyIsEnumerable（propertyname） 传入的属性是否可以用for-in
+ - toString()  返回对象的字符串表示，原生返回的是[object Constructor]
+ - valueOf()   返回对象的字符串、数值、布尔值表示,console.log 貌似会调用这个方法;**原生返回的好像是本身**
+1. 创建object 
+```js
+//直接用类创建，不推荐
+var obj = new Object();
+obj.name = “白” ;
+
+
+//字面量形式  属性可以是任何数据，只是最后会自动转化为string，并且字面量方法运算更快，并且不会调用OBject的构造函数，当然也可以额外添加属性
+var person = {
+    name : "bai",
+    age : 29,
+    4: 4,
+    "hello":"hello"
+};
+person.gg ="1cm";
+```
+字面量形式，是一种很好的传递大量参数的方法（最好是必须的参数使用命名参数，字面量来封装可选参数） 
+
+2. 访问  
++ 访问属性名    for(item in object){}  中item就是属性名字
+
+
++ 访问属性值
+    - 点方法。 对象可以通过 对象名.属性名  的方法来访问属性的值，但是这里属性名是明确的，不能是变量和奇怪的形式，多数用这个就够了
+
+    - 方括号法   对象名[属性名]   这里的属性名必须是字符串形式，并且可以接受变量   
+
+```js
+for(item in person){
+    console.log(item);
+    console.log(person[item]); //争取的访问
+    console.log(person.item); //这里是错误的，什么也访问不到
+}
+
+person["hello  bai"]; //只能方括号访问
+
+```
+
+
+
+### Array 类型  
+有序的列表，但是JS中可以存储任何类型的数据，并且长度可以自动调整  
+1.定义数组 
+
+```js
+ var color = new Array();//创建数组
+ var colors = new Array(20)；//创建包含20项的数组，里面的值都是undefined
+ //任何没有初始化的项都会用undefined填充的  
+ var name = new Array("gred");//创建一项的数组
+ //创建数组不加new也是合理的  
+ var name = Array(20);
+
+
+ //方括号语法定义 ，这种也不会调用Array的构造函数
+  var colors = ["red","blue"];
+  var colors = [];
+  var number = [1,2,]; //不推荐，因为ie8会解析成3项，现代浏览器会解析成两项，最后一个逗号为空的话，不会计入数据的
+  var number = [,,,,,];//五项或者六项  
+```
+
+2. 访问
+通过方括号索引值访问  
+```js
+var num = [1,2];
+num[0] ;//1 
+num[10];//undefined;这时长度会自动加到索引+1；并将其中的项都变成undefined
+```
+
+array.length是可读写的 ，写入的话是调整数组的长度,小于现有长度的话，会发生裁剪，后面的项都就不见了；大于的话，自动扩充数组的项目 
+
+array[array.length]= value  可以不停地为数组添加项
+
+3. 检测  
+array instanceof Array;  //在一个全局环境下可以这么检测
+Array.isArray(array); //一种没有限制的方法 
+
+4. 转换方法    
+array.toString()  会返回每一项的字符串形式，并拼接成以逗号分割的字符串，每一项的字符串是由自身的toString方法来的  
+array.valueOf()   会返回数组本身,完完全全是同一个对象啊   
+array.jion(value)  以value为分隔符将数组拼接成字符串
+
+5. 栈和队列
++ 栈方法
+  * array.push(value)   将数据加入数组末尾，同时返回推入了多少项  
+  * array.pop()    将最后一个数据取出 
+
+
++ 队列方法 
+  * array.unshift(value) 将数值放入开头   
+  * array.shift()        取出开头的数据  
+
+```js
+var a = [];
+a.push(1,2,3);//[1,2,3]
+a.push(4);   //[1,2,3,4]
+a.unshift(7,8,9); //[7,8,9,1,2,3,4]
+```
+6. 重排列     
+array.reverse();  //返回转化后的数组本身
+array.sort(fn)；传入的函数 ，返回排序后的数组本身
+```js
+function fn(value1,value2){
+    if(条件){
+        return 1 ；//返回正数交换顺序
+    }else if(条件){
+      return -1 ；返回负数不变
+    }else{
+        return 0；返回0也不变
+    }
+}
+```
+7. 操作方法  
+ * var c = arr1.concat(arr2,arr3)   concat首先复制出一个新数组，然后将其他的数组或者值添加到末尾，如果没有穿入值，就是返回的克隆体，原数组不变的是    
+ * slice方法，基于当前数组截取处一个新的数组，原数组不变，可以接收一个或者两个参数，表示截取的起止位置（
+    - 一个的话到结尾，两个的话包头不包尾
+    - 传入负数的话，用长度加上该数字，得到正数，
+    - 结束位置小于起始位会返回空数组
+
+ * splice(index,count[,insert])
+
+array.splice(start)    从 array[start] 开始删除，后面全删
+array.splice(start, deleteCount)       从 array[start] 开始删除，总共删deleteCount项
+array.splice(start, deleteCount, item1, item2, ...)   从 array[start] 开始删除，总共删deleteCount项，并将值插入到array[start]
+
+```js
+var a =[1,2,3,4,5];
+var c = a.splice(2);  // 在原数组上改变，a [1,2]  c [3,4,5]
+var c = a.splice(2,1);  // 在原数组上改变，a [1,2,4,5]  c [3]
+var c = a.splice(2,1,6);  // 在原数组上改变，a [1,2,6,4,5]  c [3]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //字面量创建对象是最常用的方式
 var person = {
   name : "weichuanzhang",
@@ -5547,4 +6063,4 @@ innerHtml比js快的多
 通过检测change事件可以访问file
 
 #### FileReader
-类似于XMLHttpRequest
+类似于XMLHttpRequest  
