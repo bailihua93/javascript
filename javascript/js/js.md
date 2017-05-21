@@ -83,7 +83,7 @@ isNaN（value）  value不是数值对吗，该函数会尝试Number()自动转�
 NaN在比较操作符中总返回false
 4. 数值转化  
 + Number(value) 转化任何类型；  
-    - true转1 false转2；数值转本身；
+    - true转1 false转0；数值转本身；
     - null转0，undefined转NaN。
     - 字符串的话  ： 
        - 空字符串 转为0 
@@ -176,13 +176,13 @@ JS中所有的数据都是64位的，未操作会先将64位转化成32位，之
  1. -减法法和前面的相同，先number后操作
 
  2. +加号操作 
-    +  两个操作数都是数字的时候会用加法 ；
-      - 一个是NaN结果是NaN
-    +  一个是数字的时候，布尔值返回数字，对象返回valueof（注意：返回值为字符串数字直接相加或者拼接，返回值布尔/null/define 用Number函数）
-       原生对象会返回toString的字符串，之后在按照字符串操作
+    +  两个操作数都是数字的时候会用加法 ；()
+    +  一个是数字的时候，布尔值返回数字， 那么undefined转为NaN，null转为0,对象返回valueof（注意：返回值为字符串数字直接相加或者拼接，返回值布尔/null/define 用Number函数） 原生对象会返回toString的字符串，之后在按照字符串操作
     +  如果，其中一个是字符串，其他任何情况都是使用String()函数，然后拼接字符串 ; 
-    - 如果其中一个是对象 、数组或者布尔值,会先调用valueof 没有返回基础类型的话，在调用toString
-    - 如果一个是数字，那么undefined转为NaN，null转为0
+    + 一个是布尔值，另外的是null  、undefined 、数字的话， 都转化成数字 
+    + undefined   undefined、null   相加都是NaN
+    + null + null      0  
+   
 #### 关系操作符
  大于（>） 、小于（<）、大于等于（>=)、小于等于(<=)   返回布尔值 ，当操作数
  - 都是数字的时候，直接比较
@@ -192,6 +192,7 @@ JS中所有的数据都是64位的，未操作会先将64位转化成32位，之
  - 有一个是对象，先valueof在按照前面的去比较 
  - 有NaN返回false
 
+最终比较的是数字和字符，数字优先级高
 
 #### 相等操作符
 相等（==）不相等（！=）先转换在比较； 全等（===)不全等（！==）先比较不转化
@@ -475,7 +476,8 @@ function fn(value1,value2){
     - 一个的话到结尾，两个的话包头不包尾
     - 传入负数的话，用长度加上该数字，得到正数，
     - 结束位置小于起始位会返回空数组
-
+   
+   Array.prototype.slice.call(arguments);可以把类数组转化为数组
  * splice(index,count[,insert])
 
 array.splice(start)    从 array[start] 开始删除，后面全删
@@ -489,17 +491,341 @@ var c = a.splice(2,1);  // 在原数组上改变，a [1,2,4,5]  c [3]
 var c = a.splice(2,1,6);  // 在原数组上改变，a [1,2,6,4,5]  c [3]
 ```
 
+8. 位置方法 （IE9）
+
+* array.indexOf(value[,index])   要找的项value在array中的第几项， 可传入的index表示从哪一项开始找，下一次的时候就得从找到项+1处开始了
+* array.lastIndexOf(value[,index])  只是方向不同罢了，从后向前找，返回的 位置还是正常的位置  
+
+没找到返回 -1  
+
+9. 迭代方法  
+
+ - every 每一项都返回true，则该函数返回true
+ - some  有一项返回true，该函数返回true
+ - filter 返回true的项，数组内的项组成一个新的数组返回
+ - map    每一项的返回值，返回，组成一个数组
+ - forEach 便利每一项，操作，不返回值，
+```js
+var array1 = [1,2,3,4,5,6];
+
+var everyResult = array1.every(function(item,index,array){
+    return item;
+});
+var someResult = array1.some(function(item,index,array){
+    return item;
+});
+
+var filterResult = array1.filter(function(item,index,array){
+    return item;
+});
+var mapResult = array1.map(function(item,index,array){
+    return item;
+});
+ array1.forEach(function(item,index,array){
+     process(item);
+});
+
+```
+
+10. 归并方法
+reduce和reduceRight，遍历并操作每一项，操作函数返回值将作为下一项执行函数中的prev，然后重复此过程，就是省了一个记录结果并迭代的全局变量 ，接受两个参数，操作函数和初始的作为prev的值；没有传入的话，就从第二项开始了，所以最好传入一下 
+
+```js
+var values = [1,2,3,4,5];
+var sum = values.reduce(function(prev,cur,index,array){
+    return prev+cur*2;
+},0);
+console.log(sum);
+```
+
+###Date类型  
+```js
+var now = new Date(); //不传参数的话获取的是当前的时间；
+//想要根据特定的日期和时间创建日期对象，需要传入该日期的毫秒数
+```
+1. Date.parse(string);   
+解析特定的字符串为毫秒数，然后传入构造函数就行了，直接把string传递给构造函数后台也会调用Date.parse的 即  
+new Date(string)  和 new Date(Date.parse(string))是一样的 ；string支持的格式  ：      
+   -  “月日年”   6/13/2004
+   - “英文月  日 年”    January  12，2004
+   - "英文星期几 英文月 日 年 时 分 秒 时区"     Tue May 25 2004 00：00：00  GMT-0700
+   -  YYYY-MM_DDTHH:mm:ss.sssZ               2004-05-25T18:00:00      ES5才行  
+
+
+2. Date.UTC();
+基于本地时间的，传入数字参数  ：
+   - 年  
+   - 0~11 的月
+   - 1~31 的日
+   - 0~23 的时
+   - 分
+   - 秒
+
+   同样new Date(num,num)与new Date(Date.UTC(num,num)) 相同    
+   Date.UTC(2004,1,31,11,11,11);   
+
+
+传入字符串按照parse处理，传入数字，按照UTC处理 
+
+3. Date.now()  ES5 
+返回当前时间的毫秒数，可以用来计算耗时问题    
++new Date()   正号也可以获取当前毫秒数
+4. toString /toLocalString 返回时间，没一点用；  valueof 返回毫秒数 
+5. 格式化成字符 
+toUTCString() 传入参数来格式化时间为 字符串  等价函数 toGMTString（） 后者兼容性号
+
+6. 常见方法  
+  -  getTime     等价valueOf
+  -  setTime     设置毫秒数，会改变日期，不用直接初始化就传入秒了
+  还有一大堆  
+
+
+7. UTC时间  
+没有时区偏差的情况下的时间，本初子午线上的时间，北京比他早8小时
+
+### RegExp类型 
+正则表达式
+```js
+var partern1 = /partern/flags;
+var partern2 = new RegExp(pattern,flag)
+```
+使用字面量和使用构造函数在ES3中，字面量是共享一个RegExp实例（实例属性不会重置），而构造函数会重建每一个； Es5规定，字面两每次都会重新创建
+1. partern 里面可以写什么  
++  范围
+   - abg;   查找字符串中所有ab的实例 
+   - [abc]d 查找abc中的一个，与组成d的字符串的实例
+   - [^abc] 查找不包含abc中任意一个字符的字符串 
+   - [0-9]  0~9之间的任意一个数字 
+   - [a-z] 
+   - [A-z]
+   - [A-Z] 
+   - （red|blue|grean） 包含其中之一的
++ 元字符
+   -  .  任意字符
+   -  \w 任意字母
+   -  \W   非字母
+   -  \d 数字
+   -  \D 非数字
+   -  \s  空白符
+   -  \b  单词边界  
+   -  \0  null
+   -   \n 换行
+   - 必须要转义的字符  ([{\/^$|?*+.}])
++ 量词 
+   - n+ 至少一个
+   - n* 任意个
+   - n？ 0或1个
+   - n{x} x个
+   - n{x,y} x~y个之间
+   - n{x,}  至少x个
+   - n$  以n结尾
+   - ^n  以n开头
+   - ？=n  后面紧跟着n
+   - ？！n 后面不是n
+
+2. flag
+ - g 全局模式，表示应用与所有字符串，并非发现的第一个 ；不添加这个的话，只匹配第一个
+ - i 不区分大小写
+ - m  partter为字符串的话省略这个； 跨行
+
+
+3. 捕获组 
++ (exppression) 作为整体的正则式的一部分，返回其中匹配的项目，方便之后调用其内容   
+
+
++ 命名
+如果没有显式为捕获组命名，即没有使用命名捕获组，那么需要按数字顺序来访问所有捕获组。在只有普通捕获组的情况下，捕获组的编号是按照“(”出现的顺序，从左到右，从1开始进行编号的 。
+
+
+命名捕获组通过显式命名，可以通过组名方便的访问到指定的组，而不需要去一个个的数编号，同时避免了在正则表达式扩展过程中，捕获组的增加或减少对引用结果导致的不可控。不过容易忽略的是，命名捕获组也参与了编号的，在只有命名捕获组的情况下，捕获组的编号也是按照“(”出现的顺序，从左到右，从1开始进行编号的 。（js不可用）
+
+混合方式的捕获组编号，首先按照普通捕获组中“(”出现的先后顺序，从左到右，从1开始进行编号，当普通捕获组编号完成后，再按命名捕获组中“(”出现的先后顺序，从左到右，接着普通捕获组的编号值继续进行编号。
+
++ 引用 
+ 在Replace中引用，通常是通过$number方式引用。
+举例：替换掉html标签中的属性。
+```html
+<textarea id="result" rows="10" cols="100"></textarea> 
+
+<script type="text/javascript"> 
+
+var data = "<table id=\"test\"><tr class=\"light\"><td> test </td></tr></table>";
+
+var reg = /<([a-z]+)[^>]*>/ig;
+
+document.getElementById("result").value = data.replace(reg, "<$1>");
+
+</script>
+
+//输出
+
+<table><tr><td> test </td></tr></table>
+```
+
+
+
+在匹配时的引用，通常通过RegExp.$number方式引用。
+
+```html
+    <textarea id="result" rows="10" cols="100"></textarea>   
+    <script type="text/javascript">   
+    var data = [' <img alt="" border="0" name="g6-o44-1" onload="DrawImage" src="/bmp/foo1.jpg" />', ' <img src="/bmp/foo2.jpg" alt="" border="0" name="g6-o44-2" onload="DrawImage" />'] ;  
+    var reg = /<img\b(?=(?:(?!name=).)*name=(['"]?)([^'"\s>]+)\1)(?:(?!src=).)*src=(['"]?)([^'"\s>]+)\3[^>]*>/i;  
+    for(var i=0;i<data.length;i++)  
+    {  
+        var s = data[i];  
+        document.getElementById("result").value += "源字符串：" + s + "\n";  
+        document.write("<br />");  
+        if(reg.test(s))  
+        {  
+            document.getElementById("result").value += "name: " + RegExp.$2 + "\n";  
+            document.getElementById("result").value += "src: " + RegExp.$4 + "\n";  
+        }  
+    }  
+    </script>  
+```
+
+
+
+<a href = "http://blog.csdn.net/lxcnn/article/details/4146148">捕获组详解</a>
+   
+4. RegExp实例的属性
+  - global 是否设置了g标志
+  - ignoreCase 是否设置了i标志
+  - multiling 是否设置了m
+  - lastIndex 下一次开始搜索的时候起始位置 从0 算起
+  - source    字面量中的pattern 返回的是字符串，不是构造函数传入的那种
 
 
 
 
+5. 实例的方法 
+
++ exec()  用于确认目标位置和匹配的项，返回结果
+   * var matches = pattern.exec(text); 
+      结果是就是matches ，每次只能返回匹配到的一个结果 ，只有pattern设置了g在调用的时候才会按照原来的lastIndex来继续搜索           
+   * matches[index]返回第一次匹配到的位置  
+   * matches[input]  返回传入的字符串 text
+   * matches[0]   整体匹配到的东西
+   * matches[n]   第n捕获组捕获 的东西 
++ test()   确认字符串是否存在    
+  if(pattern.test(text)){}  
+
+6. 继承的方法 
+ toString toLocalString 返回正则表达式的字面量    
+ valueOf 返回 expression本身
+
+ 7. RegExp构造函数属性  
+```js
+ if(patter.test(text)){
+    process(RegExp.input)             //传入的内容也就是Text          RegExp.$_
+    process(RegExp.lastParen)         //最近一次匹配捕获组      写成   RegExp.$1   RegExp.$2 没有$0
+    process(RegExp.lastMatch)         // 最近的一次匹配项             RegExp[$&] 非法字符，只能方括号访问
+    process(RegExp.leftContext)       // 匹配项左侧内容
+    process(RegExp.rightContext)      //最后一次匹配项右侧内容
+    process(RegExp.multiline)
+ }
+
+```
 
 
 
+### Function  
 
 
+**函数是对象，函数名是指向对象的指针**
+
+1. 定义  
+
+```js
+ function sum(){}
+ var del = function(){};
+ var sel = new Function(num1,num2,return num1+num2)
+```
+2. 没有重载
+按照后定义的函数进行运算  ; 如果是函数声明的话，会提前编译，所以即使在两个定义之间执行也是按照后定义的执行的  
+未指定返回值的函数其实是返回一个undefined 的
+
+```js
+ fn()
+ var fn = function(){
+     console.log("fn1");
+ }
+
+ fn();
+
+ function fn(){
+     console.log("fn2")
+ }
+ function fn(){
+     console.log("fn3")
+ }
+ 
+ //结果fn3 fn1
+ ```
+3.  理解参数  
+调用函数的时候传入多少个参数都是没有影响的，参数在函数内部是一个类数组arguments存储的，函数接受到的始终都是这个数组   
+命名的参数只提供便利，但不是必须的，   
+arguments对象length属性返回传入参数的个数，可以通过arguments[index]获取对应的参数  
+arguments的值永远与对应的命名参数的值一致，但是内存是独立的，只是值是相同的   
+```js
+function add(num1,num2){
+    arguments[1] =10;
+  console.log(num1+num2);
+}
+add(1,2); //11
+add(1); //NaN
+```
+上面的函数传入两个实参的话，第二个参数始终会被改为10的   
+arguments的长度始终由实参决定的 ，不可修改数量，即使手动修改，也不会映射到对应的形参上   
+没有传值的形参会自动给赋予underfined；  
+
+函数参数传递的永远是数值传递   
 
 
+4. 作为值传递的函数 （闭包相关的技术啊）
+当需要一个函数的时候，可以用闭包传递出来的函数，这样还能多做些东西呢，并且，这个返回函数有些值还是可控的 ；例如sort函数需要传入的比较函数可以这么写
+```js
+function createCompareFunction(property){
+    return function(object1,object2){
+        var v1= object1.property;
+        var v2 = object2.property;
+        if(v1<v2){
+            return -1;
+        }else if(v1>v2){
+            return 1;
+
+        }else{
+            return 0;
+        }
+    }
+}
+```
+
+5. arguments(下面的这些严格模式下出错)
++ arguments 包含函数中传入的所有参数，伪数组，Array.prototype.slice.call(arguments)可以给转化成数组    
+  arguments.callee   指向arguments的拥有函数，函数内部调用自己的时候，可以用来解耦合   
+6.  this   
+ 引用函数运行时候的环境对象，  函数的调用者  
+ 函数名字只是一个指着  say  和  obj.say 值得是同一个函数  ；只有say()和obj.say() 才是不同的，这一点，可以在函数绑定那节的内容看出来，函数的调用者，并不一定是函数开起来的引用者的样子  
+
+7. caller 
+  保存着调用但钱函数的函数的引用  ，更加松散的方式，arguments.callee.caller
+8. length 属性，返回函数期望收到参数的个数  
+
+
+9. prototype  
+   + 保存ECMAScript5中所有引用类型的实例的方法，Es5中prototype下的属性无法枚举
+
+10. call和apply 
++  使用   
+function.call(thisArg, arg1, arg2, ...)    thisArg问对象，也就是要指定的环境变量，必须的是，null和undefined将转化为全局变量   
+fun.apply(thisArg, [argsArray])           
+区别，接受的参数形式不同，call接收单个的参数，apply接受数组或者伪数组，因此首先可以用来改变函数的参数的形式，（函数科林化）  
+
++ 作用  
+   - 传递参数，改变参数的形式，在函数中调用其他函数  ；函数柯林化
+   - 改变函数的运行的环境变量（作用域）    ； 对象不用与函数耦合了
 
 
 
@@ -5176,7 +5502,7 @@ EventUtil.addHandler(btn,"click",bind(handler.handlerClick,handler));
 //ES5自带原声的bind  
 EventUtil.addHandler(btn,"click",handler.handlerClick.bind(handler));
 ```
-#### 函数科里化   
+#### 函数柯里化   
 用于创建已经设置好一个或者多个参数的函数 ，**闭包返回一个函数**    
 
 ```js

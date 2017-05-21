@@ -1433,3 +1433,19 @@ function ABKDUFF(values, fn) {
         fn(values[i++]);
     } while (--iterations > 0);
 }
+
+// 返回闭包的比较函数
+function createCompareFunction(property){
+    return function(object1,object2){
+        var v1= object1.property;
+        var v2 = object2.property;
+        if(v1<v2){
+            return -1;
+        }else if(v1>v2){
+            return 1;
+
+        }else{
+            return 0;
+        }
+    }
+}
