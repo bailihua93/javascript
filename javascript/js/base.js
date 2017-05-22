@@ -1449,3 +1449,24 @@ function createCompareFunction(property){
         }
     }
 }
+
+
+// 确认属性是来自实例还是来自原型对象
+function hasPrototypePeoperty(object,name){
+    return !object.hasOwnProperty(name)&&(name in object);
+}
+
+
+
+//寄生组合式继承
+function object(o){
+    function F(){}
+    F.prototype = o;
+    return new F();
+} //创建超类原型的的一个副本；也可以创建一个对象的副本；如果想要加强的话，还可以以这种形式添加些函数就行了
+// 实际是 sub的原型 == sup原型的副本
+function inheritPrototype(subType,supType){
+    var protoType = object(supType.prototype);
+    protoType.constructor = subType;
+    subType.prototype = protoType;
+}

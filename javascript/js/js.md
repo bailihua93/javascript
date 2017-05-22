@@ -478,7 +478,7 @@ function fn(value1,value2){
     - 结束位置小于起始位会返回空数组
    
    Array.prototype.slice.call(arguments);可以把类数组转化为数组
- * splice(index,count[,insert])
+ * splice(index,count[,insert]) 原数组改变
 
 array.splice(start)    从 array[start] 开始删除，后面全删
 array.splice(start, deleteCount)       从 array[start] 开始删除，总共删deleteCount项
@@ -704,16 +704,13 @@ document.getElementById("result").value = data.replace(reg, "<$1>");
 + exec()  用于确认目标位置和匹配的项，返回结果
    * var matches = pattern.exec(text); 
       结果是就是matches ，每次只能返回匹配到的一个结果 ，只有pattern设置了g在调用的时候才会按照原来的lastIndex来继续搜索           
-   * matches[index]返回第一次匹配到的位置  
+   * matches[index]  返回第一次匹配到的位置  
    * matches[input]  返回传入的字符串 text
    * matches[0]   整体匹配到的东西
    * matches[n]   第n捕获组捕获 的东西 
 + test()   确认字符串是否存在    
   if(pattern.test(text)){}  
 
-6. 继承的方法 
- toString toLocalString 返回正则表达式的字面量    
- valueOf 返回 expression本身
 
  7. RegExp构造函数属性  
 ```js
@@ -727,7 +724,59 @@ document.getElementById("result").value = data.replace(reg, "<$1>");
  }
 
 ```
+8. 字符串的方法
++ matches
+```js
+var text = "cat,bat,sat";
+var pattern = /.(at)/g;
+var matches = text.match(pattern);
+//pattern没有g的时候 ,matches[index]=0;matches[0]=cat;matches[1]=at;matches[input]=text;pattern.lastIndex=0;
+//pattern 设置了g的时候，matches就变成了所有匹配项的结果组成的数组，很奇特的设定
+```
 
++ search
+```js
+var matches = text.search(pattern);
+console.log(RegExp.lastMatch);
+console.log(RegExp.$1);
+```
+对应的test,自身返回获取到的第一次匹配的位置
+
+
+
++ str.replace(regexp|substr, newSubstr|function)  
+   * 传入的第一个参数是正则表达式（没有设置g）或者字符串的话，只会替换第一个匹配到的东西    
+   第一个参数是设定了g的正则表达式，那就会替换所有匹配项   
+   * 第二个参数是字符串的话还可以添加写匹配项的信息进去； $&等于RegExp.lastMatch    $'等于 RegExp.leftContext  $`等于 RegExp.rightContext    $n $nn  第n个捕获组内容 
+   * 第二个参数是函数的话，会提供更加精细的操作，函数其前几个参数是 匹配项和捕获组，最后两项是匹配的位置和原始字符串  
+
+```js
+result = text.replacc(/.at/g,"word$1") ; //结果就是wordcat，worldbat，wordsat
+
+ result = text.replace(pattern,function(match,$1,pos,input){
+    switch(match){
+        case "cat": return "hello";
+        case "bat": return "bai";
+        case "sat": return "mr";
+       
+    }
+});
+
+```
+
+9. 字符串位置方法   
+var pos = str1.indexOf(str2[,index]);    
+var c = str1.lastIndexOf(str2[,index]);   
+返回对应字符串的位置，并且，可以传递一个参数，用来指定从那个位置开始向后（前）找；
+
+通过不断地 str.indexOf(st,pos+st.length) 就可以找到所有的位置了
+
+
+
+
+10. 继承的方法 
+ toString toLocalString 返回正则表达式的字面量    
+ valueOf 返回 expression本身
 
 
 ### Function  
@@ -830,16 +879,187 @@ fun.apply(thisArg, [argsArray])
 
 
 
+### 基本包装类型 
+
+* 基本类型访问和操作的过程  
+```js
+var s1 = "string";
+var s2 = s1.substring(2);
+
+// 当读取到一个基本类型的时候，后台就会创建一个对应的基本包装类型对象，从而进行操作；以上面为例子
+// 第一行还是基本类型 ，第二行访问s1的时候，访问过程处于一种读取模式，也就是从内存中访问这个值，而读取模式就会
+// 创建String类型的一个实例
+//在实例上调用指定方法
+//销毁实例
+//即：
+var temp = new String(s1);
+var s2 = temp.substring(2);
+temp = null;
+``` 
+
+
+* 引用类型和基本包装类型的区别就是对象的生存期，new 的引用类型对象会一直到离开当前作用域，而基本包装类型则是在代码执行的一瞬间
+
+```js
+var a = "a";
+var b =a;
+var a = "C";
+```  
+a b 是独立的变量，但是常量是只有一个的，这个常量不会变，只是会变的只有变量映射的方法和位置
+
+
+```js
+var s = "s";
+s.name = "hello";
+console.log(s.name);
+```
+第二行添加属性没有错，但是并不是添加到了s上，而是添加到基本包装类型的实例上了，执行的时候这个实例就销毁了，没一次执行都会重建和销毁；
+
+
+* 基本包装类型  new操作得到的是引用类型了就；  
+
+
+####Boolean类型
+
+```js
+var b = new Boolean(0);
+console.log(b.toString());  “false”
+console.log(b.valueOf());  false
+//传入任何值，然后返回的是对应的东西 但是  
+var c = "a";
+var d = b&&c; //返回的是c的值，因为对象会Boolean成true
+```
+
+最好永远不要用Boolean
+
+#### Number
+ 
+1. 方法
+  + toString([number])   可以传入一个数字，然后返回对应进制的数字的字符串   
+  + toFix(number)   按照指定的小数位进行返回值的字符串，会四舍五入0~20位；ie8在传入0时。{（-0.94，-0.5]],[0.5,0.94)]}返回0   
+  + toExponential(number)  指定科学计数法的e值  
+  + toPrecision(numbe)    自己选择最好的总共显示number位数字的方法返回数字  1~21位
+
+2. 不要用显示的方法
+
+
+####String类型 
+
+1. length 
+返回字符串包含多少字符，是按照字符来算的，不是按照字节，汉子也算一个字符，空格也算一个字符,tab是三个字符  
+
+2. 字符方法 
+ + string.charAt(index)  返回index位置处的字符
+ + string.charCodeAt(index)   返回字符编码
+ + string[index]   IE8和以上支持 和charAt相同
+3. 字符串操作方法  
+  + var st = st1.concat(st2[,str3,str4]);   拼接出新的字符串，源字符串不变      推荐用加号+
+
+
+  + var st = st1.slice(index[,index])   截取的起止位置，从0开始； 负数加长度, 前大后小返回空
+  + var st = st1.substring(index[,index])   截取的起止位置    ；   负数都转0（小在前大在后）
+  + var st = st1.substr(index[,number])   截取的起位置和返回多少字符串  负数，第一个参数加长度，第二个转0（空串）
+
+
+4. 字符串位置方法   
+var pos = str1.indexOf(str2[,index]);    
+var c = str1.lastIndexOf(str2[,index]);   
+返回对应字符串的位置，并且，可以传递一个参数，用来指定从那个位置开始向后（前）找；
+
+通过不断地 str.indexOf(st,pos+st.length) 就可以找到所有的位置了
+
+5. trim()
+var st = str.trim() ;返回一个删除了前置和后置空格的字符串，源字符串不变 
+6. toLowerCase/toUpperCase/toLocalLowerCase/toLocalUppercase   转大小写
+7. 字符串的模式匹配法  
+
++ matches
+```js
+var text = "cat,bat,sat";
+var pattern = /.(at)/g;
+var matches = text.match(pattern);
+//pattern没有g的时候 ,matches[index]=0;matches[0]=cat;matches[1]=at;matches[input]=text;pattern.lastIndex=0;
+//pattern 设置了g的时候，matches就变成了所有匹配项的结果组成的数组，很奇特的设定
+```
+
++ search
+```js
+var matches = text.search(pattern);
+console.log(RegExp.lastMatch);
+console.log(RegExp.$1);
+```
+对应的test,自身返回获取到的第一次匹配的位置
 
 
 
++ str.replace(regexp|substr, newSubstr|function)  
+   * 传入的第一个参数是正则表达式（没有设置g）或者字符串的话，只会替换第一个匹配到的东西    
+   第一个参数是设定了g的正则表达式，那就会替换所有匹配项   
+   * 第二个参数是字符串的话还可以添加写匹配项的信息进去； $&等于RegExp.lastMatch    $'等于 RegExp.leftContext  $`等于 RegExp.rightContext    $n $nn  第n个捕获组内容 
+   * 第二个参数是函数的话，会提供更加精细的操作，函数其前几个参数是 匹配项和捕获组，最后两项是匹配的位置和原始字符串  
+
+```js
+result = text.replacc(/.at/g,"word$1") ; //结果就是wordcat，worldbat，wordsat
+
+ result = text.replace(pattern,function(match,$1,pos,input){
+    switch(match){
+        case "cat": return "hello";
+        case "bat": return "bai";
+        case "sat": return "mr";
+       
+    }
+});
+
+```
+8. 字符串转化成数组  str.split([separator[, limit]])    
+不传入参数的话整体作为数组的第一项   
+传入第一个参数可以是字符串也可以是RegExp ，用于指定分割符号  
+传入的二个参数会限制字符串的长度   
+
+```js
+var val1 = text.split(",")；//[cat,bat,sat]
+var val2 = text.split(",",2); //[cat,bat]
+var val3 = text.split(/[^\,]+/);//[",",",",","]
+```
+9. str1.localeCompare(str2)  比较str1和str2  str1>str2 返回 1（字母表靠后）； str1< str2 返回 -1（字母表靠前）; str1=str2 返回01（字母表相同）   
+10. var str = String.fromCharCode(104,101,108,108,111)  //hello 与  charCodeAt相反
 
 
 
+###单体内置对象  
+在JS程序执行前就存在的对象  
+#### Global对象  
+浏览器中的window什么的，isNaN() parseInt()等都是他的方法  
+1. URI编码方法 
+ * encodeURI(URI)用于整个URI（http://www.baidu.com?hah）；不会对本身属于url的特殊字符编码,像是冒号 正斜杠 问好 井号，空格会被处理
+ * encodeURIComponent() 用于部分编码，表单处理那里   对任何非标准字符进行编码  
+ * decodeURI
+ * decodeURIComponent
+
+2. eval(str)
+ 就像完整的js解析器，会把str解析成js并插入到所在位置，与所在环境有相同的作用于连，只有eval执行的时候，其中的代码才会被创建    
+ 多用于代码注入   
+3. window 
+浏览器中，Global是window的一部分 
+####Math  
+1. 属性 
+Math.E  e; Math.LN10 10的自然对数;Math.PI   π 
+2. max(num1,num2,num3) 和 min()  
+如果是一个数组的话   Math.max.apply(Math,array);传入的对象必须是Math
+
+3. 舍入方法
+Math.ceil(num) 向上进位成整数，直接进的 。只要有数字就进，不在乎是不是小数第一位
+Math.floor(num) 向下舍入成整数
+Math.round(num) 四舍五入为整数
+4. Math.random()  0<=x<1    
+与Math.floor和倍数相乘可以构造任何范围 
+
+5. Math.abs()  Math.sqrt()   Math.pow()
 
 
-
-
+##面向对象  
+```js
+var person = new Object();
 //字面量创建对象是最常用的方式
 var person = {
   name : "weichuanzhang",
@@ -849,7 +1069,7 @@ var person = {
     alert(this.name);
   }
 }
-
+```
 es5中定义只有内部采用的特性时，描述了属性的各种特性。这些特性是为了实现js引擎用的，js中不能直接访问他，
 为了表示特性是内部值，该规范吧他们放在了方括号中。
 
@@ -874,7 +1094,7 @@ Object.defineProperty(object,"name",{
 + [get] 读取属性时调用，默认为undifined
 + [set] 写入属性时调用，默认 undifined
 
-访问器属性不能直接定义，必须使用Object.defineProperty();
+访问器属性不能直接定义，必须使用Object.defineProperty();也是就是只能通过该方法来定义这个属性，属性的返回值什么的都是自己方法定义的
 ```js
 // 访问器属性
 var book = {
@@ -936,7 +1156,350 @@ Object.defineProperties(book4,{
 ```
 
 
+####Object.getOwnPropertyDescriptior(object,"year") 获取属性
 
+### 创建对象   
+字面量缺点，使用同一个接口创建很多对象，会产生大量重复代码；因此人们开始使用工厂模式的一种变体 
+#### 工厂模式  
+js无法创建类 ,所以每次在函数内部创建新对象，并返回
+```js
+function createPerson(name,age,job,fn){
+    var  0 = new Object();
+    o.name = name;
+    o.age =age;
+    o.job = job;
+    o.fn = fn;
+    o.sayHi = function(){
+        console.log("hi");
+    }；
+    return o;
+}
+function haha(){}
+var person1 = createPerson("bai",24,"nothing",haha);
+```
+
+
+
+####构造函数模式
+
+```js
+function Person(name,age,job){
+   
+    this.name = name;
+    this.age =age;
+    this.job = job;
+    this.sayHi = function(){
+        console.log("hi");
+    }
+}
+var person1 =new Person("bai",24,"nothing");
+
+```
+1. 特点
+* 构造函数名大写  
+* new : 创建一个新对象；将构造函数的作用域赋给新对象（this指向新对象）；执行代码（新对象添加属性）； 返回新对象  
+* 实例中有个constructor属性指向构造函数；    
+* 构造函数，可以将实例标示为一种类型，instancef  Object.prototype.toString.call 可以检测
+2. 使用 
+```js
+var person = new Person("bai",18);
+person.sayHi(); //new创建的this是new的，所以属性添加到新对象上了 
+
+
+Person("he",18);
+window.sayHi();//直接调用，this指向window
+
+var o = new Object();
+Person.call(o,"lan",18);
+o.sayhi();//通过call改变this指向
+```
+
+
+2. 存在问题  
+函数是对象，则每次新建一个实例，作为实例的方法都会重新创建一个匿名函数对象； 但是这些方法的功能是不变的，因此，并不需要每次创建,改进  
+```js
+function Person(name,age,job){
+   
+    this.name = name;
+    this.age =age;
+    this.job = job;
+    this.sayHi = sayHi;
+}
+function sayHi(){
+        console.log("hi");
+    }
+}
+var person = new Person("bai");
+
+```
+把函数定义到外面就会破坏封装性，并且为了添加进去，定义很多全局变量也不好  
+
+#### 原型模式 
+每个函数都有一个prototype属性，指向一个对象（原型对象），可以用来包含可以由特定类型的所有实例共享的属性和方法    
+1. 原型对象  
+没创建一个新函数，就会根据一组特定的规则为该函数创建一个prototype属性，属性指向原型对象；
+
+默认情况下，原型对象，会有自动获得一个constructor属性，指向拥有这个prototype属性的函数， 通过这个构造函数，我们才可以继续为原型对象添加其他属性和方法（？？？）;constructor作用是什么  
+
+创建的自定义的构造函数后，其原型对象默认只会取得constructor属性，其他方法是从Object继承来的；   
+
+构造函数创建的新实例内部，有个内部属性[[Prototype]]指向构造函数的原型对象;有些浏览器，实例的__proto__属性指向了原型对象(IE没有)  
+
+Person.prototype.isPrototypeOf(person);     
+
+Object.getProtoTypeOf(person)  会返回[[Prototype]] 指向的原型对象，也就是Person.prototype;ES5可用 ；这个在原型实现继承中很重要 （IE9+）  
+
+代码读取对象的属性： 首先搜索这个对象本身有没有这个属性，有的话返回该属性；没有的话，沿着指针搜索原型对象中有没有，有的话就返回  
+
+constructor也是共享的，也就可以直接通过实例搜索到其构造函数     
+
+虽然实例可以访问原型对象中的值，但是不能直接重写原型对象中的属性；重写只会是给实例本身添加了个同名属性，然后按照先实例后原型的原则，导致直接回复的是实例本身的属性了  
+
+delete可以删除实例中的属性，从而是我们的屏蔽了的原型中的属性，可以重新访问    
+
+hasOwnProoperty()可以检测一个属性是否是实例自己的属性，（原型中的属性的话，就会返回false）
+
+Object.getOwnPropertyDescriptor() 只能返回实例属性　　  
+
+2. 原型和ｉｎ
+* 单独使用in的时候，能访问的属性都会返回true ,不论属性来自本身还是原型；通过hasOwnProperty合作，可以确认属性来源　　
+```js
+function hasPrototypePeoperty(object,name){
+    return !object.hasOwnProperty(name)&&(name in object);
+}
+```
+* for-in 　　会列出所有可以枚举的元素，不论来自原型还是实例本身，因此与for-in 合作的时候最好检测下是否是自身的属性，在进行操作　　　　　
+Object.keys(obj);会显示实例自身所有的可枚举属性的名字构成的数组    
+Object.getOwnPropertyNames(obj)  会将实例所有的属性（包括不可枚举的）组成的数组
+ 
+3. 自定义原型对象　　
+```js
+function Person(){ }
+Person.prototype = {
+    name : "bai"
+}
+```  
+自定义的constructor属性指向的是Object了，也就是，实例通过constructor无法访问构造函数了；instanceof没有影响； 
+为了方便，最好手动设置一下constructor；直接添加的话，constructor就是可以枚举的了，最好用
+```js
+Object.defineProperty(Person.prototype,"constructor",{
+    enumerable:false,
+    value:Person
+})
+```
+
+4. 原型的动态性
+为原型函数添加属性，会实时的反应到实例中去     
+实例的指针只指向原型对象，并没有经过构造函数，一旦实例被创建，其指向的原型对象就不变了， 最好不要在创建对象后在改变函数的原型对象  
+
+5. 原型对象的问题  
+
+原型对象中的属性，会被所有实例共享的，基本类型的值没有影响，最多就是会被屏蔽；函数也没有影响，最多也就是 被屏蔽； 但是值是引用类型的话，那么有一个实例操作这个属性，那么该属性的变化就会被所有的实例共享了；因为他们一般是直接操作的，不会屏蔽，会实时的变化的；
+
+
+
+#### 组合构造函数模式和原型模式 
+
+构造函数用于定义实例属性，原型模式用于定义方法和共享的属性      
+```js
+function Person(name){
+   this.name =name;
+   this.friend = function(){
+
+   };
+}
+Person.prototype = {
+    constructor : Person,
+    say:function(){
+        alert("hi");
+    }
+}
+
+var person1 = new Person("bai");
+var person2 = new Person("hei");
+//构造函数中的引用类型都是不全等的，每次创建是来都重新创建一遍的
+console.log(person1.friend == person2.friend); //false
+console.log(person1.friend === person2.friend);//false
+```
+
+
+
+#### 动态原型模式
+为了让其他OO语言的人看懂的一种写法，把原型的内容在构造函数内部动态创建遍 ,只会初始化一次，之后就直接继承了 ；不要用字面量重写原型函数了，因为第一次执行的时候 指定了默认的原型函数  
+```js
+funcition Person(name){
+    this.name = name;
+    if(typeof this.say != "function"){
+        Person.prototype.say = function(){
+            alert("hi");
+        }
+    }
+}
+```
+
+
+
+####寄生构造函数模式  
+工厂模式，只是使用的时候用new来操作了； 作用是为工厂生产的东西添加特殊的方法等，如构造特殊的数组;好像new没什么用
+```js
+ function SpecialArray(){
+     var values = new Array();
+
+     values.push.apply(values,arguments);//这里apply主要用于传递参数
+     values.toPipeString = function(){
+         return this.join("|");
+     }
+     return values;
+ }
+var calors = new SpecialArray("red","blue");
+var colars = SpecialArray("red","blue");
+```
+
+
+####稳妥构造函数模式  
+
+1. 稳妥对象  
+没有公共属性，其方法不引用this的对象  ；在安全环境（禁this和new的）；或者防止数据被其他程序改动的情况 ： 实例方法不用this，不用new引用构造函数  
+```js
+function Person(name,age){
+    var o = new Object();
+    //可以在这里定义私有的变量和函数
+    o.say = function(){
+        return name;
+    }
+    return o;
+}
+
+传入传出东西，都不会在对象上定义；对象自身没有属性，但是可以返回属性值，可以这么叫
+```
+
+
+
+
+###继承 
+
+1. 原型链继承
+* 用一个类（B）的实例（b）做另一个构造函数（A）的原型，那么A的实例a就包含b的属性方法以及B的原型对象的属性和方法  ；这就是原型链继承
+* instanceof  IsPrototypeOf 对被继承者都会显示true    
+* 添加方法一定要在替换原型以后才行；并且不能在用对象字面量方法来添加方法了
+* 存在的问题: 新建的原型对象肯能含有引用类型；创建子类实例的时候，不能把超类的实例参数一起传递了 
+2. 借用构造函数继承 
+
+```js
+function Super(name){
+    this.name =name;
+}
+function sub (name){
+    Super.apply(this,name)
+    this.he = function(){}
+}
+
+```
+
+3. 组合继承
+```js
+function sup(){};
+function sub(){
+    sup.call(this,arg)
+}
+sub.prototype = new sup();
+sub.prototype.constructor = sub;
+```
+先借用构造函数，解决实例属性问题，新的实例的属性是自身的一套，    原型继承会继承一套属性和方法，但是由于自身的方法会屏蔽原型对象的属性，
+那么就不会存在属性共享的问题了  ； 存在的问题就只有sup的构造函数会执行两次  
+
+4. 寄生组合式继承  
+```js 
+//寄生组合式继承
+function object(o){
+    function F(){}
+    F.prototype = o;
+    return new F();
+} //创建超类原型的的一个副本；也可以创建一个对象的副本；如果想要加强的话，还可以以这种形式添加些函数就行了
+// 实际是 sub的原型 == sup原型的副本；实现原型的继承
+function inheritPrototype(subType,supType){
+    var protoType = object(supType.prototype);
+    protoType.constructor = subType;
+    subType.prototype = protoType;
+}
+
+
+
+function sup(){};
+function sub(){
+    sup.call(this,arg);//这里实现参数的继承
+}
+inheritPrototype(sub,sup);
+```
+
+
+
+
+
+
+
+
+## 函数表达式  
+```js
+// 创建函数
+//声明函数
+function functionName(){
+
+}
+
+
+//浏览器支持一个name属性，返回函数名（声明时的名字）
+var name =　functionName.name;
+
+
+//函数声明提升：执行代码前会先执行函数声明
+say();
+function say(){}
+//不会报错
+
+
+//函数表达式多种
+//匿名函数的函数表达式,function 后面没有跟着标识符就是匿名函数
+var functionName = function(arg1,arg2,arg3){
+
+};
+
+// 函数表达式和普通的表达式一样，必须先赋值才调用，下面的会报错
+/*say1();
+var say1 = function(){};   */
+
+//即使是命名函数表达式也是不行的
+/*say2();
+var say1 = function　say2(){};*/
+
+
+
+//不允许使用条件来声明　函数；　想要不同的条件来创建函数，必须使用函数表达式，
+// 下面代码无效，自动修复后保留了后面的声明
+var condition;
+　if(condition){
+    function say1(){
+        return "hello";
+    }
+}else{
+    function say1(){
+        return "ha";
+    }
+}
+
+console.log(say1());
+
+//把函数当做值来传递的话，都可以使用匿名函数
+
+
+```
+
+
+
+
+
+
+## 不知道哪一张的
 
 ### history
 　保存着用户的上网历史记录，窗口打开开始，窗口、标签／框架　都有自己的history对象与特定的windows关联，
