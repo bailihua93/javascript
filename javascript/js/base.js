@@ -207,9 +207,9 @@ function convertToArrey(args) {
 
 
 /**
- * outputAttributes(element)，遍历属性
+ *getAttributes(element)，遍历属性
  */
-function outputAttributes(element) {
+function getAttributes(element) {
     var pairs = new Arrey(),
         attrName,
         attrValue,
@@ -227,6 +227,8 @@ function outputAttributes(element) {
     return pairs.join(" ");
 }
 
+
+//ie7 创建几个特殊的标签用到的方法
 
 if (client.browser.ie && client.browser.ie <= 7) {
     //必须用下面的方法创建对应的元素

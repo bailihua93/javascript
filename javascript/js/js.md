@@ -1435,20 +1435,6 @@ inheritPrototype(sub,sup);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## 函数表达式  
 ####基本介绍
 ```js
@@ -2289,13 +2275,13 @@ alert(someNode.lastChild == newNode);         //true
 
    + http相关的
       - var referrer = document.referrer ; // 链接到本页面的的那个页面
-      - var url = document.URL; //获取URL
-      - var domain =  document.domain;   //域名
+      - var url = document.URL; //获取URL     location.href   location.toString
+      - var domain =  document.domain;   //域名  hostName
       -  这三个属性中只有domain可以设置，只能设置成url中包含的域，假设 url "www.baidu.com";
       document.domain = "baidu.com"; //对的
       document.domain = "php.baidu.com"; //错的
       一旦用了短的，就不能再设置回长的
-      页面中有其他子域的框架或者内嵌框架的时候，不同框架间不能跨域访问，此时都改成相同的document.domain就可以相互访问了
+      **页面中有其他子域的框架或者内嵌框架的时候，不同框架间不能跨域访问，此时都改成相同的document.domain就可以相互访问了**
 3. 查找元素
    + (someNode||document)getElementById("str") ;  大小写一致且没有的话返回null ，ie7不区分;并且ie7会把name当id用，且返回的是第一个元素
    + (someNode||document)getElementsByTagName("str") ;  大小写一致且没有的话返回null； 返回的HTMLCollection对象，是一个**动态合集** ,
@@ -2343,7 +2329,7 @@ alert(someNode.lastChild == newNode);         //true
     </script>
 ```
   注意： 1.  写的内容会直接在这个script标签下面开始写
-        2.  当页面onload 之后在写的话就会重写整个页面
+        2.  当页面onload 之后在写的话就会重写整个页面,所以最好在html中用
 
  +  open();close();用于打开和关闭网页的输入流
  #### Element
@@ -2370,18 +2356,22 @@ alert(someNode.lastChild == newNode);         //true
 - style 直接属性访问的话返回一个对象， getAttribute访问的话返回一个字符串
 - onclick 属性访问时返回一个函数，getAttribute访问的时候返回一个相应字符串的
 
-由于上面的特性，操作DOM的时候通常只使用对象的属性，自定义属性的时候才会用getAttribute()
+由于上面的特性，**操作DOM的时候通常只使用对象的属性，自定义属性的时候才会用getAttribute()**
 
 3.  设置特性
 + setAttribute(keystr,valuestr); // 特性有的话会覆盖，没有的话就创建,并且属性默认转化为小写
 
  直接通过属性来设置自定义属性不会有效果，除了那些特性，
  > div.id = "hello";  //ok
- > div.color = "red"; //null
+ > div.color = "red"; //null  
+  **自定义属性最好用setAttributte，自带的属性直接访问**
+ 
 + div.removeAttribute("str");删除属性和特性  ie6不支持
 
 4. attributes 属性
 + 本质是一个NamedNodeMap，“动态” 集合，元素的每个特性都由一个Attr节点表示，每个节点都保存在NamedNodeMap中。方法
+   - element.attributes 获得元素的所有属性  
+   - element.attributes["name"] 获得元素的叫name的属性
    - element.attributes.getNamedItem("id").nodeValue;
    - element.attributes["id"].nodeValue; // 和上面的相同  访问id属性
    - element.attributes["id"].nodeValue = “someID” ； 赋值
@@ -2426,10 +2416,10 @@ for(var i =0,len=element.childNodes.length;i<len;i++){
 
 #### Text类型
 + 文本节点由Text类型表示，包含可以按照字面解释的纯文本内容，可以包含转转义后的HTML字符，不能包含HTML代码特性
-     - nodeType                  1
+     - nodeType                  3
      - nodeName                 "#text"
      - nodeValue                自身包含的文本，也可以通过data访问
-     - parentNode               一份element
+     - parentNode               一element
      - length                  节点中字符的数目，nodeValue.length  data.length
      - 不支持子节点
      - appendData(text);        将text添加到节点的末尾
@@ -2499,7 +2489,7 @@ attr.value = "left";
 element.setAttributeNode(attr);
 ```
 
-**优先使用 getAttribute()  setAttribute()   removeAttriute()**
+**优先使用 getAttribute()  setAttribute()   removeAttriute()   以及属性的直接访问**
 
 ### DOM 操作
 
@@ -2605,7 +2595,7 @@ function matchesSelector(element,selector){
 ```
 ### 元素遍历
 
-+ 对于元素间的空格，ie9以前不会返回文本节点。为了弥补childNodes和firstChild在不同浏览器之间的差异，Element Travarsal定义了一些新的特性，支持的浏览器有ie9+
++ **对于元素间的空格，ie9以前不会返回文本节点**为了弥补childNodes和firstChild在不同浏览器之间的差异，Element Travarsal定义了一些新的特性，支持的浏览器有ie9+
   - childElementCount： 返回子元素（不包含文本节点和注释）的个数
   - firstElementChild : 第一个子元素
   - lastElementChild
@@ -2614,7 +2604,7 @@ function matchesSelector(element,selector){
 ### HTML5
 #### 与类相关的扩充
 h4导致class属性用的越来越多，**class一方面可以通过他为元素添加样式，另一方面可以表示元素的语义**。h5增加了很多api
-1. getElementsByClassName()
+1. getElementsByClassName()   (ie9)
 返回的是一个动态NodeList，可以传入的参数是“class1 class2 ”这种的
 
 2. classList属性
@@ -2639,7 +2629,7 @@ function deleteClass(element,classname){
    element.className = classArr.join(" ");
 }
 ```
-+ h5添加了操作类名的方式，为所有元素添加classList属性，此属性是 DOMTokenList的实例，动态属性？？，并且定义了一些新的方法 操作类名的方法，chrome
++ h5添加了操作类名的方式，为所有元素添加classList属性，此属性是 DOMTokenList的实例，动态属性？？，并且定义了一些新的方法 操作类名的方法，div.classList.method
    - add(value)
    - contains(value)
    - remove(value)
@@ -2647,6 +2637,7 @@ function deleteClass(element,classname){
 #### 焦点管理（ie4）
 + document.activeElement;  获取目前页面获得焦点的元素
 + document.hasFocus();   判断当前页面是否获得了焦点
++ button.focus()
 #### HTMLDocument的变化
 1. document.readyState; 有两个值 "loading/complete" 检查文档是否加载完毕，ie4
 
@@ -2662,7 +2653,7 @@ function deleteClass(element,classname){
 + document.defaultCharset  根据系统和浏览器确认的话该是哪种字符集，只读的
 
 #### 自定义数据属性
-html5 规定可以给元素添加非标准属性，但是要加上data-；为元素提供与渲染无关的信息，或者提供语义信息，如 <div id="myId" data-appId = "12345" data-myname= "nicholas"></div>,然后可以通过元素的 **datalist** 属性来访问自定义属性值，属性值是DOMStringMap的一个实例，可读写的
+html5 规定可以给元素添加非标准属性，但是要加上data-；为元素提供与渲染无关的信息，或者提供语义信息，如 <div id="myId" data-appId = "12345" data-myname= "nicholas"></div>,然后可以通过元素的 **dataset** 属性来访问自定义属性值，属性值是DOMStringMap的一个实例，可读写的
 >div.dataset.appId = "3"
 > div.dataset.myname = "bai"
 
@@ -2675,7 +2666,7 @@ html5 规定可以给元素添加非标准属性，但是要加上data-；为元
 
 + 读模式下，返回调用元素的所有子节点对用的HTML标记；ie和opera会大写标签，其他浏览器原原本本的返回
 
-+ 写模式下，根据指定的值创建新的DOM树，然后这个DOM树完全替换元素原来的所有子节点；一定会序列化，所以在设置的时候要转义
++ 写模式下，根据指定的值创建新的DOM树，然后这个DOM树完全替换元素原来的所有子节点；一定会序列化，所以在设置的时候要转义(效率更高)
 
 
 + **限制**
@@ -2694,7 +2685,7 @@ html5 规定可以给元素添加非标准属性，但是要加上data-；为元
  div.removeChild(div.firstCHlid);
 ```
 
-+ ie8之前 style没有作用域的元素，需要上免得方法来尽心
++ ie8之前   **style没有作用域的元素，需要上免得方法来尽心**
 ```html
  <col>/<fragemet>/<head>/<html>/<table>/<thead>/<tbdy>/<tr> 都不支持innerHTML
 ```
@@ -2752,9 +2743,11 @@ elementFather.contains(elementb); //b是不是a的后代节点
 #### 插入文本
 1. innerText 属性  ie8
 
+读的时候会返回后代及自身的所有text
+
 读的时候，element.innerText将返回所有的文本内容（包括子节点的）,不包含行内样式和脚本
 
-写的时候，会删除所有的子节点，并且也会对文本中存在的HTML语法字符（大于小于号引号和号）进行过编码; 这里不知道怎回事没有达到预期的效果什么有没变    ？？？？？
+写的时候，会删除所有的子节点，并且也会对文本中存在的HTML语法字符（大于小于号引号和号）进行过编码; 这里不知道怎回事没有达到预期的效果什么有没变    ？？？？？    设置  div  span 里面的内容    textNode也可以完成的，只是效率和什么不如这个快
 
 2. textContent ie9
 
@@ -2820,9 +2813,9 @@ svg 元素所有子元素，以及这些元素的所有特性，都被认为属�
 
 1. Node类型的变化
 
-- localName   不带命名空间前缀的节点名称
 - namespaceURI  命名空间的URI 未指定的话为null
 - prefix 命名空间前缀 未指定的话是null
+- localName   不带命名空间前缀的节点名称
 - nodeName    (prefix:)localName  tagName
 
 对html来说，localName和tagName为html，namespaceURI是“http://www.w3.org/1999/xhtml”，prefix是null   
@@ -3041,7 +3034,8 @@ function deleteRule(sheet,index){
 -  offsetHeight：  边框高+元素高+滚动条高，以像素为单位
 -  offsetWidth ：  边框宽+元素宽+滚动条宽
 -  offsetLeft  ：  元素左边框外到到其包含元素的内左边框的距离 ，px为单位
--  offsetTop   :   上边框到内上边框距离         
+-  offsetTop   :   上边框到内上边框距离   
+-  offsetParent 最近的元素      
 其中offsetLeft、offsetTop属性与包含的元素有关，该元素保存在offsetParent属性中，并且并不一定是parentNode值相等。偏移量是上述属性的叠加。
 ```js
 function getElementLeft(element){
@@ -3116,7 +3110,7 @@ function docWidth(){
 }
 ```
 
-4. 确定元素的大小      
+4. 确定元素的大小（相对视口的位置）   
 浏览器提供了一个getBoundingClientRect()方法，返回一个矩形对象，包含的属性：left、top、right、bottom.元素相对于视口的位置。但是ie8认为文档的左上角坐标是(2,2),传统的浏览器以(0,0)为起点坐标。
 ```js
 function getBoundingClientRect(element){
@@ -3154,7 +3148,7 @@ function getBoundingClientRect(element){
 }
 ```
 
-<<<<<<< HEAD
+
 #### 遍历
 Dom2 提供了NodeIterator和TreeWalker可以执行深度优先的遍历。ie不支持。 检测是否支持的方法  
 ```js
@@ -3163,8 +3157,6 @@ var supportNodeIterator = (typeof document.createNodeIterator == "function");
 var supportTeerWalker = (typeof document.createTeerWalker == "function");
 ```
 
-##### NodeIterator
-=======
 ####遍历
 - 定义深度优先的遍历操作
 ```js
@@ -3206,6 +3198,7 @@ var filter = {
   //先深度后横向的遍历，无节点的时候返回null，nextNode() 返回下一个节点，previousNode()返回前一个节点
   while(currentNode != null){
       console.log(currentNode.nodeName);
+      currentNode = iterator.nextNode();
   }
  ```
 ##### TreeWalker
@@ -3219,6 +3212,8 @@ NodeIterator的高级版本，包含方法：
 - previousSibling()
 - document.createTreeWalker(node,whatToShow,filter)
 - filter支持NodeFilter.FILTER_ACCEPT   NodeFilter.FILTER_SKIP , 并且支持 NodeFilter.FILTER_REJECT直接跳过整个子树
+
+
 #### 范围    
 通过范围可以选择文档中的一个区域，而不必考虑节点的界限，可以用来修改文档
 ##### DOM中的范围
@@ -3692,7 +3687,7 @@ ie9以上支持，触发后可以处里dom并添加事件。对于不支持的�
 ie中支持很久的东西，用于替代DOMContentLoaded；替代的方法,一本只有ie支持
 ```js
 EventUtil.addHandler(document,"readystatechange",function(event){
-    if(document.readyState == "interactive" || document.readyState == "conplete"){
+    if(document.readyState == "interactive" || document.readyState == "complete"){
     EventUtil.removeHandler(document,"readystatechange",arguments.callee);
     //这里的arguments.callee指向的是最开始的，也就是最初的匿名处理函数
     }
