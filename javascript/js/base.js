@@ -1464,9 +1464,44 @@ function object(o){
     F.prototype = o;
     return new F();
 } //创建超类原型的的一个副本；也可以创建一个对象的副本；如果想要加强的话，还可以以这种形式添加些函数就行了
-// 实际是 sub的原型 == sup原型的副本
+// 实际是 sub的原型 == sup原型的副本；实现原型的继承
 function inheritPrototype(subType,supType){
     var protoType = object(supType.prototype);
     protoType.constructor = subType;
     subType.prototype = protoType;
+}
+
+
+//location.search
+function getQueryStringArgs() {                                             
+ //获取没有没有问号的字符串
+ var qs = (location.search.length > 0) ? location.search.substring(1) : "",
+//  var qs ="q=hello&g=10",
+     //保存数据的对象，这是个全局的变量　　？？？？
+     var args = {},
+     //取得每一项
+     items = qs.length ? qs.split("&") : [],
+     item = null,
+     name = null,
+     value = null,
+     // 循环用
+     i = 0,
+     len = items.length;
+     // 取出每一项
+     for(i =0;i<len;i++){
+         item =items[i].split("=");
+         name =decodeURIComponent(item[0]);
+         value = decodeURIComponent(item[1]);
+         if(name.length){
+            args[name] = value;
+         }
+     }
+     return args;
+ }
+
+ //  判断对象是否有某个方法                                                       
+function isHostMethod(object,property){
+  var t = typeof object[property];
+    return t == 'function'||
+  (!!(t == 'object'&&object[property]) )||t == 'unknown';
 }

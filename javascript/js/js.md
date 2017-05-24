@@ -1439,14 +1439,24 @@ inheritPrototype(sub,sup);
 
 
 
+
+
+
+
+
+
+
+
+
+
 ## 函数表达式  
+####基本介绍
 ```js
 // 创建函数
 //声明函数
 function functionName(){
 
 }
-
 
 //浏览器支持一个name属性，返回函数名（声明时的名字）
 var name =　functionName.name;
@@ -1495,11 +1505,421 @@ console.log(say1());
 ```
 
 
+####闭包
+1. 处理方法
+  闭包：　有权访问其他函数作用域中变量的　函数                   
+  作用域连的实质：　指向变量对象的指针列表，只引用不包含变量对象           
+  闭包占用内存比较多，除非必要，还是要谨慎使用               
+  除非将接受返回函数的变量释放，才能释放这个变量对象，结束闭包     
+  **想要保存实时性的东西，只能通过值传递，然后引用形参来处理**    外包一个自执行函数，把需要实时记录的量用形参记录 
+```js
+
+//闭包只能取得包含函数中任何变量最后一个值  。
+// 闭包保存到是整个变量对象，不是特殊值 
+function createFunction(){
+    var result = new Array();
+    for(var i =0;i<10;i++){
+        result[i] = function(){
+            return i;
+        };
+    }
+    return result;
+}
+console.log(createFunction()[1]());  //这里的所有函数都返回10
+
+//**想要保存实时性的东西，只能通过值传递，然后引用形参来处理**
+// 通过在外层包一个自执行的函数表达式，然后将想要保存的实时数据以参数的形式传递才行，值传递的话值传递可一个副本
+function createFunction(){
+    var result = new Array();
+
+    for(var i =0;i<10;i++){
+       (function(i){
+        result[i] = function(){
+            return i;
+        }
+       })(i)
+    }
+    //这里的两种方法是一样的，想要实时对应，只能进行值传递才行的
+    for(var i =0;i<10;i++){
+       result[i] = function(num){
+           return function(){
+              return num;
+           }
+       }(i);
+    }
+
+    return result;
+}
+
+```
+2. this
+闭包中使用this： this是基于函数运行环境的；在全局函数中，this就是window。而当函数作为某个对象的方法调用时，this等于那个对象  
+匿名函数的执行环境具有全局性，因此this对象通常window；  
+由于闭包方式不同，这一点不会那么明显:函数运行的时候，this和window都只会访问到自身的活动对象；因此想要访问到闭包的外部this需要传入
+
+```js
+
+var name = "this window";
+var object ={
+    name : "myobject",
+    getName: function(){
+        return function(){
+            return this.name;
+        }
+    }
+}
+
+object.getName()();//this window  
+
+//改进
+var object ={
+    name : "myobject",
+    getName: function(){
+        var that = this;
+        return function(){
+            return that.name;
+        }
+    }
+}
+
+```
+3. 模仿块级作用域
+```js
+
+var b =function(){};
+b();
+
+
+//函数声明后面不能跟小括号，表达式可以；所以在外边加上小括号，就可以变成函数表达式了
+(function (){
+  //这里定义的变量一般可以认为是局部变量，不用必报的话，一般执行玩就直接销毁了
+  //return 1;返回值没有人接受没有问题也
+})();
+
+
+var a = function(){
+    return 1;
+}();
+//上面的很有意思；最终的结果是a =1； a = a();函数运行，然后结果返回起调用引用，这个函数之后消失
+
+var b = (function (){
+    return 1;
+})();
+console.log(b);  //这里和上面的情况差不多　　
+```
+
+#### 私有变量（构造函数方法做到每个实例不相干的是；静态私有变量，是大家共享的）
+1. 介绍
+ 私有变量　：　　函数中定义的变量都可以认为是私有变量，外部不可访问，包含函数的参数／局部变量／内部定义的其他函数
+ 特权方法　：   闭包可以访问私有变量，有权访问私有变量和私有方法的方法成为特权方法
+**一般用构造函数，创建私有变量，在用闭包的特性，来传出可以访问私有变量的特权方法**
+```js
+function Myobject(){
+    //私有变量和私有方法
+   var privateVariable = 10;
+   function privateFunction(){
+
+   }
+   　
+   //特权方法
+   this.publicMethed = function(){
+       privateVariable++;
+       return privateFunction();
+   }
+}
+```
+2. 应用
+```js
+//利用私有和特权成员，可以隐藏那些不应该被修改的数据
+function Person(name){
+    this.getName = function(){
+        return name;
+    };
+    this.setName = function(value){
+        name = value;
+    }
+}
+// 　闭包可以访问形参，即使没有重新定义一个变量，也可以保存下来形参的
+// 缺点:   必须使用构造函数模式来达到这个目的
+```
+
+
+**静态私有变量,用表达式创建，并且所有的实例都是共享一个变量的**
+```js
+(function(){
+//这里是私有作用域，　一旦执行后没有任何引用，只会销毁
+var privateVariable = 10;
+function privateFunction(){
+    return false;
+}
+
+
+//这里没有var定义，则自动被升级为全局变量，并且这是个构造函数，原型对象中可以创建分享私有变量的放方法
+MyObject1 = function(){
+
+};
+MyObject1.prototype.publicMethed= function(){
+    privateVariable++;
+    return privateFunction();
+};
+})();
+
+var o1 = new MyObject();
+```
+// 模块模式：和静态的区别是直接返回了一个字面量对象
+// 为单例创建私有变量和特权方法
+// 单例：只有一个实例的对象
+
+3. 模块模式 （利用函数表达式的加括号，将私有变量通过返回的字面量来访问） 
+```js
+var single = function(){
+    //在函数中可以定义私有变量
+    var name = "bai";
+    function privateFn(){
+        //私有方法
+    }
+    var c = []
+
+   // 返回对象达到可以访问内部的目的，
+   var app = new constructtFucntion();
+   app.get=function(){
+       return c;
+   }
+   app.set = function(a){
+       if(a){
+        c.push()
+       }
+      
+   }
+  return app;
+
+}();  //并且次对象具有不可重复性，只能通过自身来操作
+
+```
 
 
 
 
-## 不知道哪一张的
+
+
+
+###内存泄露
+ ｉｅ中闭包保存一个ｈｔｍｌ元素这个元素就不会销毁，正确的用法
+
+
+function assignHandler(){
+    var element = document.getElementById("someElement");
+    var id = element.id;
+    element.onclock = function(){
+        alert(id);
+    }
+    element = null;//即使没有直接引用也会保存整个环境对象的，所以需要
+}
+
+## BOM (与浏览器交互的方法)
+###window
+1. ES的global和js访问浏览器的接口 
+全局变量不能通过delete删除；
+2. 浏览器位置（不能跨浏览器用，所以就当看看算数了）
+```js
+  //screantop　和　screen left 虽然如此还是无法跨浏览器的条件下取得窗口左边和上边的距离，并且这个必须写在里面或者局部环境里面
+     var left = (typeof window.screenLeft == "number") ? window.screenLeft : window.screenX;
+     var top = (typeof window.screenTop == "number") ? window.screenTop : window.screenY;
+
+  // 虽然获取的方法不能用，但是可以把浏览器的位置移动（这个在高级浏览器里面是自动禁用的）
+  window.moveTo(x,y);移动到(x,y);
+  window.moveBy(xlen,ylen); 沿着轴移动一定距离 
+  
+```
+3.  视口的大小
+```js
+// 窗口大小无法确认，只能确认页面的视口大小
+　　　var innerWidth = window.innerWidth;
+     var innerHeight = window.innerHeight;
+     /*针对ie8  以下的部分*/
+     if(typeof innerWidth != "number"){
+        //  标准模式
+         if(document.compatMode == "CSS1Compat"){
+             innerWidth = document.documentElement.clientWidth;
+             innerHeight = document.documentElement.clientHeight;
+         }else{
+            innerWidth = document.body.clientWidth;
+            innerHeight =document.body.clientHeight;
+         }
+     }
+//调整视口大小的方法，默认被禁止了 
+//window。resizeTo(x,y);    调整到x*y像素
+```
+
+4. 在移动设备中
+```js
+　window.innerWidth window.innerHeight ; 保存着可视视口
+　document.documentElement.clientHeight ;保存着渲染视口
+　document.body.clientHeight ;      winphone的渲染视口
+```
+5.  打开窗口 
+```js
+window.open("http://www.huxiu.com"); //在新页面中打开网页，但有的浏览器阻止
+window.open("http://www.huxiu.com","_top"); //top弹出窗口 _blank  新的页面，_self自身
+
+//当打开新的不存在的窗口的时候，第二个参数传入新的名字，并传入第三个参数（字符串形式，有些可以省略）
+window.open("www.baidu.com","read","height=400,width=100,top=10,left=10,resizable=yes,menubar=yes,scrollbars=yes");
+
+//可以自己控制弹出窗口
+
+var wroxWin = window.open("http://www.baidu.com","_top");
+wroxWin.resizeTo(500,500);
+wroxWin.moveTo(100,100);
+wroxWin.close();
+```
+
+#### 超时调用
+**在执行前调用清楚可以把他取消**
+```js
+// clearTimeout(timer);
+
+/**
+ * 间歇调用,在函数内部设置限制条件来结束循环
+ */
+var num = 0;
+var timer1 = setInterval(function(){
+     num++;
+     console.log(num)
+     if(num>10){
+         clearInterval(timer1);
+         console.log("down")
+     }
+},1000);
+
+/**
+ * 用超时模拟间歇,函数必须是有名字的了,并且不推荐直接使用间歇调用
+ */
+num = 0;
+// var timer3 = setTimeout(function() {
+//     console.log(num)
+
+// }, 1000);
+function interval(){
+    num++;
+    console.log(num);
+    if(num<10){
+        setTimeout(interval,1000);
+    }else{
+        console.log("满足的话继续循环")
+    }
+}
+setTimeout(interval,1000);
+```
+
+####confirm
+```js
+var choise = confirm("要退出吗");//根据选择的结果返回布尔值
+if(choise){
+    console.log("是的");
+}
+```
+
+
+
+
+### location
+
+
+1. location        
+window.location == document.location, 保存当前文档信息并且将URL解析为独立的片段  ； 属性 
+  * href              http://www.baidu.com
+  * host              www.baidu.com:8080    
+  * hostname          www.baidu.com
+  * protocol          http
+  * pathname          /date
+  * port              8080
+  * hash               #号  和#号后面的
+  * search             ？号和？后面的
+
+2. location.search
+
+```js
+/**
+ * 解析url中的queryString   , location.search
+ */
+
+function getQueryStringArgs() {                                             
+ //获取没有没有问号的字符串
+ var qs = (location.search.length > 0) ? location.search.substring(1) : "",
+//  var qs ="q=hello&g=10",
+     //保存数据的对象，这是个全局的变量　　？？？？
+     var args = {},
+     //取得每一项
+     items = qs.length ? qs.split("&") : [],
+     item = null,
+     name = null,
+     value = null,
+     // 循环用
+     i = 0,
+     len = items.length;
+     // 取出每一项
+     for(i =0;i<len;i++){
+         item =items[i].split("=");
+         name =decodeURIComponent(item[0]);
+         value = decodeURIComponent(item[1]);
+         if(name.length){
+            args[name] = value;
+         }
+     }
+     return args;
+ }
+
+```
+3. 改变位置 
+
++ location.assign("http://www.baidu.com"); 一调用就会打开新的url并在历史记录中生成记录   
++ window.location = "http://www.baidu.com";          
++ loccation.href = "http://www.baidu.com";         
+**修改location的其他属性也会改变当前加载的页面，并且会产生记录**             
++  location.replace("http://www.baidu.com")       也是打开新页面，但是不产生记录，不可以回退 
++ laoction.reload([true]); 重新加载页面，如果不传入true的话可能来自缓存，传true的话，重新加载从服务器获取  
+
+ ###navigator (第九章的浏览器检测用的)
+ 1. 浏览器检查
+ ```js
+ window.onload　 = function () {
+    function hasPlugin(name1) {
+        var name = name1.toLowerCase();
+        for (var i = 0; i < navigator.plugins.length; i++) {
+            if (navigator.plugins[i].name.toLowerCase().indexOf(name) > -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+    console.log(hasPlugin("Flash"));
+}
+
+```
+2. 插件
+3. 桌面应用   注册处理程序  
+
+###screan
+没什么用， android    screen.width   screen.height  调整旋转  
+
+
+
+
+
+
+
+
+
+//  不是最好的，需要修改可能                                                         
+function isHostMethod(object,property){
+  var t = typeof object[property];
+    return t == 'function'||
+  (!!(t == 'object'&&object[property]) )||t == 'unknown';
+}
+
+
+
+
 
 ### history
 　保存着用户的上网历史记录，窗口打开开始，窗口、标签／框架　都有自己的history对象与特定的windows关联，
@@ -1547,10 +1967,6 @@ if(object.propertyInQuestion){
      return !!object.sort ;
      //只是显示是否含有这个属性
    }
-+ 检测是否包含某个方法
-function isSortable(object){
-  return typeof object.sort == "function“；
-}
 
 + 比较好的检测函数　
 ```js
@@ -1843,14 +2259,14 @@ alert(someNode.lastChild == newNode);         //true
 **上面的方法需要先取得父节点，并且在不支持子节点的节点上调用这些方法将会导致错误（text）**
 
 
-+ node.cloneNode(boolean); true 克隆子节点、特性不会而空js属性;false父标签的特性和标签本身,不会克隆子节点的
++ node.cloneNode(boolean); true 克隆子节点、特性不会克隆js属性;false父标签的特性和标签本身,不会克隆子节点的
 
 *bug：ie中会复制事件处理程序，复制前最好先移除事件*
 
-+ normalize();  使用后，删除该节点的子节点中的空文本节点，病合并相邻的两个文本节点
++ normalize();  使用后，删除该节点的子节点中的空文本节点，并合并相邻的两个文本节点
 #### Document类型（表示文档的类型）
 + document对象是HTMLDocment(继承Document)的实力，表示整个html页面，并且是windows对象的一个属性，因此可以全局访问
-   - nodeType 9    
+   - nodeType   9    
    - nodeName  "#document"
    - nodeValue   parentNode    ownerDocument: null   
    - 子节点可能是一个DocumentType、Element、ProcessingInstruction或者Comment
@@ -1864,7 +2280,7 @@ alert(someNode.lastChild == newNode);         //true
   + document.doctype 用处有限不值得记住
 
   + <html>外的注释
-   ie8、chrome、safari把第一条作为节点
+    ie8、chrome、safari把第一条作为节点
     ie9及以上  每一条都是一个节点
      firefox 忽略
 2. 文档信息
