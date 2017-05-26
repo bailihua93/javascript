@@ -1,3 +1,4 @@
+##配置
 sudo su
 1. apache
 sudo apt-get install apache2
@@ -138,3 +139,15 @@ vacode xdebug
  sudo  pecl install xdebug
 
 zend_extension="/usr/local/php/modules/xdebug.so"
+
+
+
+##基本
+###
+1. 标记，
+<?php 和 ?>    最好去掉后面的
+
+文件末尾的 PHP 代码段结束标记“;”可以不要，有些情况下当使用 include 或者 require 时省略掉会更好些，这样不期望的空白符就不会出现在文件末尾，之后仍然可以输出响应标头。在使用输出缓冲时也很便利，就不会看到由包含文件生成的不期望的空白符。   
+
+
+tar -xvzf test.tar.gz
