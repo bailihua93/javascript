@@ -177,7 +177,7 @@ JS中所有的数据都是64位的，未操作会先将64位转化成32位，之
 
  2. +加号操作 
     +  两个操作数都是数字的时候会用加法 ；()
-    +  一个是数字的时候，布尔值返回数字， 那么undefined转为NaN，null转为0,对象返回valueof（注意：返回值为字符串数字直接相加或者拼接，返回值布尔/null/define 用Number函数） 原生对象会返回toString的字符串，之后在按照字符串操作
+    +  一个是数字的时候，布尔值返回数字， 那么undefined转为NaN，null转为0,对象返回valueof（注意：返回值为字符串数字直接相加或者拼接，返回值布尔/null/define 用Number函数） 原生对象会返回toString的字符串，之后在按照字符串操作；数组会自动转化成字符串，然后进行操作
     +  如果，其中一个是字符串，其他任何情况都是使用String()函数，然后拼接字符串 ; 
     + 一个是布尔值，另外的是null  、undefined 、数字的话， 都转化成数字 
     + undefined   undefined、null   相加都是NaN
@@ -7363,4 +7363,341 @@ innerHtml比js快的多
 通过检测change事件可以访问file
 
 #### FileReader
-类似于XMLHttpRequest  
+类似于XMLHttpRequest          
+
+
+
+
+
+
+
+
+#    es6 入门  
+
+
+## 简介 
+### 配置babel  
+配置文件  >.babelrc   放在根目录下。     
+内容是设置转码规则和插件   
+```json
+{
+    "presets": [
+      "latest",
+      "react",
+      "stage-2"
+    ],
+    "plugins": []
+  }
+```
+presets设定的规则有
+```js
+# 最新转码规则
+$ npm install --save-dev babel-preset-latest
+
+# react 转码规则
+$ npm install --save-dev babel-preset-react
+
+# 不同阶段语法提案的转码规则（共有4个阶段），选装一个
+$ npm install --save-dev babel-preset-stage-0
+$ npm install --save-dev babel-preset-stage-1
+$ npm install --save-dev babel-preset-stage-2
+$ npm install --save-dev babel-preset-stage-3
+```
+
+直接在webpack中学更好 ；
+
+ 
+### let和const 
+1. let 声明的变量只在所在的代码块有效   
+
+  *  for循环计数很适合let命令  
+
+```js
+var a = [];
+for (var i = 0; i < 10; i++) {
+  a[i] = function () {
+    console.log(i);
+  };
+}
+a[6](); // 10
+//量i是var命令声明的，在全局范围内都有效，所以全局只有一个变量i。每一次循环，变量i的值都会发生改变，而循环内被赋给数组a的函数内部的console.log(i)，里面的i指向的就是全局的i。也就是说，所有数组a的成员里面的i，指向的都是同一个i，导致运行时输出的是最后一轮的i的值，也就是10。  
+
+var a = [];
+for (let i = 0; i < 10; i++) {
+  a[i] = function () {
+    console.log(i);
+  };
+}
+a[6](); // 6
+//变量i是let声明的，当前的i只在本轮循环有效，所以每一次循环的i其实都是一个新的变量，所以最后输出的是6。每一轮循环的变量i都是重新声明的，, JavaScript 引擎内部会记住上一轮循环的值，初始化本轮的变量i时，就在上一轮循环的基础上进行计算。  
+
+
+
+//for循环还有一个特别之处，就是设置循环变量的那部分是一个父作用域，而循环体内部是一个单独的子作用域。
+for (let i = 0; i < 3; i++) {
+  let i = 'abc';
+  console.log(i);
+}
+// 代码正确运行，输出了3次abc。这表明函数内部的变量i与循环变量i不在同一个作用域，有各自单独的作用域
+``` 
+
+
+ * let没有变量提升 ，一定要先声明后使用   
+   暂时性死区的本质就是，只要一进入当前作用域，所要使用的变量就已经存在了，但是不可获取，只有等到声明变量的那一行代码出现，才可以获取和使用该变量。  
+```js
+// let 的情况
+console.log(bar); // 报错ReferenceError,报错
+let bar = 2;
+```
+ * 暂时性死区     
+ 只要块级作用域内存在let命令，它所声明的变量就“绑定”（binding）这个区域，不再受外部的影响。 如果区块中存在let和const命令，这个区块对这些命令声明的变量，从一开始就形成了封闭作用域。凡是在声明之前就使用这些变量，就会报错。
+```js 
+ var tmp = 123;
+if (true) {
+  tmp = 'abc'; // ReferenceError
+  let tmp;
+}
+``` 
+  + 暂时性死区”也意味着typeof不再是一个百分之百安全的操作。
+```js
+typeof x; // ReferenceError
+let x;
+
+
+function bar(x = y, y = 2) {
+  return [x, y];
+}
+bar(); // 报错
+//上面代码中，调用bar函数之所以报错（某些实现可能不报错），是因为参数x默认值等于另一个参数y，而此时y还没有声明，属于”死区“。如果y的默认值是x，就不会报错，因为此时x已经声明
+
+
+let x = x;
+// ReferenceError: x is not defined
+
+```
+
+* 不允许重复声明  
+let不允许在相同作用域内，重复声明同一个变量。
+```js
+// 报错
+function () {
+  let a = 10;
+  var a = 1;
+}
+
+// 报错
+function () {
+  let a = 10;
+  let a = 1;
+}
+
+
+function func(arg) {
+  let arg; // 报错
+}
+
+function func(arg) {
+  {
+    let arg; // 不报错
+  }
+}
+```
+
+2. 块级作用域
+
+```js
+var tmp = new Date();
+
+function f() {
+  console.log(tmp);
+  if (false) {
+    var tmp = 'hello world';
+  }
+}
+
+f(); // undefined
+```
+变量提升，导致内层的tmp变量覆盖了外层的tmp变量。
+
+
+
+**let实际上为 JavaScript 新增了块级作用域。**  
+块级作用域的出现，实际上使得获得广泛应用的立即执行函数表达式（IIFE）不再必要了。
+```js
+// IIFE 写法
+(function () {
+  var tmp = ...;
+  ...
+}());
+
+// 块级作用域写法
+{
+  let tmp = ...;
+  ...
+}
+```
+
+
+#### 函数声明 
+```js
+function f() { console.log('I am outside!'); }
+
+(function () {
+  if (false) {
+    // 重复声明一次函数f
+    function f() { console.log('I am inside!'); }
+  }
+
+  f();
+}());
+```
+ES5 中运行，会得到“I am inside!”，因为在if内声明的函数f会被提升到函数头部，实际运行的代码如下。
+```js
+// ES5 环境
+function f() { console.log('I am outside!'); }
+
+(function () {
+  function f() { console.log('I am inside!'); }
+  if (false) {
+  }
+  f();
+}());
+```
+
+ES6 就完全不一样了，理论上会得到“I am outside!”。因为块级作用域内声明的函数类似于let，对作用域之外没有影响
+
+```js
+// 浏览器的 ES6 环境
+function f() { console.log('I am outside!'); }
+(function () {
+  var f = undefined;
+  if (false) {
+    function f() { console.log('I am inside!'); }
+  }
+
+  f();
+}());
+// Uncaught TypeError: f is not a function
+```
+
+**考虑到环境导致的行为差异太大，应该避免在块级作用域内声明函数。如果确实需要，也应该写成函数表达式，而不是函数声明语句。**
+
+#### do表达式（提案不管）
+
+
+### const
+
+const声明一个只读的常量。一旦声明，常量的值就不能改变。const一旦声明变量，就必须立即初始化，不能留到以后赋值。const的作用域与let命令相同：只在声明所在的块级作用域内有效。const命令声明的常量也是不提升，同样存在暂时性死区，只能在声明的位置后面使用。
+
+const实际上保证的，并不是变量的值不得改动，而是变量指向的那个内存地址不得改动。对于简单类型的数据（数值、字符串、布尔值），值就保存在变量指向的那个内存地址，因此等同于常量。但对于复合类型的数据（主要是对象和数组），变量指向的内存地址，保存的只是一个指针，const只能保证这个指针是固定的，至于它指向的数据结构是不是可变的，就完全不能控制了。因此，将一个对象声明为常量必须非常小心。  
+
+
+对象冻结函数
+```js
+var constantize = (obj) => {
+  Object.freeze(obj);
+  Object.keys(obj).forEach( (key, i) => {
+    if ( typeof obj[key] === 'object' ) {
+      constantize( obj[key] );
+    }
+  });
+};
+```
+
+#### 顶层对象属性
+
+var命令和function命令声明的全局变量，依旧是顶层对象的属性；另一方面规定，let命令、const命令、class命令声明的全局变量，不属于顶层对象的属性。也就是说，从ES6开始，全局变量将逐步与顶层对象的属性脱钩。
+```js
+var a = 1;
+// 如果在Node的REPL环境，可以写成global.a
+// 或者采用通用方法，写成this.a
+window.a // 1
+
+let b = 1;
+window.b // undefined
+```
+#### 获取顶层对象  
+```js
+// 方法一
+(typeof window !== 'undefined'
+   ? window
+   : (typeof process === 'object' &&
+      typeof require === 'function' &&
+      typeof global === 'object')
+     ? global
+     : this);
+
+// 方法二
+var getGlobal = function () {
+  if (typeof self !== 'undefined') { return self; }
+  if (typeof window !== 'undefined') { return window; }
+  if (typeof global !== 'undefined') { return global; }
+  throw new Error('unable to locate global object');
+};
+
+//最新的写法
+// CommonJS的写法
+var global = require('system.global')();
+
+// ES6模块的写法
+import getGlobal from 'system.global';
+const global = getGlobal();
+```
+
+##变量的解构赋值
+ES6允许 let [a, b, c] = [1, 2, 3]; 本质上，这种写法属于“模式匹配”，只要等号两边的模式相同，左边的变量就会被赋予对应的值
+```js
+let [foo, [[bar], baz]] = [1, [[2], 3]];
+foo // 1
+bar // 2
+baz // 3
+
+let [ , , third] = ["foo", "bar", "baz"];
+third // "baz"
+
+let [x, , y] = [1, 2, 3];
+x // 1
+y // 3
+
+let [head, ...tail] = [1, 2, 3, 4];
+head // 1
+tail // [2, 3, 4]
+
+let [x, y, ...z] = ['a'];
+x // "a"
+y // undefined
+z // []
+```
+如果解构不成功，变量的值就等于undefined。
+```js
+let [foo] = [];
+let [bar, foo] = [1];
+```
+完全解构，即等号左边的模式，只匹配一部分的等号右边的数组。这种情况下，解构依然可以成
+```js
+let [x, y] = [1, 2, 3];
+x // 1
+y // 2
+
+let [a, [b], d] = [1, [2, 3], 4];
+a // 1
+b // 2
+d // 4
+```
+如果等号的右边不是数组（或者严格地说，不是可遍历的结构，参见《Iterator》一章），那么将会报错。 
+
+```js
+function* fibs() {
+  let a = 0;
+  let b = 1;
+  while (true) {
+    yield a;
+    [a, b] = [b, a + b];
+  }
+}
+
+let [first, second, third, fourth, fifth, sixth] = fibs();
+sixth // 5
+```
+
+

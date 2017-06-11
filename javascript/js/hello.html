@@ -9,8 +9,8 @@
 <body>
 
 
-    <table border = "1" width = "100%">
-        <tbody >
+    <table border="1" width="100%">
+        <tbody>
             <tr>
                 <td>Cell 1,1</td>
                 <td>Cell 2,1</td>
@@ -51,7 +51,7 @@
         // document.write(a1);
         function Pig(name, age) {
             // console.log(this);
-         
+
             this.name = name;
             this.ager = age;
             if (typeof this.sayName != "function") {
@@ -63,15 +63,15 @@
             }
         }
 
-        var pig1= new Pig("bai",1);
-        var pig2 =new Pig("hei",2);
-        function say(){
+        var pig1 = new Pig("bai", 1);
+        var pig2 = new Pig("hei", 2);
+
+        function say() {
             console.log(this);
         }
         say();
         new say();
         console.log(say);
-
     </script>
 </body>
 
