@@ -1,19 +1,20 @@
 {
     "version": "0.2.0",
     "configurations": [
+        
         {
-            "type": "chrome",
+            "type": "node",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost/index.html",
-            "webRoot": "${workspaceRoot}wwwroot"
+            "name": "Launch Program",
+            "program": "${workspaceRoot}/try.js"
         },
         {
-            "type": "chrome",
+            "type": "node",
             "request": "attach",
-            "name": "Attach to Chrome",
-            "port": 9222,
-            "webRoot": "${workspaceRoot}/try.html"
+            "name": "Attach",
+            "port": 5858
         }
-    ]
+    ],
+    "compounds": []
+
 }

@@ -1,4 +1,8 @@
-window.onload = function(){
-    var ul = document.getElementsByTagName("ul")[0];//
-    console.log(ul.innerText);
+var x = 1;
+function foo(x, y = function() { x = 2; }) {
+  var x = 3;
+  y();
+  console.log(x);
 }
+
+foo() // 3
